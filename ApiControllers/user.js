@@ -12,14 +12,17 @@ let moment  = require('moment');
 
 const   secretExpr  = require('../ApiConfig/tsconfig'),
         { admins }  = require('../models/users');
+
 /*************/
 /* functions */
 /*************/
-/* slat to crypt password */
+
+/**** slat to crypt passwords ****/
+ let salt = bCrypt.genSaltSync(10);
+/*********************************/
+
 /* register new user */
-/* login user */
-/* logout user */
-let salt = bCrypt.genSaltSync(10), registerUser = function (req, res) {
+let registerUser = function (req, res) {
     admins.findOne({$or: [{username: req.body.user.username}, {email: req.body.user.email}]}, function (err, user) { //
         if (user) {
             res.send({status: false, message: 'username and/or email already exist'});
@@ -38,7 +41,7 @@ let salt = bCrypt.genSaltSync(10), registerUser = function (req, res) {
                 },
                 role: 'admin'
             });
-            admins.save(function (err, user) {
+            user.save(function (err, user) {
                 if (err) {
                     res.send({status: false, message: 'registration failed'});
                 } else {
@@ -49,15 +52,16 @@ let salt = bCrypt.genSaltSync(10), registerUser = function (req, res) {
     })
 };
 
+/* login user */
 let loginUser = function (req, res) {
     admins.findOne({$or: [{username: req.body.username}, {email: req.body.email}]}, function (err, resp) {
         if (!err && resp) {
             if (!bCrypt.compareSync(req.body.password, resp.password)) {
                 res.status(403).send({status: false, message: "informations de connexion invalides"});
             } else {
-                let token = jwt.sign({_id: resp._id, role: resp.role}, secretExpr.secret, {expiresIn: 60 * 60 * 24}); // generate new access token
+                let token = jwt.sign({_id: resp._id, role: resp.role}, secretExpr.secret, {expiresIn: '7d'}); // generate new access token which expires after 7 days without login
                 let date = new Date();
-                date.setDate(date.getDate() + 1); // set token's end of validity to 30 days from now -- days to be added value may be taken from collection securityconfigs (field: tokenExpire)
+                date.setDate(date.getDate() + 7); // set token's end of validity to 7 days from now -- days to be added value may be taken from collection securityconfigs (field: tokenExpire)
                 admins.updateOne({"_id": resp._id},
                     {$set: {"tokenSession.token": token, "tokenSession.expire": date, "lastVisit": new Date()}},
                     function (err) {
@@ -80,12 +84,13 @@ let loginUser = function (req, res) {
                 res.status(200).send({status: true, state: "connexion réussie", user: user});
             }
         } else {
-            console.log(err)
+            console.log("error?: ", err)
             res.status(404).send({status: false, message: "utilisateur inconnu"});
         }
     })
 };
 
+/* logout user */
 let logOutUser = function (req, res) {
     let date = new Date();
     date.setDate(date.getDate() - 1); // set token's end of validity to 30 days from now
@@ -103,16 +108,19 @@ let logOutUser = function (req, res) {
     })
 };
 
+/* fetch user via his token if it's not expired*/
+
 let fetchUserInfos = function (req, res) {
-    if (!req.user.role) {
+    if (!req.user) {
         res.status(403).send({status: false, message: 'access denied'});
     } else {
         // check date in token before send back user info, otherwhise... logout
-        User.findOne({"_id": req.user._id}, {"pin.value": 0, password: 0}, function (error, response) {
+        admins.findOne({"_id": req.user._id}, {"pin.value": 0, password: 0}, function (error, response) {
             if (error) {
-                res.status(403).send({status: false, message: "user not found"});
+                console.log(error)
+                res.status(403).send({status: false, message: "utilisateur introuvable"});
             } else {
-
+                res.status(200).send({status: true, user: response})
             }
         })
     }

@@ -2,9 +2,8 @@ let mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
 let date = new Date();
-date.setDate(date.getDate() + 1);
- // set token's end of validity to 30 days from now
-let adminsSchema = new Schema(
+date.setDate(date.getDate() + 7); // set token's end of validity to 7 days from now
+let adminSchema = new Schema(
     {
         email: String,
         username: String,
@@ -16,25 +15,32 @@ let adminsSchema = new Schema(
             default: 'admin'
         },
         tokenSession: {
-            token: {type: String, default: "token"},
+            token: {type: String, default: ""},
             expire: {type: Date, default: date}
         },
         registerDate: Date,
         lastVisit: Date,
         sex: {
             type: String,
-            enum: ['male', 'female']
+            enum: ['homme', 'femme']
         },
-        isLocked: {
-            value: {type: Boolean, default: false},
-            reason: String,
-            until: Date
-        },
-        phone: {value: String, kind: String},
+        phone: {value: String, kind: String}, // phone kind can be: [Mobile, Fixe]
     }
 );
-let admins = mongoose.model('admins', adminsSchema);
+let admins = mongoose.model('admins', adminSchema);
+
+let syndicSchema = new Schema({});
+let syndic = mongoose.model("syndics", syndicSchema);
+
+let courtierSchema = new Schema({});
+let courtiers = mongoose.model('courtiers', courtierSchema);
+
+let prestataireSchema = new Schema({});
+let prestataires = mongoose.model('prestataire', prestataireSchema);
 
 module.exports = {
-    admins
+    admins,
+    syndic,
+    courtiers,
+    prestataires
 };
