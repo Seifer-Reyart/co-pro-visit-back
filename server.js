@@ -38,7 +38,7 @@ const app = express();
 
 /* // setUp environement // */
 const port      = process.env.NODE_ENV === 'production' ? 3010 : 3011;
-const domain    = process.env.NODE_ENV === 'production' ? 'https://34.ip-54-37-157.eu' : 'localhost';
+const domain    = process.env.NODE_ENV === 'production' ? 'http://34.ip-54-37-157.eu' : 'localhost';
 
 app.use(bodyParser.json({limit: '5mb'}));
 app.use(bodyParser.urlencoded({ extended : true, limit : '5mb' }));
