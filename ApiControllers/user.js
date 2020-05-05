@@ -33,30 +33,32 @@ let registerUser = function (req, res) {
     admins.findOne({$or: [{username: req.body.user.username}, {email: req.body.user.email}]}, function (err, admin) {
         if (admin) {
             user = admin;
-            res.send({status: false, message: 'identifiant et/ou email déjà utilisé(s)'});
+            res.status(403).send({status: false, message: 'identifiant et/ou email déjà utilisé(s)'});
         } else
             syndics.findOne({$or: [{username: req.body.user.username}, {email: req.body.user.email}]}, function (err, syndic) {
                 if (syndic) {
                     user = syndic;
-                    res.send({status: false, message: 'identifiant et/ou email déjà utilisé(s)'});
+                    res.status(403).send({status: false, message: 'identifiant et/ou email déjà utilisé(s)'});
                 } else
                     courtiers.findOne({$or: [{username: req.body.user.username}, {email: req.body.user.email}]}, function (err, courtier) {
                         if (courtier) {
                             user = courtier;
-                            res.send({status: false, message: 'identifiant et/ou email déjà utilisé(s)'});
+                            res.status(403).send({status: false, message: 'identifiant et/ou email déjà utilisé(s)'});
                         } else
                             architectes.findOne({$or: [{username: req.body.user.username}, {email: req.body.user.email}]}, function (err, architecte) {
                                 if (architecte) {
                                     user = architecte;
-                                    res.send({status: false, message: 'identifiant et/ou email déjà utilisé(s)'});
+                                    res.status(403).send({status: false, message: 'identifiant et/ou email déjà utilisé(s)'});
                                 } else
                                     prestataires.findOne({$or: [{username: req.body.user.username}, {email: req.body.user.email}]}, function (err, prestataire) {
                                         if (prestataire) {
                                             user = prestataire;
-                                            res.send({
+                                            res.status(403).send({
                                                 status: false,
                                                 message: 'identifiant et/ou email déjà utilisé(s)'
                                             });
+                                        } else {
+                                            console.log('no user found')
                                         }
                                     })
                             })
@@ -78,9 +80,9 @@ let registerUser = function (req, res) {
         });
         adminSave.save(function (err, user) {
             if (err) {
-                res.send({status: false, message: 'echec de l\'inscription'});
+                res.status(400).send({status: false, message: 'echec de l\'inscription'});
             } else {
-                res.send({
+                res.status(200).send({
                     status: true,
                     message: 'inscription réussie',
                     user: user
@@ -107,9 +109,9 @@ let registerUser = function (req, res) {
         });
         syndicSave.save(function (err, user) {
             if (err) {
-                res.send({status: false, message: 'echec de l\'inscription'});
+                res.status(400).send({status: false, message: 'echec de l\'inscription'});
             } else {
-                res.send({
+                res.status(200).send({
                     status: true,
                     message: 'inscription réussie',
                     user: user
@@ -136,9 +138,9 @@ let registerUser = function (req, res) {
         });
         courtierSave.save(function (err, user) {
             if (err) {
-                res.send({status: false, message: 'echec de l\'inscription'});
+                res.status(400).send({status: false, message: 'echec de l\'inscription'});
             } else {
-                res.send({
+                res.status(200).send({
                     status: true,
                     message: 'inscription réussie',
                     user: user
@@ -161,9 +163,9 @@ let registerUser = function (req, res) {
         });
         architecteSave.save(function (err, user) {
             if (err) {
-                res.send({status: false, message: 'echec de l\'inscription'});
+                res.status(400).send({status: false, message: 'echec de l\'inscription'});
             } else {
-                res.send({
+                res.status(200).send({
                     status: true,
                     message: 'inscription réussie',
                     user: user
@@ -195,9 +197,9 @@ let registerUser = function (req, res) {
         });
         prestataireSave.save(function (err, user) {
             if (err) {
-                res.send({status: false, message: 'echec de l\'inscription'});
+                res.status(400).send({status: false, message: 'echec de l\'inscription'});
             } else {
-                res.send({
+                res.status(200).send({
                     status: true,
                     message: 'inscription réussie',
                     user: user
