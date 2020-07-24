@@ -21,9 +21,9 @@ let sendMail = (mailOptions)=> {
 
 let sendCredentials = (email, password) => {
     let credentialsOptions = {
-        from: "Pop in Shop <recu@popinshop.fr>", // sender address
+        from: "CoproVisit.fr <contact@cantem.fr>", // sender address
         to: email,  // to Client
-        subject: "Requête suppression de Marchant",
+        subject: "Identifiants de connexions",
         html: "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" +
             "<html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:o=\"urn:schemas-microsoft-com:office:office\" style=\"width:100%;font-family:arial, 'helvetica neue', helvetica, sans-serif;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;padding:0;Margin:0\">" +
             " <head> " +
