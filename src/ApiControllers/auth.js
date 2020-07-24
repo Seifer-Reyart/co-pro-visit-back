@@ -4,7 +4,7 @@
 
 let bcrypt  = require('bcryptjs');
 let jwt     = require('jsonwebtoken');
-
+let salt = bcrypt.genSaltSync(10);
 /************************/
 /* import local modules */
 /************************/
@@ -125,7 +125,14 @@ let login = async (req, res) => {
 }
 
 let createAdmin = (req, res) => {
-    let admin = new Admin(req.body);
+    let admin = new Admin({
+        email: req.body.email,
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        password: bcrypt.hashSync(req.body.password, salt)
+        role: 'admin'
+    });
+
 
     admin.save(function(err) {
         if (err) {
