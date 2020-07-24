@@ -29,9 +29,9 @@ let router = express.Router();
  * @group auth - login
  * @param {LOGIN.model} email.body.required - email
  * @param {LOGIN.model} password.body.required - mot de passe
- * @returns {object} 200 - un objet avec les clés suivantes {success: true, message: 'connexion réussie', user: object}
- * @returns {Error}  404 - {success: true, message: 'utilisateur introuvable'}
- * @returns {Error}  403 - {success: true, message: 'mot de passe incorrect'}
+ * @returns {object} 200 - un objet avec les clés suivantes {success: true, message: 'connexion réussie', user: object, token: string}
+ * @returns {Error}  404 - {success: false, message: 'utilisateur introuvable'}
+ * @returns {Error}  403 - {success: false, message: 'mot de passe incorrect'}
  * @produces application/json
  * @consumes application/json
  */
