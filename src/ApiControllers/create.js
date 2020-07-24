@@ -10,6 +10,8 @@ let path    = require("path")
 /*** helpers ***/
 /***************/
 
+const {sendCredentials} = require('../Config/mailer');
+
 /*** generate password ***/
 function generateP() {
     let pass = '';
@@ -61,11 +63,12 @@ let registerSyndic = async (req, res) => {
             else if (user)
                 res.status(403).send({success: false, message: 'email déjà utilisé'});
             else {
+                let password = await generateP();
                 let syndic = new Syndic({
                     email       	: req.body.email.toLowerCase(),
                     firstName   	: req.body.firstName,
                     lastName    	: req.body.lastName,
-                    password    	: bcrypt.hashSync(generateP(), salt),
+                    password    	: bcrypt.hashSync(password, salt),
                     company         : req.body.company,
                     siren           : req.body.siren,
                     address         : req.body.address,
@@ -80,6 +83,7 @@ let registerSyndic = async (req, res) => {
                     if (err) {
                         res.status(400).send({ success: false, message: 'Erreur lors de la création du Syndic', err});
                     } else {
+                        sendCredentials(req.body.email.toLowerCase(), password);
                         res.status(200).send({ success: true, message : 'Le Syndic a bien été crée'});
                     }
                 });
@@ -101,11 +105,12 @@ let registerCourtier = async (req, res) => {
             else if (user)
                 res.status(403).send({success: false, message: 'email déjà utilisé'});
             else {
+                let password = await generateP();
                 let courtier = new Courtier({
                     email       	: req.body.email.toLowerCase(),
                     firstName   	: req.body.firstName,
                     lastName    	: req.body.lastName,
-                    password    	: bcrypt.hashSync(generateP(), salt),
+                    password    	: bcrypt.hashSync(password, salt),
                     phone           : req.body.phone,
                     company         : req.body.company,
                     role        	: 'courtier'
@@ -114,6 +119,7 @@ let registerCourtier = async (req, res) => {
                     if (err) {
                         res.send({ success: false, message: 'Erreur lors de la création du Courtier', err});
                     } else {
+                        sendCredentials(req.body.email.toLowerCase(), password);
                         res.send({ success: true, message : 'Le Courtier a bien été crée'});
                     }
                 });
@@ -135,12 +141,13 @@ let registerArchitecte = async (req, res) => {
             else if (user)
                 res.status(403).send({success: false, message: 'email déjà utilisé'});
             else {
+                let password = await generateP();
                 let architecte = new Architecte({
                     email       	: req.body.email.toLowerCase(),
                     civility        : req.body.civility,
                     firstName   	: req.body.firstName,
                     lastName    	: req.body.lastName,
-                    password    	: bcrypt.hashSync(generateP(), salt),
+                    password    	: bcrypt.hashSync(password, salt),
                     phone           : req.body.phone,
                     nomCabinet      : req.body.nomCabinet,
                     siren           : req.body.siren,
@@ -153,6 +160,7 @@ let registerArchitecte = async (req, res) => {
                     if (err) {
                         res.send({ success: false, message: "Erreur lors de la création de L'Architecte", err});
                     } else {
+                        sendCredentials(req.body.email.toLowerCase(), password);
                         res.send({ success: true, message : "L'Architecte a bien été crée"});
                     }
                 });
@@ -174,11 +182,12 @@ let registerPresidentCS = async (req, res) => {
             else if (user)
                 res.status(403).send({success: false, message: 'email déjà utilisé'});
             else {
+                let password = await generateP();
                 let pcs = new PresidentCS({
                     email       	: req.body.email.toLowerCase(),
                     firstName   	: req.body.firstName,
                     lastName    	: req.body.lastName,
-                    password    	: bcrypt.hashSync(generateP(), salt),
+                    password    	: bcrypt.hashSync(password, salt),
                     phone           : req.body.phone,
                     BatimentId      : req.body.BatimentId,
                     permissions     : {label: 'Lecture seule', value: 0},
@@ -188,6 +197,7 @@ let registerPresidentCS = async (req, res) => {
                     if (err) {
                         res.send({ success: false, message: "Erreur lors de la création du PCS", err});
                     } else {
+                        sendCredentials(req.body.email.toLowerCase(), password);
                         res.send({ success: true, message : "Le PCS a bien été crée"});
                     }
                 });
@@ -209,9 +219,10 @@ let registerPrestataire = async (req, res) => {
             else if (user)
                 res.status(403).send({success: false, message: 'email déjà utilisé'});
             else {
+                let password = await generateP();
                 let prestataire = new Prestataire({
                     email       	    : req.body.email.toLowerCase(),
-                    password    	    : bcrypt.hashSync(generateP(), salt),
+                    password    	    : bcrypt.hashSync(password, salt),
                     company             : req.body.company,
                     address             : req.body.address,
                     codePostal          : req.body.codePostal,
@@ -236,6 +247,7 @@ let registerPrestataire = async (req, res) => {
                     if (err) {
                         res.send({ success: false, message: "Erreur lors de la création du Prestataire", err});
                     } else {
+                        sendCredentials(req.body.email.toLowerCase(), password);
                         res.send({ success: true, message : "Le Prestataire a bien été crée"});
                     }
                 });
@@ -324,12 +336,13 @@ let registerGestionnaire = async (req, res) => {
             else if (user)
                 res.status(403).send({success: false, message: 'email déjà utilisé'});
             else {
+                let password = await generateP();
                 let gestionnaire = new Gestionnaire({
                         email       	: req.body.email.toLowerCase(),
                         civility        : req.body.civility,
                         firstName   	: req.body.firstName,
                         lastName    	: req.body.lastName,
-                        password    	: bcrypt.hashSync(generateP(), salt),
+                        password    	: bcrypt.hashSync(password, salt),
                         companyId       : req.body.companyId,
                         phone           : req.body.phone,
                         parc            : req.body.parc,
@@ -341,6 +354,7 @@ let registerGestionnaire = async (req, res) => {
                     if (err) {
                         res.send({ success: false, message: "Erreur lors de la création du Gestionnaire", err});
                     } else {
+                        sendCredentials(req.body.email.toLowerCase(), password);
                         res.send({ success: true, message : "Le Gestionnaire a bien été crée"});
                     }
                 });
