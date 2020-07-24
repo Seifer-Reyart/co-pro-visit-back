@@ -124,8 +124,21 @@ let login = async (req, res) => {
     });
 }
 
+let createAdmin = (req, res) => {
+    let admin = new Admin(req.body);
+
+    admin.save(function(err) {
+        if (err) {
+            res.send({ success: false, message: "Erreur lors de la création de l'Admin", err});
+        } else {
+            res.send({ success: true, message : "L'Admin a bien été créé"});
+        }
+    })
+}
+
 /* Export Functions */
 
 module.exports = {
-    login
+    login,
+    createAdmin
 }

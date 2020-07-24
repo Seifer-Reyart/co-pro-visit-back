@@ -8,7 +8,7 @@ const express = require('express');
 /* import local modules */
 /************************/
 
-const login = require('../ApiControllers/auth').login;
+const {login, createAdmin} = require('../ApiControllers/auth');
 
 /***************/
 /* init router */
@@ -38,7 +38,8 @@ let router = express.Router();
 
 router.post('/login', login);
 
-
+/*create Admin*/
+router.post('/admin', createAdmin)
 /* Export '/auth' routes */
 
 module.exports = router;
