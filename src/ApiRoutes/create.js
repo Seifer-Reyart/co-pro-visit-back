@@ -14,7 +14,8 @@ let {
     registerArchitecte,
     registerPresidentCS,
     registerPrestataire,
-    registerGestionnaire
+    registerGestionnaire,
+    parseXlsThenStore
 } = require('../ApiControllers/create');
 
 let {
@@ -364,6 +365,24 @@ router.post('/prestataire', registerPrestataire);
  * @security JWT
  */
 router.post('/copro', registerCopro);
+
+/**
+ * @typedef COPROS-FROM-XLS
+ * @property {file} data.required - fichier Excel pour enregistrer plusieurs Copros d'un coup
+ */
+/**
+ * Cette route permet de uploader un fichier Excel dans le but d'enregistrer plusieurs copros en même temps
+ * @route POST /create/multi-copros
+ * @group syndic et gestionnaire
+ * @param {COPROS-FROM-XLS.model} data.body - fichier Excel pour enregistrer plusieurs Copros d'un coup
+ * @returns {object} 200 - {success: true, message : "La liste de Copros a bien été créée"}
+ * @returns {Error}  400 - {success: false, message: "message d'erreur si mauvais format de fichier (xls|xlsx)"}
+ * @produces application/json
+ * @consumes multipart/form-data
+ * @security JWT
+ */
+
+router.post('/multi-copros', parseXlsThenStore);
 
 /**
  * @typedef BATIMENT

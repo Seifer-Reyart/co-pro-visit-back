@@ -4,7 +4,8 @@
 
 let bcrypt  = require('bcryptjs');
 let multer  = require('multer');
-let path    = require("path")
+let path    = require("path");
+let xlsx    = require('node-xlsx').default;
 
 /***************/
 /*** helpers ***/
@@ -260,10 +261,10 @@ let registerPrestataire = async (req, res) => {
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
         // Uploads is the Upload_folder_name
-        cb(null, "uploads/RC-files")
+        cb(null, "./src/uploads/RC-files")
     },
     filename: function (req, file, cb) {
-        cb(null, file.fieldname + "-" + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + '.' + file.mimetype.substr(6, file.mimetype.length))
+        cb(null, req.user.id + "-" + file.originalname)
     }
 })
 
@@ -277,23 +278,21 @@ let upload = multer({
         let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
         let mimetype = filetypes.test(file.mimetype);
 
-        let extname = filetypes.test(path.extname(
-            file.originalname).toLowerCase());
+        let extname = filetypes.test(path.extname(file.originalname).toLowerCase());
 
         if (mimetype && extname) {
             return cb(null, true);
         }
 
-        cb("Error: File upload only supports the "
-            + "following filetypes - " + filetypes);
+        cb("Error: File upload only supports the following filetypes - " + filetypes);
     }
 
-// file is the name of file attribute
-}).single("file");
+// data is the name of file attribute sent in body
+}).single("data");
 
 let uploadRCProfessionnelle = (req, res) => {
     // Error MiddleWare for multer file upload, so if any
-    // error occurs, the image would not be uploaded!
+    // error occurs, the file would not be uploaded!
     upload(req, res, function(err) {
         if(err) {
             // ERROR occured (here it can be occured due
@@ -309,7 +308,7 @@ let uploadRCProfessionnelle = (req, res) => {
 
 let uploadRCDecennale = (req, res) => {
     // Error MiddleWare for multer file upload, so if any
-    // error occurs, the image would not be uploaded!
+    // error occurs, the file would not be uploaded!
     upload(req, res, function(err) {
         if(err) {
             // ERROR occured (here it can be occured due
@@ -376,14 +375,13 @@ let registerCopro = (req, res) => {
             else if (copro)
                 res.status(403).send({success: false, message: 'La Copro existe déjà'});
             else {
-
                 let copro = new Copro({
                     name       	    : req.body.name,
                     reference       : req.body.reference,
                     address    	    : req.body.address,
                     codePostal      : req.body.codePostal,
                     ville    	    : req.body.ville,
-                    syndic          : req.body.syndic
+                    syndicEnCours   : req.body.syndic
                 })
                 copro.save(function(err) {
                     if (err) {
@@ -395,6 +393,83 @@ let registerCopro = (req, res) => {
             }
         })
     }
+}
+
+/* upload an xls/xlsx file of copros, parse it and store elements in DB */
+/* upload RCProfessionnelle & RCDecennale */
+let storageXls = multer.diskStorage({
+    destination: function (req, file, cb) {
+        // Uploads is the Upload_folder_name
+        cb(null, "./src/uploads/copros-xls")
+    },
+    filename: function (req, file, cb) {
+        cb(null, req.user + "-" + file.originalname);
+    }
+})
+
+let uploadXls = multer({
+    storage: storageXls,
+    fileFilter: function (req, file, cb){
+        // Set the filetypes, it is optional
+        let filetypes = /vnd.ms-excel|vnd.openxmlformats-officedocument.spreadsheetml.sheet|/;
+        let exttypes = /xls|xlsx/
+        let mimetype = filetypes.test(file.mimetype);
+        let extname = exttypes.test(path.extname(file.originalname).toLowerCase());
+
+        if (mimetype && extname) {
+            return cb(null, true);
+        }
+
+        cb("Error: Assurez vous de transmettre un fichier excel - " + exttypes);
+    }
+
+// data is the name of file attribute sent in body
+}).single("data");
+
+let parseXlsThenStore = (req, res) => {
+    // Error MiddleWare for multer file upload, so if any
+    // error occurs, the file would not be uploaded!
+    uploadXls(req, res, async function(err) {
+        if(err) {
+            // ERROR occured
+            res.status(400).send({success: false, message: err})
+        } else {
+            // SUCCESS, file successfully uploaded
+            let obj = await xlsx.parse('./src/uploads/copros-xls/' + req.file.filename);
+            let error = {
+                isError : false,
+                message : "",
+                errors  : []
+            };
+            obj[0].data.map((item, index) => {
+               if (index >= 1) {
+                   if (item[0] && item[2] && item[3] && item[4] && item[5]) {
+                       let copro = new Copro({
+                           name         : item[1],
+                           reference    : item[0],
+                           address      : item[2],
+                           codePostal   : item[3],
+                           ville        : item[4],
+                           surface      : item[5],
+                           compagnie    : {
+                               assurance : item[6],
+                               echeance  : null
+                           },
+                           syndicEnCours: req.user.id
+                       })
+                       copro.save(function(err) {
+                           if (err) {
+                               error.isError = true;
+                               error.message = err;
+                               error.errors.push(item)
+                           }
+                       });
+                   }
+               }
+            });
+            res.status(200).send({ success: true, message : "La liste de Copros a bien été créée", error});
+        }
+    })
 }
 
 /* register new Batiment */
@@ -477,5 +552,6 @@ module.exports = {
     registerGestionnaire,
     registerCopro,
     registerBatiment,
-    registerDevis
+    registerDevis,
+    parseXlsThenStore
 }
