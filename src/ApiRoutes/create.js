@@ -8,6 +8,8 @@ const express = require('express');
 /* import local modules */
 /************************/
 
+let {checkEmailExist} = require('../Middleware/ApiHelpers');
+
 let {
     registerSyndic,
     registerCourtier,
@@ -79,7 +81,7 @@ let router = express.Router();
  * @consumes application/json
  * @security JWT
  */
-router.post('/syndic', registerSyndic);
+router.post('/syndic', checkEmailExist, registerSyndic);
 
 /**
  * @typedef GESTIONNAIRE
@@ -113,7 +115,7 @@ router.post('/syndic', registerSyndic);
  * @consumes application/json
  * @security JWT
  */
-router.post('/gestionnaire', registerGestionnaire);
+router.post('/gestionnaire', checkEmailExist, registerGestionnaire);
 
 /**
  * @typedef COURTIER
@@ -149,7 +151,7 @@ router.post('/gestionnaire', registerGestionnaire);
  * @consumes application/json
  * @security JWT
  */
-router.post('/courtier', registerCourtier);
+router.post('/courtier', checkEmailExist, registerCourtier);
 
 /**
  * @typedef ARCHITECTE
@@ -187,7 +189,7 @@ router.post('/courtier', registerCourtier);
  * @consumes application/json
  * @security JWT
  */
-router.post('/architecte', registerArchitecte);
+router.post('/architecte', checkEmailExist, registerArchitecte);
 
 /**
  * @typedef PCS
@@ -217,7 +219,7 @@ router.post('/architecte', registerArchitecte);
  * @consumes application/json
  * @security JWT
  */
-router.post('/pcs', registerPresidentCS);
+router.post('/pcs', checkEmailExist, registerPresidentCS);
 
 /**
  * @typedef RCDECENNALE
@@ -303,7 +305,7 @@ router.post('/rcprofessionnelle', uploadRCProfessionnelle);
  * @consumes application/json
  * @security JWT
  */
-router.post('/prestataire', registerPrestataire);
+router.post('/prestataire', checkEmailExist, registerPrestataire);
 
 /**
  * @typedef COPRO
