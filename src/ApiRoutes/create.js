@@ -107,7 +107,7 @@ router.post('/syndic', registerSyndic);
  * @param {GESTIONNAIRE.model} permissions.body - contient des entiers de 0 à 6 chacun correspondant à une permission spécifique
  * @returns {object} 200 - {success: true, message : 'Le Syndic a bien été crée'}
  * @returns {Error}  400 - {success: false, message: error system log from mongoose}
- * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
+ * @returns {Error}  401 - si dans token, role !== syndic  {success: false, message: 'accès interdit'}
  * @returns {Error}  403 - si email existe  {success: false, message: 'email déjà utilisé'}
  * @produces application/json
  * @consumes application/json
@@ -143,7 +143,7 @@ router.post('/gestionnaire', registerGestionnaire);
  * @param {COURTIER.model} phone.body.required - Téléphone contact du Courtier
  * @returns {object} 200 - {success: true, message : 'Le Courtier a bien été crée'}
  * @returns {Error}  400 - {success: false, message: error system log from mongoose}
- * @returns {Error}  401 - si dans token, role !== syndic  {success: false, message: 'accès interdit'}
+ * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
  * @returns {Error}  403 - si email existe  {success: false, message: 'email déjà utilisé'}
  * @produces application/json
  * @consumes application/json
