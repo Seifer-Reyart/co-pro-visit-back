@@ -326,7 +326,7 @@ let uploadRCDecennale = (req, res) => {
 
 let registerGestionnaire = async (req, res) => {
     const {email} = req.body;
-    if (req.user.role !== 'admin' ||  req.user.role !== 'syndic') {
+    if (req.user.role !== 'syndic') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
         Gestionnaire.findOne({email}, async (err, user) => {
@@ -344,8 +344,8 @@ let registerGestionnaire = async (req, res) => {
                         password    	: bcrypt.hashSync(password, salt),
                         companyId       : req.body.companyId,
                         phone           : req.body.phone,
-                        parc            : req.body.parc,
-                        enCoursSelect   : req.body.enCoursSelect,
+                        parc            : req.body.parc && req.body.parc.length > 0 ? req.body.parc : [],
+                        enCoursSelect   : req.body.enCoursSelect && req.body.enCoursSelect.length > 0 ? req.body.enCoursSelect : [],
                         permissions     : req.body.permissions,
                         role        	: 'gestionnaire'
                 })

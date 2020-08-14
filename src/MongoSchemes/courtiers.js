@@ -9,6 +9,7 @@ let courtiersSchema = new Schema({
     phone           : String,
     company         : String,
     syndics         : [Schema.Types.ObjectId],
+    parc            : [Schema.Types.ObjectId],
     role        	: {
         type: String,
         default: 'courtier'
