@@ -39,14 +39,19 @@ const   Devis           = require('../MongoSchemes/devis'),
 
 let getSyndics = (req, res) => {
     if (req.user.role === 'admin')
-        Syndic.find({}, (err, syndics) => {
-            if (err)
-                res.status(400).send({success: false, message: 'erreur system', err});
-            else if (!syndics)
-                res.status(404).send({success: false, message: 'aucun syndic enregistré'});
-            else
-                res.status(200).send({success: true, syndics});
-        });
+        Syndic.find()
+            .populate({
+                path: 'parc',
+                model: 'copros'
+            })
+            .then((err, syndics) => {
+                if (err)
+                    res.status(400).send({success: false, message: 'erreur system', err});
+                else if (!syndics)
+                    res.status(404).send({success: false, message: 'aucun syndic enregistré'});
+                else
+                    res.status(200).send({success: true, syndics});
+            });
     else if (req.user.role === 'courtier')
         Courtier.findOne({_id: req.user.id}, (err, courtier) => {
             if (err)
@@ -100,7 +105,7 @@ let getCourtiers = (req, res) => {
             if (err)
                 res.status(400).send({success: false, message: 'erreur system', err});
             else if (!syndic)
-                res.status(404).send({success: false, message: "ce Syndic n'existe pas!"});
+                res.status(403).send({success: false, message: "ce Syndic n'existe pas!"});
             else
                 Courtier.find({_id: {$in: syndic.courtiers }}, (err, courtiers) => {
                     if (err)
@@ -112,11 +117,11 @@ let getCourtiers = (req, res) => {
                 });
         })
     else if (req.user.role === 'gestionnaire')
-        Syndic.findOne({_id: req.user.id}, (err, syndic) => {
+        Gestionnaire.findOne({_id: req.user.id}, (err, gestionnaire) => {
             if (err)
                 res.status(400).send({success: false, message: 'erreur system', err});
-            else if (!syndic)
-                res.status(404).send({success: false, message: "ce Gestionnaire n'existe pas!"});
+            else if (!gestionnaire)
+                res.status(403).send({success: false, message: "ce Gestionnaire n'existe pas!"});
             else
                 Courtier.find({_id: {$in: syndic.courtiers }}, (err, courtiers) => {
                     if (err)
@@ -128,7 +133,7 @@ let getCourtiers = (req, res) => {
                 });
         })
     else
-        res.status(403).send({success: false, message: 'accès refusé'});
+        res.status(401).send({success: false, message: 'accès refusé'});
 }
 
 /*** get devis ***/

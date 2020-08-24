@@ -348,7 +348,7 @@ let registerGestionnaire = async (req, res) => {
                         firstName   	: req.body.firstName,
                         lastName    	: req.body.lastName,
                         password    	: bcrypt.hashSync(password, salt),
-                        companyId       : req.body.companyId,
+                        syndic          : req.body.syndic,
                         phone           : req.body.phone,
                         parc            : req.body.parc && req.body.parc.length > 0 ? req.body.parc : [],
                         enCoursSelect   : req.body.enCoursSelect && req.body.enCoursSelect.length > 0 ? req.body.enCoursSelect : [],
