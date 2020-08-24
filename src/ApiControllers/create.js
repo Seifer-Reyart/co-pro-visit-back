@@ -355,12 +355,18 @@ let registerGestionnaire = async (req, res) => {
                         permissions     : req.body.permissions,
                         role        	: 'gestionnaire'
                 })
-                gestionnaire.save(function(err) {
+                gestionnaire.save(function(err, gest) {
                     if (err) {
                         res.send({ success: false, message: "Erreur lors de la création du Gestionnaire", err});
                     } else {
-                        sendCredentials(req.body.email.toLowerCase(), password);
-                        res.send({ success: true, message : "Le Gestionnaire a bien été créé"});
+                        Syndic.updateOne({_id: req.body.syndic}, {$push: {gestionnaires: gest._id}}, (err) => {
+                            if (err)
+                                res.send({ success: false, message: "Erreur lors de l'ajout du Gestionnaire au Syndic", err});
+                            else {
+                                sendCredentials(req.body.email.toLowerCase(), password);
+                                res.send({ success: true, message : "Le Gestionnaire a bien été créé"});
+                            }
+                        })
                     }
                 });
             }

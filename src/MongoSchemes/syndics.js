@@ -12,6 +12,7 @@ let syndicsSchema = new Schema({
     codePostal      : String,
     ville           : String,
     phone           : String,
+    gestionnaires   : [Schema.Types.ObjectId],
     parc            : [Schema.Types.ObjectId],
     enCoursSelect   : [Schema.Types.ObjectId],
     courtiers       : [Schema.Types.ObjectId],

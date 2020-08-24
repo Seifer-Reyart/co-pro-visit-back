@@ -44,6 +44,10 @@ let getSyndics = (req, res) => {
                 path: 'parc',
                 model: 'copros'
             })
+            .populate({
+                path: 'gestionnaires',
+                model: 'gestionnaires'
+            })
             .then((syndics, err) => {
                 if (err)
                     res.status(400).send({success: false, message: 'erreur system', err});
@@ -123,14 +127,16 @@ let getCourtiers = (req, res) => {
             else if (!gestionnaire)
                 res.status(403).send({success: false, message: "ce Gestionnaire n'existe pas!"});
             else
-                Courtier.find({_id: {$in: syndic.courtiers }}, (err, courtiers) => {
-                    if (err)
-                        res.status(400).send({success: false, message: 'erreur system', err});
-                    else if (!courtiers)
-                        res.status(404).send({success: false, message: 'aucun courtier enregistré'});
-                    else
-                        res.status(200).send({success: true, courtiers});
-                });
+                Syndic.findOne({_id: gestionnaire.syndic}, (err, syndic) => {
+                    Courtier.find({_id: {$in: syndic.courtiers }}, (err, courtiers) => {
+                        if (err)
+                            res.status(400).send({success: false, message: 'erreur system', err});
+                        else if (!courtiers)
+                            res.status(404).send({success: false, message: 'aucun courtier enregistré'});
+                        else
+                            res.status(200).send({success: true, courtiers});
+                    });
+                })
         })
     else
         res.status(401).send({success: false, message: 'accès refusé'});
@@ -258,5 +264,7 @@ let getVisites = (req, res) => {
 }
 
 module.exports = {
+    getCopro,
     getSyndics,
+    getCourtiers
 }
