@@ -52,7 +52,7 @@ let getSyndics = (req, res) => {
             if (err)
                 res.status(400).send({success: false, message: 'erreur system', err});
             else if (!courtier)
-                res.status(404).send({success: false, message: "ce courtier n'existe pas!"});
+                res.status(403).send({success: false, message: "ce courtier n'existe pas!"});
             else
                 Syndic.find({_id: {$in: courtier.syndics}}, (err, syndics) => {
                     if (err)
@@ -67,8 +67,8 @@ let getSyndics = (req, res) => {
         Prestataire.findOne({_id: req.user.id}, (err, prestataire) => {
             if (err)
                 res.status(400).send({success: false, message: 'erreur system', err});
-            else if (!courtier)
-                res.status(404).send({success: false, message: "ce prestataire n'existe pas!"});
+            else if (!prestataire)
+                res.status(403).send({success: false, message: "ce prestataire n'existe pas!"});
             else
                 Syndic.find({_id: {$in: prestataire.syndics}}, (err, syndics) => {
                     if (err)
@@ -80,7 +80,7 @@ let getSyndics = (req, res) => {
                 });
         });
     else
-        res.status(403).send({success: false, message: 'accès refusé'});
+        res.status(401).send({success: false, message: 'accès refusé'});
 }
 
 /*** get Courtiers ***/
@@ -101,6 +101,22 @@ let getCourtiers = (req, res) => {
                 res.status(400).send({success: false, message: 'erreur system', err});
             else if (!syndic)
                 res.status(404).send({success: false, message: "ce Syndic n'existe pas!"});
+            else
+                Courtier.find({_id: {$in: syndic.courtiers }}, (err, courtiers) => {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur system', err});
+                    else if (!courtiers)
+                        res.status(404).send({success: false, message: 'aucun courtier enregistré'});
+                    else
+                        res.status(200).send({success: true, courtiers});
+                });
+        })
+    else if (req.user.role === 'gestionnaire')
+        Syndic.findOne({_id: req.user.id}, (err, syndic) => {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur system', err});
+            else if (!syndic)
+                res.status(404).send({success: false, message: "ce Gestionnaire n'existe pas!"});
             else
                 Courtier.find({_id: {$in: syndic.courtiers }}, (err, courtiers) => {
                     if (err)
@@ -234,4 +250,8 @@ let getVisites = (req, res) => {
         })
     else
         res.status(403).send({success: false, message: 'accès refusé'});
+}
+
+module.exports = {
+    getSyndics,
 }
