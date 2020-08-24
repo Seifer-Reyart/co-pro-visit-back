@@ -71,8 +71,7 @@ let router = express.Router();
  * @param {COMPAGNIE.model} compagnie.body - date de nomination du pcs
  * @returns {object} 200 - {success: true, message : 'La Copro a bien été crée'}
  * @returns {Error}  400 - {success: false, message: error system log from mongoose}
- * @returns {Error}  401 - si dans token, role !== syndic ou role !== gestionnaire  {success: false, message: 'accès interdit'}
- * @returns {Error}  403 - si email existe  {success: false, message: 'email déjà utilisé'}
+ * @returns {Error}  401 - si dans token, role !== syndic ou role !== gestionnaire ou role !== 'architecte'  {success: false, message: 'accès interdit'}
  * @produces application/json
  * @consumes application/json
  * @security JWT

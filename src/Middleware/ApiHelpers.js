@@ -18,31 +18,31 @@ let checkEmailExist = async (req, res, next) => {
         if (err)
             console.log(err)
         else if (user)
-            res.status(403).send({status: false, message: "ce mail est déjà utilisé"})
+            res.status(403).send({status: false, message: "cet email est déjà utilisé"})
         else
             Syndic.findOne({email}, (err, user) => {
                 if (err)
                     console.log(err)
                 else if (user)
-                    res.status(403).send({status: false, message: "ce mail est déjà utilisé"})
+                    res.status(403).send({status: false, message: "cet email est déjà utilisé"})
                 else
                     Courtier.findOne({email}, (err, user) => {
                         if (err)
                             console.log(err)
                         else if (user)
-                            res.status(403).send({status: false, message: "ce mail est déjà utilisé"})
+                            res.status(403).send({status: false, message: "cet email est déjà utilisé"})
                         else
                             Architecte.findOne({email}, (err, user) => {
                                 if (err)
                                     console.log(err)
                                 else if (user)
-                                    res.status(403).send({status: false, message: "ce mail est déjà utilisé"})
+                                    res.status(403).send({status: false, message: "cet email est déjà utilisé"})
                                 else
                                     PresidentCS.findOne({email}, (err, user) => {
                                         if (err)
                                             console.log(err)
                                         else if (user)
-                                            res.status(403).send({status: false, message: "ce mail est déjà utilisé"})
+                                            res.status(403).send({status: false, message: "cet email est déjà utilisé"})
                                         else
                                             Prestataire.findOne({email}, (err, user) => {
                                                 if (err)
@@ -50,7 +50,7 @@ let checkEmailExist = async (req, res, next) => {
                                                 else if (user)
                                                     res.status(403).send({
                                                         status: false,
-                                                        message: "ce mail est déjà utilisé"
+                                                        message: "cet email est déjà utilisé"
                                                     })
                                                 else
                                                     Gestionnaire.findOne({email}, (err, user) => {
@@ -59,7 +59,7 @@ let checkEmailExist = async (req, res, next) => {
                                                         else if (user)
                                                             res.status(403).send({
                                                                 status: false,
-                                                                message: "ce mail est déjà utilisé"
+                                                                message: "cet email est déjà utilisé"
                                                             })
                                                         else
                                                             next();

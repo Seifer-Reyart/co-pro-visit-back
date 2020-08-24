@@ -16,14 +16,14 @@ let updateCopro = (req, res) => {
     const {_id} = req.body;
     let update = req.body;
     delete update._id;
-    if (req.user.role !== 'gestionnaire' || req.user.role !== 'syndic') {
-        res.status(403).send({success: false, message: 'accès interdit'});
+    if (req.user.role !== 'gestionnaire' || req.user.role !== 'syndic' || req.user.role !== 'architecte') {
+        res.status(401).send({success: false, message: 'accès interdit'});
     } else {
         Copro.findOneAndUpdate({_id}, {update}, {new: true}, async (err, copro) => {
             if (err)
                 res.status(400).send({success: false, message: err});
             else
-                res.status(403).send({success: false, message: 'La Copro a été mise à jour', copro});
+                res.status(200).send({success: false, message: 'La Copro a été mise à jour', copro});
         });
     }
 }

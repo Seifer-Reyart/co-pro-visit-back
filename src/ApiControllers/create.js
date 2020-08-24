@@ -85,7 +85,7 @@ let registerSyndic = async (req, res) => {
                         res.status(400).send({ success: false, message: 'Erreur lors de la création du Syndic', err});
                     } else {
                         sendCredentials(req.body.email.toLowerCase(), password);
-                        res.status(200).send({ success: true, message : 'Le Syndic a bien été crée'});
+                        res.status(200).send({ success: true, message : 'Le Syndic a bien été créé'});
                     }
                 });
             }
@@ -121,7 +121,7 @@ let registerCourtier = async (req, res) => {
                         res.send({ success: false, message: 'Erreur lors de la création du Courtier', err});
                     } else {
                         sendCredentials(req.body.email.toLowerCase(), password);
-                        res.send({ success: true, message : 'Le Courtier a bien été crée'});
+                        res.send({ success: true, message : 'Le Courtier a bien été créé'});
                     }
                 });
             }
@@ -162,7 +162,7 @@ let registerArchitecte = async (req, res) => {
                         res.send({ success: false, message: "Erreur lors de la création de L'Architecte", err});
                     } else {
                         sendCredentials(req.body.email.toLowerCase(), password);
-                        res.send({ success: true, message : "L'Architecte a bien été crée"});
+                        res.send({ success: true, message : "L'Architecte a bien été créé"});
                     }
                 });
             }
@@ -174,7 +174,7 @@ let registerArchitecte = async (req, res) => {
 
 let registerPresidentCS = async (req, res) => {
     const {email} = req.body;
-    if (req.user.role !== 'admin') {
+    if (req.user.role !== 'admin' && req.user.role !== 'syndic' && req.user.role !== 'gestionnaire') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
         PresidentCS.findOne({email}, async (err, user) => {
@@ -199,7 +199,7 @@ let registerPresidentCS = async (req, res) => {
                         res.send({ success: false, message: "Erreur lors de la création du PCS", err});
                     } else {
                         sendCredentials(req.body.email.toLowerCase(), password);
-                        res.send({ success: true, message : "Le PCS a bien été crée"});
+                        res.send({ success: true, message : "Le PCS a bien été créé"});
                     }
                 });
             }
@@ -249,7 +249,7 @@ let registerPrestataire = async (req, res) => {
                         res.send({ success: false, message: "Erreur lors de la création du Prestataire", err});
                     } else {
                         sendCredentials(req.body.email.toLowerCase(), password);
-                        res.send({ success: true, message : "Le Prestataire a bien été crée"});
+                        res.send({ success: true, message : "Le Prestataire a bien été créé"});
                     }
                 });
             }
@@ -291,35 +291,41 @@ let upload = multer({
 }).single("data");
 
 let uploadRCProfessionnelle = (req, res) => {
-    // Error MiddleWare for multer file upload, so if any
-    // error occurs, the file would not be uploaded!
-    upload(req, res, function(err) {
-        if(err) {
-            // ERROR occured (here it can be occured due
-            // to uploading file of size greater than
-            // 5MB or uploading different file type)
-            res.status(400).send({success: false, message: err})
-        } else {
-            // SUCCESS, file successfully uploaded
-            res.status(200).send({success: true, message:"RCProfessionnelle uploadé!", RCProfessionnelle: req.file.filename})
-        }
-    })
+    if (req.user.role !== 'prestataire') {
+        res.status(403).send({success: false, message: 'accès interdit'});
+    } else
+        // Error MiddleWare for multer file upload, so if any
+        // error occurs, the file would not be uploaded!
+        upload(req, res, function(err) {
+            if(err) {
+                // ERROR occured (here it can be occured due
+                // to uploading file of size greater than
+                // 5MB or uploading different file type)
+                res.status(400).send({success: false, message: err})
+            } else {
+                // SUCCESS, file successfully uploaded
+                res.status(200).send({success: true, message:"RCProfessionnelle uploadé!", RCProfessionnelle: req.file.filename})
+            }
+        })
 }
 
 let uploadRCDecennale = (req, res) => {
-    // Error MiddleWare for multer file upload, so if any
-    // error occurs, the file would not be uploaded!
-    upload(req, res, function(err) {
-        if(err) {
-            // ERROR occured (here it can be occured due
-            // to uploading file of size greater than
-            // 5MB or uploading different file type)
-            res.status(400).send({success: false, message: err})
-        } else {
-            // SUCCESS, file successfully uploaded
-            res.status(200).send({success: true, message:"RCDecennale uploadé!", RCDecennale: req.file.filename})
-        }
-    })
+    if (req.user.role !== 'prestataire') {
+        res.status(403).send({success: false, message: 'accès interdit'});
+    } else
+        // Error MiddleWare for multer file upload, so if any
+        // error occurs, the file would not be uploaded!
+        upload(req, res, function(err) {
+            if(err) {
+                // ERROR occured (here it can be occured due
+                // to uploading file of size greater than
+                // 5MB or uploading different file type)
+                res.status(400).send({success: false, message: err})
+            } else {
+                // SUCCESS, file successfully uploaded
+                res.status(200).send({success: true, message:"RCDecennale uploadé!", RCDecennale: req.file.filename})
+            }
+        })
 }
 
 /* register new gestionnaire */
@@ -354,7 +360,7 @@ let registerGestionnaire = async (req, res) => {
                         res.send({ success: false, message: "Erreur lors de la création du Gestionnaire", err});
                     } else {
                         sendCredentials(req.body.email.toLowerCase(), password);
-                        res.send({ success: true, message : "Le Gestionnaire a bien été crée"});
+                        res.send({ success: true, message : "Le Gestionnaire a bien été créé"});
                     }
                 });
             }
@@ -366,7 +372,7 @@ let registerGestionnaire = async (req, res) => {
 
 let registerCopro = (req, res) => {
     const {name, codePostal, ville} = req.body;
-    if (req.user.role !== 'gestionnaire' || req.user.role !== 'syndic') {
+    if (req.user.role !== 'gestionnaire' && req.user.role !== 'syndic') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
         Copro.findOne({$and: [{name}, {codePostal}, {ville}]}, async (err, copro) => {
@@ -427,56 +433,60 @@ let uploadXls = multer({
 }).single("data");
 
 let parseXlsThenStore = (req, res) => {
-    // Error MiddleWare for multer file upload, so if any
-    // error occurs, the file would not be uploaded!
-    uploadXls(req, res, async function(err) {
-        if(err) {
-            // ERROR occured
-            res.status(400).send({success: false, message: err})
-        } else {
-            // SUCCESS, file successfully uploaded
-            let obj = await xlsx.parse('./src/uploads/copros-xls/' + req.file.filename);
-            let error = {
-                isError : false,
-                message : "",
-                errors  : []
-            };
-            obj[0].data.map((item, index) => {
-               if (index >= 1) {
-                   if (item[0] && item[2] && item[3] && item[4] && item[5]) {
-                       let copro = new Copro({
-                           name         : item[1],
-                           reference    : item[0],
-                           address      : item[2],
-                           codePostal   : item[3],
-                           ville        : item[4],
-                           surface      : item[5],
-                           compagnie    : {
-                               assurance : item[6],
-                               echeance  : null
-                           },
-                           syndicEnCours: req.user.id
-                       })
-                       copro.save(function(err) {
-                           if (err) {
-                               error.isError = true;
-                               error.message = err;
-                               error.errors.push(item)
-                           }
-                       });
-                   }
-               }
-            });
-            res.status(200).send({ success: true, message : "La liste de Copros a bien été créée", error});
-        }
-    })
+    if (req.user.role !== 'syndic') {
+        res.status(403).send({success: false, message: 'accès interdit'});
+    } else {
+        // Error MiddleWare for multer file upload, so if any
+        // error occurs, the file would not be uploaded!
+        uploadXls(req, res, async function (err) {
+            if (err) {
+                // ERROR occured
+                res.status(400).send({success: false, message: err})
+            } else {
+                // SUCCESS, file successfully uploaded
+                let obj = await xlsx.parse('./src/uploads/copros-xls/' + req.file.filename);
+                let error = {
+                    isError: false,
+                    message: "",
+                    errors: []
+                };
+                obj[0].data.map((item, index) => {
+                    if (index >= 1) {
+                        if (item[0] && item[2] && item[3] && item[4] && item[5]) {
+                            let copro = new Copro({
+                                name: item[1],
+                                reference: item[0],
+                                address: item[2],
+                                codePostal: item[3],
+                                ville: item[4],
+                                surface: item[5],
+                                compagnie: {
+                                    assurance: item[6],
+                                    echeance: null
+                                },
+                                syndicEnCours: req.user.id
+                            })
+                            copro.save(function (err) {
+                                if (err) {
+                                    error.isError = true;
+                                    error.message = err;
+                                    error.errors.push(item)
+                                }
+                            });
+                        }
+                    }
+                });
+                res.status(200).send({success: true, message: "La liste de Copros a bien été créée", error});
+            }
+        })
+    }
 }
 
 /* register new Batiment */
 
 let registerBatiment = async (req, res) => {
     const {batiment} = req.body.batiments;
-    if (req.user.role !== 'gestionnaire' || req.user.role !== 'syndic') {
+    if (req.user.role !== 'gestionnaire' && req.user.role !== 'syndic' && req.user.role !== 'architecte') {
         res.status(401).send({success: false, message: 'accès interdit'});
     } else {
         Batiment.findOne({$and: [{reference: batiment.reference}, {copro: batiment.copro}]}, async (err, Batiment) => {
@@ -502,7 +512,7 @@ let registerBatiment = async (req, res) => {
 
 let registerDevis = async (req, res) => {
     const {name, codePostal, ville, copro} = req.body;
-    if (req.user.role !== 'admin' || req.user.role !== 'syndic') {
+    if (req.user.role !== 'admin' && req.user.role !== 'prestataire') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
         Devis.findOne({$and: [{copro}, {prestataire}, {syndic}, {copro}]}, async (err, Batiment) => {
@@ -531,7 +541,7 @@ let registerDevis = async (req, res) => {
                     if (err) {
                         res.send({ success: false, message: "Erreur lors de la création du Devis", err});
                     } else {
-                        res.send({ success: true, message : "Le Devis a bien été crée"});
+                        res.send({ success: true, message : "Le Devis a bien été créé"});
                     }
                 });
             }

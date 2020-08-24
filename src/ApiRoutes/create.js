@@ -73,7 +73,7 @@ let router = express.Router();
  * @param {SYNDIC.model} codePostal.body.required - code postal du Syndic
  * @param {SYNDIC.model} ville.body.required - ville du Syndic
  * @param {SYNDIC.model} phone.body.required - Téléphone contact du Syndic
- * @returns {object} 200 - {success: true, message : 'Le Syndic a bien été crée'}
+ * @returns {object} 200 - {success: true, message : 'Le Syndic a bien été créé'}
  * @returns {Error}  400 - {success: false, message: error system log from mongoose}
  * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
  * @returns {Error}  403 - si email existe  {success: false, message: 'email déjà utilisé'}
@@ -96,7 +96,7 @@ router.post('/syndic', checkEmailExist, registerSyndic);
  * @property {string} role - type de compte - eg: syndic
  */
 /**
- * Cette route permet de créer un Syndic, le mot de passe du compte est généré dans le Back et envoyé par email, JWT necessaire.
+ * Cette route permet de créer un Gestionnaire, le mot de passe du compte est généré dans le Back et envoyé par email, JWT necessaire.
  * @route POST /create/gestionnaire
  * @group syndic et gestionnaire
  * @param {GESTIONNAIRE.model} email.body.required - email
@@ -107,7 +107,7 @@ router.post('/syndic', checkEmailExist, registerSyndic);
  * @param {GESTIONNAIRE.model} parc.body - tableau Ids des copros affiliées
  * @param {GESTIONNAIRE.model} enCourSelect.body - tableau Ids des copros en cours de selection
  * @param {GESTIONNAIRE.model} permissions.body - contient des entiers de 0 à 6 chacun correspondant à une permission spécifique
- * @returns {object} 200 - {success: true, message : 'Le Syndic a bien été crée'}
+ * @returns {object} 200 - {success: true, message : 'Le Gestionnaire a bien été créé'}
  * @returns {Error}  400 - {success: false, message: error system log from mongoose}
  * @returns {Error}  401 - si dans token, role !== syndic  {success: false, message: 'accès interdit'}
  * @returns {Error}  403 - si email existe  {success: false, message: 'email déjà utilisé'}
@@ -143,7 +143,7 @@ router.post('/gestionnaire', checkEmailExist, registerGestionnaire);
  * @param {COURTIER.model} codePostal.body.required - code postal du Courtier
  * @param {COURTIER.model} ville.body.required - ville du Courtier
  * @param {COURTIER.model} phone.body.required - Téléphone contact du Courtier
- * @returns {object} 200 - {success: true, message : 'Le Courtier a bien été crée'}
+ * @returns {object} 200 - {success: true, message : 'Le Courtier a bien été créé'}
  * @returns {Error}  400 - {success: false, message: error system log from mongoose}
  * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
  * @returns {Error}  403 - si email existe  {success: false, message: 'email déjà utilisé'}
@@ -181,7 +181,7 @@ router.post('/courtier', checkEmailExist, registerCourtier);
  * @param {ARCHITECTE.model} codePostal.body.required - code postal du cabinet
  * @param {ARCHITECTE.model} ville.body.required - ville du cabinet
  * @param {ARCHITECTE.model} phone.body.required - Téléphone contact de l'Architecte
- * @returns {object} 200 - {success: true, message : "L'ARCHITECTE a bien été crée"}
+ * @returns {object} 200 - {success: true, message : "L'ARCHITECTE a bien été créé"}
  * @returns {Error}  400 - {success: false, message: error system log from mongoose}
  * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
  * @returns {Error}  403 - si email existe  {success: false, message: 'email déjà utilisé'}
@@ -213,7 +213,7 @@ router.post('/architecte', checkEmailExist, registerArchitecte);
  * @param {PCS.model} coproId.body.required - Object Id de la copro affiliée
  * @returns {object} 200 - {success: true, message : "Le PCS a bien été crée"}
  * @returns {Error}  400 - {success: false, message: error system log from mongoose}
- * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
+ * @returns {Error}  401 - si dans token, role !== 'syndic' || role !== 'gestionnaire' || role !== 'admin' {success: false, message: 'accès interdit'}
  * @returns {Error}  403 - si email existe  {success: false, message: 'email déjà utilisé'}
  * @produces application/json
  * @consumes application/json
@@ -232,6 +232,7 @@ router.post('/pcs', checkEmailExist, registerPresidentCS);
  * @param {RCDECENNALE.model} data.body - fichier RCDecennale au format jpg|jpeg|png|pdf
  * @returns {object} 200 - {success: true, message : "RCDecennale uploadé!", RCDecennale: "filename"}
  * @returns {Error}  400 - {success: false, message: error system log}
+ * @returns {Error}  401 - si dans token, role !== prestataire  {success: false, message: 'accès interdit'}
  * @produces application/json
  * @consumes multipart/form-data
  * @security JWT
@@ -249,6 +250,7 @@ router.post('/rcdecennale', uploadRCDecennale);
  * @param {RCPROFESSIONNELLE.model} data.body - fichier RCProfessionnelle au format jpg|jpeg|png|pdf
  * @returns {object} 200 - {success: true, message : "RCProfessionnelle uploadé!", RCProfessionnelle: "filename"}
  * @returns {Error}  400 - {success: false, message: error system log}
+ * @returns {Error}  401 - si dans token, role !== prestataire  {success: false, message: 'accès interdit'}
  * @produces application/json
  * @consumes multipart/form-data
  * @security JWT
@@ -327,7 +329,7 @@ router.post('/prestataire', checkEmailExist, registerPrestataire);
  * @property {Array.<string>} syndicEnCours - tableau des Ids de syndic en cours de selection
  * @property {string} gestionnaire - Id du gestionnaire
  * @property {string} pcs - Id du président du conseil syndical de la copro
- * @property {object} compagnie - Compagnie d'assurance {assurance: string, echance: date}
+ * @property {object} compagnie - Compagnie d'assurance {assurance: string, echeance: date}
  *
  */
 /**
@@ -360,7 +362,7 @@ router.post('/prestataire', checkEmailExist, registerPrestataire);
  * @param {COMPAGNIE.model} compagnie.body - date de nomination du pcs
  * @returns {object} 200 - {success: true, message : 'La Copro a bien été crée'}
  * @returns {Error}  400 - {success: false, message: error system log from mongoose}
- * @returns {Error}  401 - si dans token, role !== syndic ou role !== gestionnaire  {success: false, message: 'accès interdit'}
+ * @returns {Error}  401 - si dans token, role !== 'syndic' || role !== 'gestionnaire'  {success: false, message: 'accès interdit'}
  * @returns {Error}  403 - si email existe  {success: false, message: 'email déjà utilisé'}
  * @produces application/json
  * @consumes application/json
@@ -379,6 +381,7 @@ router.post('/copro', registerCopro);
  * @param {COPROS-FROM-XLS.model} data.body - fichier Excel pour enregistrer plusieurs Copros d'un coup
  * @returns {object} 200 - {success: true, message : "La liste de Copros a bien été créée"}
  * @returns {Error}  400 - {success: false, message: "message d'erreur si mauvais format de fichier (xls|xlsx)"}
+ * @returns {Error}  401 - si dans token, role !== 'syndic' || role !== 'gestionnaire'  {success: false, message: 'accès interdit'}
  * @produces application/json
  * @consumes multipart/form-data
  * @security JWT
@@ -509,7 +512,7 @@ router.post('/multi-copros', parseXlsThenStore);
  * @param {IMAGES.model} images.body - sous objet contenant des tableaux d'images pour certaines parties du batiment
  * @returns {object} 200 - {success: true, message : 'Le batiment a bien été crée'}
  * @returns {Error}  400 - {success: false, message: error system log from mongoose}
- * @returns {Error}  401 - si dans token, role !== syndic ou role !== gestionnaire  {success: false, message: 'accès interdit'}
+ * @returns {Error}  401 - si dans token, role !== 'syndic' || role !== 'gestionnaire' || role !== 'architecte' {success: false, message: 'accès interdit'}
  * @returns {Error}  403 - si email existe  {success: false, message: 'Le batiment existe déjà'}
  * @produces application/json
  * @consumes application/json
@@ -554,7 +557,7 @@ router.post('/batiment', registerBatiment);
  * @param {DEVIS.model} photos.body - photos divers pour le devis
  * @returns {object} 200 - {success: true, message : "Le PCS a bien été crée"}
  * @returns {Error}  400 - {success: false, message: error system log from mongoose}
- * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
+ * @returns {Error}  401 - si dans token, role !== prestataire  {success: false, message: 'accès interdit'}
  * @returns {Error}  403 - si email existe  {success: false, message: 'email déjà utilisé'}
  * @produces application/json
  * @consumes application/json
