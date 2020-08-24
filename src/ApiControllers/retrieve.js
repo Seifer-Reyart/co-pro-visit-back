@@ -44,7 +44,7 @@ let getSyndics = (req, res) => {
                 path: 'parc',
                 model: 'copros'
             })
-            .then((err, syndics) => {
+            .then((syndics, err) => {
                 if (err)
                     res.status(400).send({success: false, message: 'erreur system', err});
                 else if (!syndics)
