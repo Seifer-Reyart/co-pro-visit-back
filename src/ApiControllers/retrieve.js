@@ -92,6 +92,22 @@ let getSyndics = (req, res) => {
         res.status(401).send({success: false, message: 'accès refusé'});
 }
 
+/*** get Gestionnaires ***/
+
+let getGestionnaires = (req, res) => {
+    if (req.user.role === 'syndic')
+        Gestionnaire.find({syndic: req.user.id}, (err, gestionnaires) => {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur system', err});
+            else if (!gestionnaires)
+                res.status(404).send({success: false, message: 'aucun gestionnaire enregistré'});
+            else
+                res.status(200).send({success: true, gestionnaires});
+        })
+    else
+        res.status(401).send({success: false, message: 'accès refusé'});
+}
+
 /*** get Courtiers ***/
 
 let getCourtiers = (req, res) => {
@@ -266,5 +282,6 @@ let getVisites = (req, res) => {
 module.exports = {
     getCopro,
     getSyndics,
-    getCourtiers
+    getCourtiers,
+    getGestionnaires
 }
