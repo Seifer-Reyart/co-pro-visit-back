@@ -388,17 +388,26 @@ let registerCopro = (req, res) => {
                 res.status(403).send({success: false, message: 'La Copro existe déjà'});
             else {
                 let copro = new Copro({
-                    name       	    : req.body.name,
+                    nomCopro       	: req.body.nomCopro,
                     reference       : req.body.reference,
                     address    	    : req.body.address,
                     codePostal      : req.body.codePostal,
                     ville    	    : req.body.ville,
-                    syndicEnCours   : req.body.syndic
+                    nbBatiments     : req.body.nbBatiments,
+                    surface         : req.body.surface,
+                    multiDevis      : req.body.multiDevis,
+                    maxTravaux      : req.body.maxTravaux,
+                    syndicNominated : req.body.syndicNominated ? req.body.syndicNominated : null,
+                    syndicEnCours   : req.body.syndicEnCours ? req.body.syndicEnCours : null
                 })
-                copro.save(function(err) {
+                copro.save(async function(err, cpr) {
                     if (err) {
                         res.send({ success: false, message: "Erreur lors de la création de la Copro", err});
                     } else {
+                        if (req.body.syndicNominated)
+                            await Syndic.updateOne({_id: req.body.syndicNominated}, {$push: {parc: cpr._id}});
+                        else
+                            await Syndic.updateOne({_id: req.body.syndicEnCours}, {$push: {enCoursSelect: cpr._id}});
                         res.send({ success: true, message : "La Copro a bien été créée"});
                     }
                 });
