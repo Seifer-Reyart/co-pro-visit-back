@@ -290,6 +290,45 @@ let getCopro = (req, res) => {
         res.status(401).send({success: false, message: 'accès refusé'});
 }
 
+/*** get Copros en cours de selection ***/
+
+let getEncoursSelect = (req, res) => {
+    if (req.user.role === 'syndic')
+        Syndic.findOne({_id: req.user.id}, (err, syndic) => {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur system', err});
+            else if (!syndic)
+                res.status(404).send({success: false, message: 'aucun syndic enregistré'});
+            else
+                Copro.find({_id: {$in: syndic.enCoursSelect}}, (err, copros) => {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur system', err});
+                    else if (!copros)
+                        res.status(404).send({success: false, message: 'aucune copro en cours de selection'});
+                    else
+                        res.status(200).send({success: true, enCours: copros});
+                })
+        });
+    else if (req.user.role === 'gestionnaire')
+        Gestionnaire.findOne({_id: req.user.id}, (err, gestionnaire) => {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur system', err});
+            else if (!gestionnaire)
+                res.status(404).send({success: false, message: 'aucun gestionnaire enregistré'});
+            else
+                Copro.find({_id: {$in: gestionnaire.parc}}, (err, copros) => {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur system', err});
+                    else if (!copros)
+                        res.status(404).send({success: false, message: 'aucune copro en cours de selection'});
+                    else
+                        res.status(200).send({success: true, enCours: copros});
+                })
+        });
+    else
+        res.status(401).send({success: false, message: 'accès refusé'});
+}
+
 /*** get one copro ***/
 
 let postCopro = (req, res) => {
@@ -368,4 +407,5 @@ module.exports = {
     postCourtier,
     getGestionnaires,
     postGestionnaire,
+    getEncoursSelect,
 }
