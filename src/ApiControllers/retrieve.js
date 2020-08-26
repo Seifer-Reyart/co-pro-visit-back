@@ -39,7 +39,7 @@ const   Devis           = require('../MongoSchemes/devis'),
 
 let getSyndics = (req, res) => {
     if (req.user.role === 'admin')
-        Syndic.find({}, (syndics, err) => {
+        Syndic.find({}, (err, syndics) => {
                 if (err)
                     res.status(400).send({success: false, message: 'erreur system', err});
                 else if (!syndics)
@@ -316,7 +316,7 @@ let getEncoursSelect = (req, res) => {
             else if (!gestionnaire)
                 res.status(404).send({success: false, message: 'aucun gestionnaire enregistré'});
             else
-                Copro.find({_id: {$in: gestionnaire.parc}}, (err, copros) => {
+                Copro.find({_id: {$in: gestionnaire.enCoursSelect}}, (err, copros) => {
                     if (err)
                         res.status(400).send({success: false, message: 'erreur system', err});
                     else if (!copros)
@@ -348,13 +348,13 @@ let postCopro = (req, res) => {
                 path: 'gestionnaire',
                 model: 'gestionnaires'
             })
-            .then((err, copro) => {
+            .then((copro, err) => {
                 if (err)
                     res.status(400).send({success: false, message: 'erreur system', err});
-                else if (!copros)
+                else if (!copro)
                     res.status(404).send({success: false, message: 'aucune copro enregistrée'});
                 else
-                    res.status(200).send({success: true, parc: copro});
+                    res.status(200).send({success: true, copro: copro});
             })
 }
 
