@@ -39,16 +39,7 @@ const   Devis           = require('../MongoSchemes/devis'),
 
 let getSyndics = (req, res) => {
     if (req.user.role === 'admin')
-        Syndic.find()
-            .populate({
-                path: 'parc',
-                model: 'copros'
-            })
-            .populate({
-                path: 'gestionnaires',
-                model: 'gestionnaires'
-            })
-            .then((syndics, err) => {
+        Syndic.find({}, (syndics, err) => {
                 if (err)
                     res.status(400).send({success: false, message: 'erreur system', err});
                 else if (!syndics)
@@ -92,6 +83,31 @@ let getSyndics = (req, res) => {
         res.status(401).send({success: false, message: 'accès refusé'});
 }
 
+/*** get one Syndic ***/
+
+let postSyndic = (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'courtier' && req.user.role !== 'prestataire' && req.user.role !== 'architecte')
+        res.status(401).send({success: false, message: "accès interdit"})
+    else
+        Syndic.findOne({_id: req.body._id})
+            .populate({
+                path: 'parc',
+                model: 'copros'
+            })
+            .populate({
+                path: 'gestionnaires',
+                model: 'gestionnaires'
+            })
+            .then((syndic, err) => {
+                if (err)
+                    res.status(400).send({success: false, message: 'erreur system', err});
+                else if (!syndic)
+                    res.status(404).send({success: false, message: "ce syndic n'existe pas"});
+                else
+                    res.status(200).send({success: true, syndic});
+            });
+}
+
 /*** get Gestionnaires ***/
 
 let getGestionnaires = (req, res) => {
@@ -103,6 +119,22 @@ let getGestionnaires = (req, res) => {
                 res.status(404).send({success: false, message: 'aucun gestionnaire enregistré'});
             else
                 res.status(200).send({success: true, gestionnaires});
+        })
+    else
+        res.status(401).send({success: false, message: 'accès refusé'});
+}
+
+/*** get one gestionnaire ***/
+
+let postGestionnaire = (req, res) => {
+    if (req.user.role === 'syndic' || req.user.role === 'admin')
+        Gestionnaire.find({syndic: req.body._id}, (err, gestionnaire) => {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur system', err});
+            else if (!gestionnaire)
+                res.status(404).send({success: false, message: 'aucun gestionnaire enregistré'});
+            else
+                res.status(200).send({success: true, gestionnaire});
         })
     else
         res.status(401).send({success: false, message: 'accès refusé'});
@@ -156,6 +188,22 @@ let getCourtiers = (req, res) => {
         })
     else
         res.status(401).send({success: false, message: 'accès refusé'});
+}
+
+/*** get one courtier ***/
+
+let postCourtier = (req, res) => {
+    if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire' && req.user.role !== 'admin')
+        res.status(401).send({success: false, message: 'accès refusé'});
+    else
+        Courtier.findOne({_id: req.body._id}, (err, courtier) => {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur system', err});
+            else if (!courtier)
+                res.status(404).send({success: false, message: 'aucun courtier enregistré'});
+            else
+                res.status(200).send({success: true, courtier});
+        })
 }
 
 /*** get devis ***/
@@ -229,7 +277,7 @@ let getCopro = (req, res) => {
             else if (!pcs)
                 res.status(404).send({success: false, message: 'aucun pcs enregistré'});
             else
-                Copro.find({coproId: pcs.coproId}, (err, copros) => {
+                Copro.find({_id: pcs.coproId}, (err, copros) => {
                     if (err)
                         res.status(400).send({success: false, message: 'erreur system', err});
                     else if (!copros)
@@ -239,8 +287,40 @@ let getCopro = (req, res) => {
                 })
         });
     else
-        res.status(403).send({success: false, message: 'accès refusé'});
+        res.status(401).send({success: false, message: 'accès refusé'});
 }
+
+/*** get one copro ***/
+
+let postCopro = (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'syndic' && req.user.role !== 'gestionnaire' && req.user.role !== 'pcs' && req.user.role !== 'courtier' && req.user.role !== 'architecte' && req.user.role !== 'prestataire')
+        res.status(401).send({success: false, message: 'accès refusé'});
+    else
+        Copro.findOne({_id: req.body._id})
+            .populate({
+                path: 'batiments',
+                model: 'batiments'
+            })
+            .populate({
+                path: 'syndicNominated',
+                model: 'syndics'
+            })
+            .populate({
+                path: 'gestionnaire',
+                model: 'gestionnaires'
+            })
+            .then((err, copro) => {
+                if (err)
+                    res.status(400).send({success: false, message: 'erreur system', err});
+                else if (!copros)
+                    res.status(404).send({success: false, message: 'aucune copro enregistrée'});
+                else
+                    res.status(200).send({success: true, parc: copro});
+            })
+}
+
+
+/*** get Visites list ***/
 
 let getVisites = (req, res) => {
     if (req.user.role === 'admin')
@@ -281,7 +361,11 @@ let getVisites = (req, res) => {
 
 module.exports = {
     getCopro,
+    postCopro,
     getSyndics,
+    postSyndic,
     getCourtiers,
-    getGestionnaires
+    postCourtier,
+    getGestionnaires,
+    postGestionnaire,
 }
