@@ -367,15 +367,15 @@ let getVisites = (req, res) => {
             if (err)
                 res.status(400).send({success: false, message: 'erreur system', err});
             else if (!admin)
-                res.status(404).send({success: false, message: 'aucun admin enregistré'});
+                res.status(403).send({success: false, message: 'aucun admin enregistré'});
             else
                 Visite.find({}, (err, visites) => {
                     if (err)
                         res.status(400).send({success: false, message: 'erreur system', err});
-                    else if (!copros)
-                        res.status(404).send({success: false, message: 'aucune visites enregistré'});
+                    else if (!visites)
+                        res.status(403).send({success: false, message: 'aucune visite enregistrée'});
                     else
-                        res.status(200).send({success: true, parc: visites});
+                        res.status(200).send({success: true, visites});
                 })
         })
     else if (req.user.role === 'architecte')
@@ -388,14 +388,30 @@ let getVisites = (req, res) => {
                 Visite.find({}, (err, visites) => {
                     if (err)
                         res.status(400).send({success: false, message: 'erreur system', err});
-                    else if (!copros)
-                        res.status(404).send({success: false, message: 'aucune visites enregistré'});
+                    else if (!visites)
+                        res.status(404).send({success: false, message: 'aucune visite enregistrée'});
                     else
-                        res.status(200).send({success: true, parc: visites});
+                        res.status(200).send({success: true, visites});
                 })
         })
     else
-        res.status(403).send({success: false, message: 'accès refusé'});
+        res.status(401).send({success: false, message: 'accès refusé'});
+}
+
+/*** get one Visite ***/
+
+let postVisite = (req,res) => {
+    if (req.user.role !== 'architecte' && req.user.role !== 'admin')
+        res.status(401).send({success: false, message: 'accès refusé'});
+    else
+        Visite.findOne({_id: req.body._id}, function (err, visite) {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur system', err});
+            else if (!visite)
+                res.status(404).send({success: false, message: 'aucune visite enregistrée'});
+            else
+                res.status(200).send({success: true, visite});
+        })
 }
 
 module.exports = {
@@ -403,6 +419,8 @@ module.exports = {
     postCopro,
     getSyndics,
     postSyndic,
+    getVisites,
+    postVisite,
     getCourtiers,
     postCourtier,
     getGestionnaires,

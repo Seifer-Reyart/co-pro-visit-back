@@ -4,6 +4,8 @@ let mongoose    = require('mongoose'),
 let visitesSchema = new Schema({
     architecteId    : Schema.Types.ObjectId,
     coproId    	    : Schema.Types.ObjectId,
+    nomCopro        : String,
+    reference       : String,
     syndicId        : Schema.Types.ObjectId,
     gestionnaireId  : Schema.Types.ObjectId,
     done            : Boolean

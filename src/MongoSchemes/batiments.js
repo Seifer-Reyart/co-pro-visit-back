@@ -5,7 +5,8 @@ let batimentsSchema = new Schema({
     reference               : String,
     surface                 : Number,
     natureConstruction      : String,
-    facadeEtCanalisations   : String,
+    etatFacadeCanal         : String,
+    precisezConstr          : String,
     nbEtages                : Number,
     facadeRue               : {
         etatGen     : String,
@@ -20,7 +21,7 @@ let batimentsSchema = new Schema({
         {
             refEntree       : String,
             specEntree      : String,
-            codeAccess      : Number,
+            codeAccess      : String,
             porteVitree     : Boolean,
             codeAccess2     : Boolean,
             specCodeAccess2 : String,
@@ -54,7 +55,7 @@ let batimentsSchema = new Schema({
             type      : Boolean,
             default   : false
         },
-        habitationEtPro25  : {
+        habPro  : {
             type      : Boolean,
             default   : false
         },

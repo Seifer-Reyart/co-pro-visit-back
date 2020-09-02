@@ -46,6 +46,7 @@ const   Copro       = require('../MongoSchemes/copros'),
         Batiment    = require('../MongoSchemes/batiments');
 
 const   Devis   = require('../MongoSchemes/devis');
+const   Visite  = require('../MongoSchemes/visites');
 
 /************/
 /* Function */
@@ -70,7 +71,7 @@ let registerSyndic = async (req, res) => {
                     firstName   	: req.body.firstName,
                     lastName    	: req.body.lastName,
                     password    	: bcrypt.hashSync(password, salt),
-                    company         : req.body.company,
+                    nomSyndic       : req.body.company,
                     siren           : req.body.siren,
                     address         : req.body.address,
                     codePostal      : req.body.codePostal,
@@ -395,6 +396,7 @@ let registerCopro = (req, res) => {
                     ville    	    : req.body.ville,
                     nbBatiments     : req.body.nbBatiments,
                     surface         : req.body.surface,
+                    nbrLot          : req.body.nbrLot,
                     multiDevis      : req.body.multiDevis,
                     maxTravaux      : req.body.maxTravaux,
                     syndicNominated : req.body.syndicNominated ? req.body.syndicNominated : null,
@@ -499,27 +501,48 @@ let parseXlsThenStore = (req, res) => {
 
 /* register new Batiment */
 
+let saveBatiment = (batiment) => {
+    Batiment.findOne({$and: [{reference: batiment.reference}, {coproId: batiment.coproId}]}, async (err, Bat) => {
+        if (err)
+            return {success: false, message: err};
+        else if (Bat)
+            return {success: false, message: 'Le batiment existe déjà - reference: '+Bat.reference};
+        else {
+            let bat = new Batiment(batiment)
+            bat.save(function(err) {
+                if (err) {
+                    return { success: false, message: "Erreur lors de la création du Batiment "+bat.reference, err};
+                } else {
+                    return { success: true, message : "Le Batiment " + bat.reference + " a bien été créée"};
+                }
+            });
+        }
+    })
+}
+
 let registerBatiment = async (req, res) => {
-    const {batiment} = req.body.batiments;
-    if (req.user.role !== 'gestionnaire' && req.user.role !== 'syndic' && req.user.role !== 'architecte') {
+    const {batiments, coproId} = req.body;
+    if (req.user.role !== 'admin' && req.user.role !== 'architecte') {
         res.status(401).send({success: false, message: 'accès interdit'});
     } else {
-        Batiment.findOne({$and: [{reference: batiment.reference}, {copro: batiment.copro}]}, async (err, Batiment) => {
+        let succeded = [];
+        let failed = [];
+        await batiments.map(async (batiment) => {
+            let resp = await saveBatiment(batiment);
+            if (resp.success)
+                succeded.push(resp);
+            else
+                failed.push(resp);
+        });
+
+        Visite.findOneAndUpdate({coproId}, {$set: {done: true}}, {new: false}, function (err) {
             if (err)
-                res.status(400).send({success: false, message: err});
-            else if (copro)
-                res.status(403).send({success: false, message: 'Le batiment existe déjà'});
-            else {
-                let bat = new Batiment(batiment)
-                bat.save(function(err) {
-                    if (err) {
-                        res.send({ success: false, message: "Erreur lors de la création du Batiment", err});
-                    } else {
-                        res.send({ success: true, message : "Le Batiment a bien été créée"});
-                    }
-                });
-            }
-        })
+                failed.push({err})
+        });
+        if (failed.length > 0)
+            res.status(409).send({message: "certaines erreurs requièrent votre attention!!!", succeded, failed});
+        else
+            res.status(200).send({message: "batiment(s) enregistré(s)", succeded, failed});
     }
 }
 

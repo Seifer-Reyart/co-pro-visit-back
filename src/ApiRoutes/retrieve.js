@@ -13,6 +13,8 @@ let {
     postCopro,
     getSyndics,
     postSyndic,
+    getVisites,
+    postVisite,
     getCourtiers,
     postCourtier,
     getGestionnaires,
@@ -163,5 +165,35 @@ router.get('/gestionnaire', getGestionnaires);
  * @security JWT
  */
 router.post('/gestionnaire', postGestionnaire);
+
+/**
+ * Cette route permet de récupérer la liste des Visites, JWT necessaire.
+ * @route GET /retrieve/visite
+ * @group Get_Data
+ * @returns {object} 200 - {success: true, visites: array of visites}
+ * @returns {Error}  400 - {success: false, message: error message, err: error system log from mongoose}
+ * @returns {Error}  401 - si dans token, role !== architecte ou admin  {success: false, message: 'accès interdit'}
+ * @returns {Error}  403 - si le compte n'est pas enregistré {success: false, message: "ce compte n'existe pas!"}
+ * @returns {Error}  404 - si aucune visite trouvée  {success: false, message: 'aucune visite enregistrée'}
+ * @produces application/json
+ * @security JWT
+ */
+router.get('/visite', getVisites);
+
+/**
+ * Cette route permet de récupérer une visite via son _id, JWT necessaire.
+ * @route POST /retrieve/visite
+ * @group Get_Data
+ * @param {VISITE.model} _id.body.required - _id
+ * @returns {object} 200 - {success: true, visites: array of visites}
+ * @returns {Error}  400 - {success: false, message: error message, err: error system log from mongoose}
+ * @returns {Error}  401 - si dans token, role !== architecte ou admin  {success: false, message: 'accès interdit'}
+ * @returns {Error}  403 - si le compte n'est pas enregistré {success: false, message: "ce compte n'existe pas!"}
+ * @returns {Error}  404 - si aucune visite trouvée  {success: false, message: 'aucune visite enregistrée'}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.post('/visite', postVisite);
 
 module.exports = router;

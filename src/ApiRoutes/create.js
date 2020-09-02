@@ -49,7 +49,7 @@ let router = express.Router();
  * @property {string} email.required - email du compte - eg: martin.dupont@gmail.com
  * @property {string} firstName.required - prenom utilisateur - eg: john
  * @property {string} lastName.required - nom utilisateur - eg: doe
- * @property {string} company.required - nom/raison sociale du Syndic - eg: SOCAGI
+ * @property {string} nomSyndic.required - nom/raison sociale du Syndic - eg: SOCAGI
  * @property {string} siren.required - numero siren du syndic 9 chiffres - eg: 999999999
  * @property {string} address.required - adresse (n° et nom de rue) du siege social - eg: 12  rue de la gare
  * @property {string} codePostal.required - code postal du siege social - eg: 78000
@@ -67,7 +67,7 @@ let router = express.Router();
  * @param {SYNDIC.model} email.body.required - email
  * @param {SYNDIC.model} firstName.body.required - prenom utilisateur
  * @param {SYNDIC.model} lastName.body.required - Nom utilisateur
- * @param {SYNDIC.model} company.body.required - Nom/raison sociale du Syndic
+ * @param {SYNDIC.model} nomSyndic.body.required - Nom/raison sociale du Syndic
  * @param {SYNDIC.model} siren.body.required - N° Siren du Syndic
  * @param {SYNDIC.model} address.body.required - Adresse du Syndic (N° et nom de rue)
  * @param {SYNDIC.model} codePostal.body.required - code postal du Syndic
@@ -320,6 +320,7 @@ router.post('/prestataire', checkEmailExist, registerPrestataire);
  * @property {string} image - path vers l'image principale de la copro
  * @property {Array.<string>} batiments - id des batiments dans cette copro
  * @property {integer} surface.required - surface totale de la copro
+ * @property {integer} nbrLot.required - nombre de lot
  * @property {integer} multiDevis - montant (en €) de travaux probable, à partir du quel, la copro demande de faire plusieurs devis
  * @property {integer} maxTravaux - montant (en €) maximum pour des travaux sans demander l'avis de la copro
  * @property {date} moisAG - Le mois où se déroule l'AG du conseil syndical de la copro
@@ -347,9 +348,10 @@ router.post('/prestataire', checkEmailExist, registerPrestataire);
  * @param {COPRO.model} codePostal.body.required - code postal du siege social - eg: 78000
  * @param {COPRO.model} ville.body.required - ville de la copro - eg: Versailles
  * @param {COPRO.model} nbBatiments.body.required - nombre de batiments dans la copro (1 par defaut)
- * @param {COPRO.model} image.body - path vers l'image principale de la copro
+ * @param {COPRO.model} imgCopro.body - path vers l'image principale de la copro
  * @param {COPRO.model} batiments.body - id des batiments dans cette copro
  * @param {COPRO.model} surface.body.required - surface totale de la copro
+ * @param {COPRO.model} nbrLot.body.required - nombre de lot
  * @param {COPRO.model} multiDevis.body - montant (en €) de travaux probable, à partir du quel, la copro demande de faire plusieurs devis
  * @param {COPRO.model} maxTravaux.body - montant (en €) maximum pour des travaux sans demander l'avis de la copro
  * @param {COPRO.model} moisAG.body - Le mois où se déroule l'AG du conseil syndical de la copro
@@ -395,7 +397,8 @@ router.post('/multi-copros', parseXlsThenStore);
  * @property {integer} surface.required - surface totale de du batiment
  * @property {string} coproId.required - Id de la copro
  * @property {string} natureConstruction - type de construction
- * @property {string} facadeEtCanalisations - etat façade et canalisation - eq: bon, mauvais... etc
+ * @property {string} precisezConstr - Précisez la nature de la construction
+ * @property {string} etatFacadeCanal - etat façade et canalisation - eq: bon, mauvais... etc
  * @property {integer} nbEtages - nombre d'étage dans le batiment
  * @property {object} facadeRue - spécificités de la façade coté rue
  * @property {object} facadeArriere - spécificités de la façade arrière
@@ -411,7 +414,7 @@ router.post('/multi-copros', parseXlsThenStore);
  * @property {object} cave - spécificité des caves
  * @property {object} parkingST - spécificités du parking sous terrain si existe
  * @property {object} chaufferie - spécificités de la chaufferie
- * @property {object} - sous objet contenant des tableaux d'images pour certaines parties du batiment
+ * @property {object} images - sous objet contenant des tableaux d'images pour certaines parties du batiment
  */
 /**
  * @typedef FACADERUE
@@ -428,7 +431,7 @@ router.post('/multi-copros', parseXlsThenStore);
  * @typedef ENTREES
  * @property {string} refEntree - nom ou n° de l'entrée
  * @property {string} specEntree - porte d'entrée avec ...
- * @property {integer} codeAccess - code d'accès de la porte
+ * @property {string} codeAccess - code d'accès de la porte
  * @property {boolean} codeAccess2 - présence ou nom d'un deuxieme code d'accès - eg: dans le cas d'un sas dans le hall
  * @property {string} specCodeAccess2 - type du 2eme code d'accès avec le code, le cas échéant
  * @property {boolean} cameraVideo - présence de visio camera
@@ -447,7 +450,7 @@ router.post('/multi-copros', parseXlsThenStore);
  * @typedef OCCUPATION
  * @property {boolean} habitation - exlusivement particuliers?
  * @property {boolean} bureaux - exlusivement bureaux?
- * @property {boolean} habitationEtPro25 - Majorité de particulier et moins de 25% de bureaux
+ * @property {boolean} habPro - Majorité de particulier et moins de 25% de bureaux
  * @property {string} occupant - descriptif détaillé des occupants
  * @property {integer} nbNiveaux - nombre de niveaux
  */
@@ -491,13 +494,14 @@ router.post('/multi-copros', parseXlsThenStore);
  * @property {Array.<string>} contiguite - tableau des images si contiguité
  */
 /**
- * Cette route permet de créer un batiment dans une copro, JWT necessaire.
+ * Cette route permet de créer un ou plusieurs batiment dans une copro, un tableau de batiments est attendu dans le body, JWT necessaire.
  * @route POST /create/batiment
  * @group syndic et gestionnaire
  * @param {BATIMENT.model} reference.body.required - reference - reference interne à la copro - eg: bat1, batA, batiment bleu... etc
  * @param {BATIMENT.model} surface.body.required - surface totale de du batiment
  * @param {BATIMENT.model} coproId.body.required - Id de la copro
  * @param {BATIMENT.model} natureConstruction.body - type de construction
+ * @param {BATIMENT.model} precisezConstr.body - Précisez la nature de la construction
  * @param {BATIMENT.model} facadeEtCanalisations.body - etat façade et canalisation - eq: bon, mauvais... etc
  * @param {BATIMENT.model} nbEtages.body - nombre d'étage dans le batiment
  * @param {BATIMENT.model} facadeRue.body - spécificités de la façade coté rue
@@ -509,7 +513,7 @@ router.post('/multi-copros', parseXlsThenStore);
  * @param {CAVE.model} cave.body - spécificité des caves
  * @param {PARKINGST.model} parkingST.body - spécificités du parking sous terrain si existe
  * @param {CHAUFFERIE.model} chaufferie.body - spécificités de la chaufferie
- * @param {IMAGES.model} images.body - sous objet contenant des tableaux d'images pour certaines parties du batiment
+ * @param {BATIMENT.model} coproId.body - _id de la copro
  * @returns {object} 200 - {success: true, message : 'Le batiment a bien été crée'}
  * @returns {Error}  400 - {success: false, message: error system log from mongoose}
  * @returns {Error}  401 - si dans token, role !== 'syndic' || role !== 'gestionnaire' || role !== 'architecte' {success: false, message: 'accès interdit'}
