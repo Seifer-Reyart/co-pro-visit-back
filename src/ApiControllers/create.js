@@ -166,6 +166,7 @@ let registerArchitecte = async (req, res) => {
                 })
                 architecte.save(function(err) {
                     if (err) {
+                        console.log(err)
                         res.send({ success: false, message: "Erreur lors de la création de L'Architecte", err});
                     } else {
                         sendCredentials(req.body.email.toLowerCase(), password);
