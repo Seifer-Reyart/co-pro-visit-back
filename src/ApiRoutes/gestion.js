@@ -62,3 +62,5 @@ router.post('/demande-visite', demandeVisite);
  */
 router.post('/assign-visite', assignerVisite);
 
+module.exports = router;
+
