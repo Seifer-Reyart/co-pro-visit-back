@@ -55,15 +55,18 @@ const   Visite  = require('../MongoSchemes/visites');
 /* register new syndic */
 
 let registerSyndic = async (req, res) => {
-    const {email} = req.body;
+    const {email, siren} = req.body;
     if (req.user.role !== 'admin') {
         res.status(401).send({success: false, message: 'accès interdit'});
     } else {
-        Syndic.findOne({email}, async (err, user) => {
+        Syndic.findOne({$or: [{email},{siren}]}, async (err, user) => {
             if (err)
                 res.status(400).send({success: false, message: err});
             else if (user)
-                res.status(403).send({success: false, message: 'email déjà utilisé'});
+                if (user.email === email)
+                    res.status(403).send({success: false, message: 'email déjà utilisé'});
+                else if (user.siren === siren)
+                    res.status(403).send({success: false, message: 'siren déjà utilisé'});
             else {
                 let password = await generateP();
                 let syndic = new Syndic({
@@ -133,15 +136,18 @@ let registerCourtier = async (req, res) => {
 /* register new architecte */
 
 let registerArchitecte = async (req, res) => {
-    const {email} = req.body;
+    const {email, siren} = req.body;
     if (req.user.role !== 'admin') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
-        Architecte.findOne({email}, async (err, user) => {
+        Architecte.findOne({$or: [{email},{siren}]}, async (err, user) => {
             if (err)
                 res.status(400).send({success: false, message: err});
             else if (user)
-                res.status(403).send({success: false, message: 'email déjà utilisé'});
+                if (user.email === email)
+                    res.status(403).send({success: false, message: 'email déjà utilisé'});
+                else if (user.siren === siren)
+                    res.status(403).send({success: false, message: 'siren déjà utilisé'});
             else {
                 let password = await generateP();
                 let architecte = new Architecte({
@@ -211,16 +217,19 @@ let registerPresidentCS = async (req, res) => {
 /* register new prestataire */
 
 let registerPrestataire = async (req, res) => {
-    const {email} = req.body;
+    const {email, siret} = req.body;
     if (req.user.role !== 'admin') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
-        Prestataire.findOne({email}, async (err, user) => {
+        Prestataire.findOne({$or: [{email}, {siret}]}, async (err, user) => {
             if (err)
                 res.status(400).send({success: false, message: err});
-            else if (user)
-                res.status(403).send({success: false, message: 'email déjà utilisé'});
-            else {
+            else if (user) {
+                if (user.email === email)
+                    res.status(403).send({success: false, message: 'email déjà utilisé'});
+                else if (user.siret === siret)
+                    res.status(403).send({success: false, message: 'siret déjà utilisé'});
+            } else {
                 let password = await generateP();
                 let prestataire = new Prestataire({
                     email       	    : req.body.email.toLowerCase(),
