@@ -59,11 +59,11 @@ let registerSyndic = async (req, res) => {
     if (req.user.role !== 'admin') {
         res.status(401).send({success: false, message: 'accès interdit'});
     } else {
-        Syndic.findOne({$or: [{email},{siren}]}, async (err, user) => {
+        Syndic.findOne({$or: [{email: email.toLowerCase()},{siren}]}, async (err, user) => {
             if (err)
                 res.status(400).send({success: false, message: err});
             else if (user)
-                if (user.email === email)
+                if (user.email === email.toLowerCase())
                     res.status(403).send({success: false, message: 'email déjà utilisé'});
                 else if (user.siren === siren)
                     res.status(403).send({success: false, message: 'siren déjà utilisé'});
@@ -104,7 +104,7 @@ let registerCourtier = async (req, res) => {
     if (req.user.role !== 'admin') {
         res.status(401).send({success: false, message: 'accès interdit'});
     } else {
-        Courtier.findOne({email}, async (err, user) => {
+        Courtier.findOne({email: email.toLowerCase()}, async (err, user) => {
             if (err)
                 res.status(400).send({success: false, message: err});
             else if (user)
@@ -140,11 +140,11 @@ let registerArchitecte = async (req, res) => {
     if (req.user.role !== 'admin') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
-        Architecte.findOne({$or: [{email},{siren}]}, async (err, user) => {
+        Architecte.findOne({$or: [{email: email.toLowerCase()},{siren}]}, async (err, user) => {
             if (err)
                 res.status(400).send({success: false, message: err});
             else if (user)
-                if (user.email === email)
+                if (user.email === email.toLowerCase())
                     res.status(403).send({success: false, message: 'email déjà utilisé'});
                 else if (user.siren === siren)
                     res.status(403).send({success: false, message: 'siren déjà utilisé'});
@@ -184,7 +184,7 @@ let registerPresidentCS = async (req, res) => {
     if (req.user.role !== 'admin' && req.user.role !== 'syndic' && req.user.role !== 'gestionnaire') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
-        PresidentCS.findOne({email}, async (err, user) => {
+        PresidentCS.findOne({email: email.toLowerCase()}, async (err, user) => {
             if (err)
                 res.status(400).send({success: false, message: err});
             else if (user)
@@ -221,11 +221,11 @@ let registerPrestataire = async (req, res) => {
     if (req.user.role !== 'admin') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
-        Prestataire.findOne({$or: [{email}, {siret}]}, async (err, user) => {
+        Prestataire.findOne({$or: [{email: email.toLowerCase()}, {siret}]}, async (err, user) => {
             if (err)
                 res.status(400).send({success: false, message: err});
             else if (user) {
-                if (user.email === email)
+                if (user.email === email.toLowerCase())
                     res.status(403).send({success: false, message: 'email déjà utilisé'});
                 else if (user.siret === siret)
                     res.status(403).send({success: false, message: 'siret déjà utilisé'});
@@ -345,7 +345,7 @@ let registerGestionnaire = async (req, res) => {
     if (req.user.role !== 'syndic') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
-        Gestionnaire.findOne({email}, async (err, user) => {
+        Gestionnaire.findOne({email: email.toLowerCase()}, async (err, user) => {
             if (err)
                 res.status(400).send({success: false, message: err});
             else if (user)
