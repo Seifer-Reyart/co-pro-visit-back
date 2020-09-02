@@ -55,6 +55,7 @@ let router = express.Router();
  * @property {string} codePostal.required - code postal du siege social - eg: 78000
  * @property {string} ville.required - ville du siege social - eg: Versailles
  * @property {string} phone.required - numero contact syndic - eg: 0123456789
+ * @property {string} image - image du compte syndic
  * @property {Array.<string>} parc - id des copros affiliées
  * @property {Array.<string>} enCoursSelect - id des copros en cours de selection
  * @property {Array.<string>} courtiers - id des courtiers affiliés
@@ -89,6 +90,7 @@ router.post('/syndic', checkEmailExist, registerSyndic);
  * @property {string} firstName.required - prenom utilisateur - eg: john
  * @property {string} lastName.required - nom utilisateur - eg: doe
  * @property {string} syndic.required - Object Id du Syndic
+ * @property {string} image - Object Id du Syndic
  * @property {string} phone.required - numero contact syndic - eg: 0123456789
  * @property {Array.<string>} parc - id des copros affiliées
  * @property {Array.<string>} enCoursSelect - id des copros en cours de selection
@@ -122,6 +124,7 @@ router.post('/gestionnaire', checkEmailExist, registerGestionnaire);
  * @property {string} email.required - email du compte - eg: martin.dupont@gmail.com
  * @property {string} firstName.required - prenom utilisateur - eg: john
  * @property {string} lastName.required - nom utilisateur - eg: doe
+ * @property {string} image - image du courtier
  * @property {string} company - nom/raison sociale du Courtier - eg: John Doe, Cabinet Dupont... etc
  * @property {string} address.required - adresse (n° et nom de rue) du siege social - eg: 1 rue d'artichot
  * @property {string} codePostal.required - code postal du siege social - eg: 75001
@@ -158,6 +161,7 @@ router.post('/courtier', checkEmailExist, registerCourtier);
  * @property {string} email.required - email du compte - eg: martin.dupont@gmail.com
  * @property {string} firstName.required - prenom utilisateur - eg: john
  * @property {string} lastName.required - nom utilisateur - eg: doe
+ * @property {string} image - image de l'architecte
  * @property {string} nomCabinet.required - nom/raison sociale du cabinet d'architecte
  * @property {string} siren.required - numero siren de l'Architecte 9 chiffres - eg: 999999999
  * @property {string} address.required - adresse (n° et nom de rue) du siege social - eg: 1 rue d'artichot
@@ -195,6 +199,7 @@ router.post('/architecte', checkEmailExist, registerArchitecte);
  * @typedef PCS
  * @property {string} email.required - email du compte - eg: martin.dupont@gmail.com
  * @property {string} firstName.required - prenom utilisateur - eg: john
+ * @property {string} image - image du President du Conseil Syndical
  * @property {string} lastName.required - nom utilisateur - eg: doe
  * @property {string} phone.required - N° contact Architecte - eg: 0123456789
  * @property {string} coproId.required - object Id de la copro affiliée
@@ -261,6 +266,7 @@ router.post('/rcprofessionnelle', uploadRCProfessionnelle);
  * @typedef PRESTATAIRE
  * @property {string} email.required - email du compte - eg: martin.dupont@gmail.com
  * @property {string} company.required - nom entreprise
+ * @property {string} image - image du Prestataire
  * @property {string} siret.required - n° siret du syndic 14 chiffres - eg: 12341234567891
  * @property {string} address.required - adresse (n° et nom de rue) du siege social - eg: 12  rue de la gare
  * @property {string} codePostal.required - code postal du siege social - eg: 78000

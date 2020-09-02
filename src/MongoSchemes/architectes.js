@@ -12,6 +12,7 @@ let architectesSchema = new Schema({
     address         : String,
     codePostal      : String,
     ville           : String,
+    image           : String,
     copros          : [Schema.Types.ObjectId],
     role        	: {
         type: String,

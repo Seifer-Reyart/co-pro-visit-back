@@ -7,6 +7,7 @@ let pcsSchema = new Schema({
     lastName    	: String,
     password    	: String,
     phone           : String,
+    image           : String,
     coproId         : Schema.Types.ObjectId,
     permissions     : [0],
     role        	: {

@@ -50,6 +50,7 @@ let demandeVisite = (req, res) => {
                         nomCopro        : req.body.nomCopro,
                         reference       : req.body.reference,
                         syndicId        : req.body.syndicId,
+                        demandeLe       : new Date(),
                         done            : false
                     });
                 else
@@ -59,6 +60,7 @@ let demandeVisite = (req, res) => {
                         reference       : req.body.reference,
                         syndicId        : req.body.syndicId,
                         gestionnaireId  : req.body.gestionnaireId,
+                        demandeLe       : new Date(),
                         done            : false
                     });
                 visite.save(function(err, v) {
@@ -89,9 +91,65 @@ let assignerVisite = (req, res) => {
     }
 }
 
+let assignerCourtierToCopro = (req, res) => {
+    let {copro, courtier} = req.body;
+    if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else
+        Copro.findOneAndUpdate(
+            {_id: copro},
+            {$set: {courtiers: courtier}},
+            {new: true},
+            function (err, cop) {
+                if (err || !cop)
+                    res.status(403).send({success: false, message: 'erreur assigniation dans copro', err});
+                else {
+                    Courtier.findOneAndUpdate(
+                        {_id: courtier},
+                        {$push: {parc: cop._id}},
+                        {new: true},
+                        function (err, court) {
+                            if (err || !court)
+                                res.status(400).send({success: false, message: 'erreur assigniation dans courtier', err});
+                            else
+                                res.status(200).send({success: true, message: "le courtier a bien été assigné"})
+                        })
+                }
+            })
+}
+
+let assignerCourtierToSyndic = (req, res) => {
+    let {syndic, courtier} = req.body;
+    if (req.user.role !== 'admin')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else
+        Syndic.findOneAndUpdate(
+            {_id: syndic},
+            {$push: {courtiers: courtier}},
+            {new: true},
+            function (err, synd) {
+                if (err || !synd)
+                    res.status(403).send({success: false, message: 'erreur assigniation dans syndic', err});
+                else {
+                    Courtier.findOneAndUpdate(
+                        {_id: courtier},
+                        {$push: {syndics: syndic}},
+                        {new: true},
+                        function (err, court) {
+                            if (err || !court)
+                                res.status(400).send({success: false, message: 'erreur assigniation dans courtier', err});
+                            else
+                                res.status(200).send({success: true, message: "le courtier a bien été assigné"})
+                        })
+                }
+            })
+}
+
 /* Export Functions */
 
 module.exports = {
     demandeVisite,
     assignerVisite,
+    assignerCourtierToCopro,
+    assignerCourtierToSyndic,
 }

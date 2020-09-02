@@ -509,11 +509,11 @@ let saveBatiment = (batiment) => {
             return {success: false, message: 'Le batiment existe déjà - reference: '+Bat.reference};
         else {
             let bat = new Batiment(batiment)
-            bat.save(function(err) {
+            bat.save(function(err, b) {
                 if (err) {
                     return { success: false, message: "Erreur lors de la création du Batiment "+bat.reference, err};
                 } else {
-                    return { success: true, message : "Le Batiment " + bat.reference + " a bien été créée"};
+                    return b._id;
                 }
             });
         }
@@ -535,14 +535,16 @@ let registerBatiment = async (req, res) => {
                 failed.push(resp);
         });
 
-        Visite.findOneAndUpdate({coproId}, {$set: {done: true}}, {new: false}, function (err) {
-            if (err)
-                failed.push({err})
-        });
-        if (failed.length > 0)
-            res.status(409).send({message: "certaines erreurs requièrent votre attention!!!", succeded, failed});
-        else
-            res.status(200).send({message: "batiment(s) enregistré(s)", succeded, failed});
+        if (failed.length > 0) {
+            await Batiment.delete({_id: {$in: succeded}});
+            res.status(409).send({success: false, message: "l'enregistrement a échoué, des erreurs requièrent votre attention!!!", failed});
+        } else {
+            await Visite.findOneAndUpdate({coproId}, {$set: {faiteLe: new Date(), done: true}}, {new: false}, function (err) {
+                if (err)
+                    failed.push({err})
+            });
+            res.status(200).send({success: true, message: "fiche(s) enregistrée(s)"});
+        }
     }
 }
 

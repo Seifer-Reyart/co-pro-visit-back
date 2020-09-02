@@ -11,6 +11,7 @@ let prestatairesSchema = new Schema({
     phone               : String,
     nbSalaries          : Number,
     siret               : String,
+    image               : String,
     syndics             : [Schema.Types.ObjectId],
     representant        : {
         firstName   	: String,

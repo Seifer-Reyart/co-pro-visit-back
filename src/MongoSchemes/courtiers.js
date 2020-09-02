@@ -8,6 +8,7 @@ let courtiersSchema = new Schema({
     password    	: String,
     phone           : String,
     company         : String,
+    image           : String,
     syndics         : [Schema.Types.ObjectId],
     parc            : [Schema.Types.ObjectId],
     role        	: {

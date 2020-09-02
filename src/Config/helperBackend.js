@@ -11,6 +11,7 @@ function jwt() {
             '/api-docs.json',
             '/api-docs',
             '/auth/login',
+            '/api-docs'
         ]
     })
 }

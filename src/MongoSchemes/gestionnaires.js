@@ -8,6 +8,7 @@ let gestionnairesSchema = new Schema({
     password    	: String,
     syndic          : Schema.Types.ObjectId,
     phone           : String,
+    image           : String,
     parc            : [Schema.Types.ObjectId],
     enCoursSelect   : [Schema.Types.ObjectId],
     permissions     : [Number],
