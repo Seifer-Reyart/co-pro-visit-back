@@ -13,7 +13,6 @@ const   Admin           = require('../MongoSchemes/admins'),
 
 let checkEmailExist = async (req, res, next) => {
     let {email} = req.body;
-
     Admin.findOne({email}, (err, user) => {
         if (err)
             console.log(err)
@@ -61,8 +60,9 @@ let checkEmailExist = async (req, res, next) => {
                                                                 status: false,
                                                                 message: "cet email est déjà utilisé"
                                                             })
-                                                        else
+                                                        else {
                                                             next();
+							}
                                                     })
                                             })
                                     })

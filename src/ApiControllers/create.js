@@ -62,12 +62,12 @@ let registerSyndic = async (req, res) => {
         Syndic.findOne({$or: [{email: email.toLowerCase()},{siren}]}, async (err, user) => {
             if (err)
                 res.status(400).send({success: false, message: err});
-            else if (user)
+            else if (user) {
                 if (user.email === email.toLowerCase())
                     res.status(403).send({success: false, message: 'email déjà utilisé'});
                 else if (user.siren === siren)
                     res.status(403).send({success: false, message: 'siren déjà utilisé'});
-            else {
+            } else {
                 let password = await generateP();
                 let syndic = new Syndic({
                     email       	: req.body.email.toLowerCase(),
@@ -136,6 +136,7 @@ let registerCourtier = async (req, res) => {
 /* register new architecte */
 
 let registerArchitecte = async (req, res) => {
+console.log("create architecte")
     const {email, siren} = req.body;
     if (req.user.role !== 'admin') {
         res.status(403).send({success: false, message: 'accès interdit'});
@@ -143,12 +144,12 @@ let registerArchitecte = async (req, res) => {
         Architecte.findOne({$or: [{email: email.toLowerCase()},{siren}]}, async (err, user) => {
             if (err)
                 res.status(400).send({success: false, message: err});
-            else if (user)
+            else if (user) {
                 if (user.email === email.toLowerCase())
                     res.status(403).send({success: false, message: 'email déjà utilisé'});
                 else if (user.siren === siren)
                     res.status(403).send({success: false, message: 'siren déjà utilisé'});
-            else {
+            } else {
                 let password = await generateP();
                 let architecte = new Architecte({
                     email       	: req.body.email.toLowerCase(),
@@ -220,7 +221,7 @@ let registerPresidentCS = async (req, res) => {
 let registerPrestataire = async (req, res) => {
     const {email, siret} = req.body;
     if (req.user.role !== 'admin') {
-        res.status(403).send({success: false, message: 'accès interdit'});
+        res.status(401).send({success: false, message: 'accès interdit'});
     } else {
         Prestataire.findOne({$or: [{email: email.toLowerCase()}, {siret}]}, async (err, user) => {
             if (err)
