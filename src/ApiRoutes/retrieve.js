@@ -15,6 +15,7 @@ let {
     postSyndic,
     getVisites,
     postVisite,
+    postIncidents,
     getCourtiers,
     postCourtier,
     getGestionnaires,
@@ -195,5 +196,18 @@ router.get('/visite', getVisites);
  * @security JWT
  */
 router.post('/visite', postVisite);
+
+/**
+ * Cette route permet de récupérer la liste des Incidents, JWT necessaire.
+ * @route POST /retrieve/incident
+ * @group Get_Data
+ * @returns {object} 200 - {success: true, incidents: array of incidents}
+ * @returns {Error}  400 - {success: false, message: error message, err: error system log from mongoose}
+ * @returns {Error}  401 - si dans token, role !== architecte, syndic, gestionnaire ou admin  {success: false, message: 'accès interdit'}
+ * @returns {Error}  404 - si aucun incident trouvée  {success: false, message: 'aucun incident enregistré'}
+ * @produces application/json
+ * @security JWT
+ */
+router.post('/incident', postIncidents);
 
 module.exports = router;

@@ -24,8 +24,8 @@ const   Devis           = require('../MongoSchemes/devis'),
         Architecte      = require('../MongoSchemes/architectes'),
         PresidentCS     = require('../MongoSchemes/presidentCS'),
         Prestataire     = require('../MongoSchemes/prestataires'),
-        Gestionnaire    = require('../MongoSchemes/gestionnaires');
-
+        Gestionnaire    = require('../MongoSchemes/gestionnaires'),
+        Incident        = require('../MongoSchemes/incidents');
 /************/
 /* Function */
 /************/
@@ -414,6 +414,32 @@ let postVisite = (req,res) => {
         })
 }
 
+
+/*** fetch Incidents ***/
+
+let postIncidents = (req,res) => {
+    const { coproId, architecteId, syndicId } = req.body;
+    this.resolveIncidents = function (err, incidents) {
+        if (err)
+            res.status(400).send({success: false, message: 'erreur system', err});
+        else if (incidents && incidents?.length > 0)
+            res.status(200).send({success: true, incidents});
+        else
+            res.status(404).send({success: false, message: 'aucun incident enregistrée'});
+    };
+
+    if (req.user.role === 'admin')
+        Incident.find({}, this.resolveIncidents);
+    else if (req.user.role === 'architecte' && architecteId)
+        Incident.find({architecteId}, this.resolveIncidents);
+    else if (req.user.role === 'copro' && coproId)
+        Incident.find({coproId}, this.resolveIncidents);
+    else if (req.user.role === 'syndic' && syndicId)
+        Incident.find({syndicId}, this.resolveIncidents);
+    else
+        res.status(401).send({success: false, message: 'accès refusé'});
+}
+
 module.exports = {
     getCopro,
     postCopro,
@@ -421,6 +447,7 @@ module.exports = {
     postSyndic,
     getVisites,
     postVisite,
+    postIncidents,
     getCourtiers,
     postCourtier,
     getGestionnaires,
