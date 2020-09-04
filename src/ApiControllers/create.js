@@ -681,7 +681,7 @@ let registerIncident = async (req, res) => {
                                     if (err)
                                         res.send({success: false, message: "Erreur lors de la mise à jour de la copropriété associée", err});
                                     else
-                                        res.send({success: true, message: "L'incident a bien été créé"});
+                                        res.send({success: true, message: "L'incident a bien été créé", incident});
                                 })
                             }
                         });
