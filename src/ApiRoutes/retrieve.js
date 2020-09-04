@@ -18,6 +18,8 @@ let {
     postIncidents,
     getCourtiers,
     postCourtier,
+    getArchitectes,
+    postArchitecte,
     getGestionnaires,
     postGestionnaire,
     getEncoursSelect
@@ -137,10 +139,40 @@ router.get('/courtier', getCourtiers);
 router.post('/courtier', postCourtier);
 
 /**
+ * Cette route permet de récupérer tous les architectes, JWT necessaire.
+ * @route GET /retrieve/architecte
+ * @group Get_Data
+ * @returns {object} 200 - {success: true, architectes: array of architectes}
+ * @returns {Error}  400 - {success: false, message: "erreur system", err: {error system log from mongoose}}
+ * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
+ * @returns {Error}  404 - si aucun architecte trouvé  {success: false, message: 'aucun architecte enregistré'}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.get('/architecte', getArchitectes);
+
+/**
+ * Cette route permet de récupérer un architecte via son _id, JWT necessaire.
+ * @route POST /retrieve/architecte
+ * @group Get_Data
+ * @param {ARCHITECTE.model} _id.body.required - _id
+ * @returns {object} 200 - {success: true, architecte: objet architecte}
+ * @returns {Error}  400 - {success: false, message: "erreur system", err: {error system log from mongoose}}
+ * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
+ * @returns {Error}  403 - si le compte n'est pas enregistré {success: false, message: "cet Architecte n'existe pas!"}
+ * @returns {Error}  404 - si aucun architecte trouvé  {success: false, message: 'aucun architecte enregistré'}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.post('/architecte', postArchitecte);
+
+/**
  * Cette route permet de récupérer tout ou partie des gestionnaires selon le type de compte, JWT necessaire.
  * @route GET /retrieve/gestionnaire
  * @group Get_Data
- * @returns {object} 200 - {success: true, gestionnaires: array of courtiers}
+ * @returns {object} 200 - {success: true, gestionnaires: array of gestionnaires}
  * @returns {Error}  400 - {success: false, message: error system log from mongoose}
  * @returns {Error}  401 - si dans token, role !== syndic  {success: false, message: 'accès interdit'}
  * @returns {Error}  403 - si le compte n'est pas enregistré {success: false, message: "ce compte n'existe pas!"}
