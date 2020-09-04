@@ -414,6 +414,38 @@ let postVisite = (req,res) => {
         })
 }
 
+/*** get Architectes list ***/
+
+let getArchitectes = (req,res) => {
+    if (req.user.role !== 'admin')
+        res.status(401).send({success: false, message: 'accès refusé'});
+    else
+        Architecte.find({}, function (err, architectes) {
+            if (err)
+                res.status(400).send({success: false, message: "erreur system", err});
+            else if (!architectes)
+                res.status(404).send({success: false, message: "aucun architecte enregistré"});
+            else
+                res.status(200).send({success: true, architectes});
+        });
+}
+
+/*** get one Architecte ***/
+
+let postArchitecte = (req,res) => {
+    if (req.user.role !== 'admin')
+        res.status(401).send({success: false, message: 'accès refusé'});
+    else
+        Architecte.findOne({_id: req.body._id}, function (err, architecte) {
+            if (err)
+                res.status(400).send({success: false, message: "erreur system", err});
+            else if (!architecte)
+                res.status(403).send({success: false, message: "cet architecte n'existe pas"});
+            else
+                res.status(200).send({success: true, architectes});
+        });
+}
+
 module.exports = {
     getCopro,
     postCopro,
@@ -423,6 +455,8 @@ module.exports = {
     postVisite,
     getCourtiers,
     postCourtier,
+    getArchitectes,
+    postArchitecte,
     getGestionnaires,
     postGestionnaire,
     getEncoursSelect,
