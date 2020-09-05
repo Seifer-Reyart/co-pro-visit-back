@@ -492,7 +492,7 @@ let postIncidentslist = (req,res) => {
     this.resolveIncidents = function (err, incidents) {
         if (err)
             res.status(400).send({success: false, message: 'erreur system', err});
-        else if (incidents && incidents?.length > 0)
+        else if (incidents && incidents.length > 0)
             res.status(200).send({success: true, incidents});
         else
             res.status(404).send({success: false, message: 'aucun incident enregistrée'});
@@ -521,7 +521,7 @@ let postOneIncident = (req,res) => {
     this.resolveIncidents = function (err, incident) {
         if (err)
             res.status(400).send({success: false, message: 'erreur system', err});
-        else if (incident && incident?.length > 0)
+        else if (incident && incident.length > 0)
             res.status(200).send({success: true, incident});
         else
             res.status(404).send({success: false, message: 'incident introuvable'});

@@ -641,7 +641,7 @@ let registerIncident = async (req, res) => {
         res.status(401).send({success: false, message: 'accès interdit'});
     } else {
         Copro.findOne({_id: req.body.coproId}, async (err, user) => {
-            if (!err && (!user || user?.length === 0)) {
+            if (!err && !user) {
                 res.status(404).send({ success: false, message: "Aucune copropriété associée"});
             }
             else if (err) {
