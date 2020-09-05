@@ -638,16 +638,14 @@ let uploadIncidentImage = multer({
 
 let registerIncident = async (req, res) => {
     if (req.user.role !== 'architecte' && req.user.role !== 'admin') {
-        res.status(403).send({success: false, message: 'accès interdit'});
+        res.status(401).send({success: false, message: 'accès interdit'});
     } else {
         Copro.findOne({_id: req.body.coproId}, async (err, user) => {
-            console.log('Copro.findOne err', err);
-            console.log('Copro.findOne result', user);
             if (!err && (!user || user?.length === 0)) {
                 res.status(404).send({ success: false, message: "Aucune copropriété associée"});
             }
             else if (err) {
-                res.status(404).send({ success: false, message: "Erreur lors de la récupération de la copropriété associée", err});
+                res.status(400).send({ success: false, message: "Erreur lors de la récupération de la copropriété associée", err});
             }
             else {
                 uploadIncidentImage(req, res, function(err) {
@@ -655,9 +653,9 @@ let registerIncident = async (req, res) => {
                         // ERROR occured (here it can be occured due
                         // to uploading file of size greater than
                         // 5MB or uploading different file type)
-                        res.status(400).send({success: false, message: err});
+                        res.status(400).send({success: false, message: "erreur lors de l'upload des photos", err});
                     } else {
-                        const { courtierId, gestionnaireId, visitId, syndicId, coproId, date, metrages, desordre, situation, description, corpsEtat} = req.body;
+                        const { courtierId, gestionnaireId, visiteId, syndicId, coproId, date, metrages, desordre, situation, description, corpsEtat} = req.body;
                         let incident = new Incident({
                             date           ,
                             metrages       ,
@@ -667,21 +665,21 @@ let registerIncident = async (req, res) => {
                             corpsEtat      ,
                             courtierId     ,
                             gestionnaireId ,
-                            visitId        ,
+                            visiteId       ,
                             syndicId       ,
                             coproId        ,
                             images: req.files.map(e => e.filepath),
                         });
                         incident.save(function(err, incid) {
                             if (err) {
-                                res.send({ success: false, message: "Erreur lors de la création de l'Incident", err});
+                                res.status(400).send({ success: false, message: "Erreur lors de la création de l'Incident", err});
                             } else {
-                                Copro.findOneAndUpdate({_id: coproId}, {$push: {incidentId: incid._id}}, function (err, court) {
+                                Copro.findOneAndUpdate({_id: coproId}, {$push: {incidentId: incid._id}}, {new: true}, function (err, court) {
                                     console.log('Copro.findOneAndUpdate err', err);
-                                    if (err)
-                                        res.send({success: false, message: "Erreur lors de la mise à jour de la copropriété associée", err});
+                                    if (err || !court)
+                                        res.status(400).send({success: false, message: "Erreur lors de la mise à jour de la copropriété associée", err});
                                     else
-                                        res.send({success: true, message: "L'incident a bien été créé", incident});
+                                        res.status(200).send({success: true, message: "L'incident a bien été créé", incident});
                                 })
                             }
                         });

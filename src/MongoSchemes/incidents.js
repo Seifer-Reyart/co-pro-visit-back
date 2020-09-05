@@ -30,6 +30,10 @@ let incidentsSchema = new Schema({
         type: String,
         required: true
     },
+    visiteId    	            : {
+        type: Schema.Types.ObjectId,
+        required: false
+    },
     coproId    	            : {
         type: Schema.Types.ObjectId,
         required: false
@@ -38,11 +42,11 @@ let incidentsSchema = new Schema({
         type: Schema.Types.ObjectId,
         required: false
     },
-    visitId    	            : {
+    gestionnaireId    	    : {
         type: Schema.Types.ObjectId,
         required: false
     },
-    gestionnaireId    	    : {
+    architecteId: {
         type: Schema.Types.ObjectId,
         required: false
     },
