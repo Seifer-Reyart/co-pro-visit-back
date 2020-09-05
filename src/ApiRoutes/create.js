@@ -174,7 +174,7 @@ router.post('/courtier', checkEmailExist, registerCourtier);
  *
  */
 /**
- * Cette route permet de créer un Courtier, le mot de passe du compte est généré dans le Back, JWT necessaire.
+ * Cette route permet de créer un architecte, le mot de passe du compte est généré dans le Back, JWT necessaire.
  * @route POST /create/architecte
  * @group architecte
  * @param {ARCHITECTE.model} email.body.required - email
