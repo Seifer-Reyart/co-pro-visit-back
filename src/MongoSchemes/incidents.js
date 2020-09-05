@@ -3,31 +3,31 @@ let mongoose    = require('mongoose'),
 
 let incidentsSchema = new Schema({
     date                    : {
-        type: [Date],
+        type: Date,
         required: false
     },
     metrages                : {
-        type: [Number],
+        type: Number,
         required: true
     },
     desordre                : {
-        type: [String],
+        type: String,
         required: true
     },
     situation               : {
-        type: [String],
+        type: String,
         required: true
     },
     description             : {
-        type: [String],
+        type: String,
         required: true
     },
     corpsEtat               : {
-        type: [String],
+        type: String,
         required: true
     },
     images                  : {
-        type: [String],
+        type: String,
         required: true
     },
     coproId    	            : {
