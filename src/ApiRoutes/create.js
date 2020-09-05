@@ -589,7 +589,7 @@ router.post('/devis', registerDevis);
 /**
  * Cette route permet de créer un incident, JWT necessaire.
  * @route POST /create/incident
- * @group create
+ * @group architecte
  * @param {INCIDENT.model} date.body - Date du constat de l'incident
  * @param {INCIDENT.model} metrages.body.required - surface à étudier
  * @param {INCIDENT.model} desordre.body.required - descriptif du désordre
