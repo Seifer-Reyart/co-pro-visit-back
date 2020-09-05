@@ -23,7 +23,8 @@ let {
     postIncidentslist,
     getGestionnaires,
     postGestionnaire,
-    getEncoursSelect
+    getEncoursSelect,
+    postEncoursSelect
 } = require('../ApiControllers/retrieve');
 
 /***************/
@@ -64,7 +65,7 @@ router.post('/copro', postCopro);
 
 /**
  * Cette route permet de récupérer tout ou partie des Copros en cours de selection, selon le type de compte, JWT necessaire.
- * @route GET /retrieve/encours
+ * @route GET /retrieve/encours-list
  * @group Get_Data
  * @returns {object} 200 - {success: true, copros: array of copros}
  * @returns {Error}  400 - {success: false, message: error system log from mongoose}
@@ -75,7 +76,23 @@ router.post('/copro', postCopro);
  * @consumes application/json
  * @security JWT
  */
-router.get('/encours', getEncoursSelect);
+router.get('/encours-list', getEncoursSelect);
+
+/**
+ * Cette route permet de récupérer une Copro en cours de selection via son _id, JWT necessaire.
+ * @route POST /retrieve/encours
+ * @group Get_Data
+ * @param {COPRO.model} _id.body.required - _id de la copro encours de selection
+ * @returns {object} 200 - {success: true, copros: array of copros}
+ * @returns {Error}  400 - {success: false, message: error system log from mongoose}
+ * @returns {Error}  401 - si dans token, role !== syndic ou gestionnaire  {success: false, message: 'accès interdit'}
+ * @returns {Error}  403 - si le compte n'est pas enregistré {success: false, message: "ce compte n'existe pas!"}
+ * @returns {Error}  404 - si aucun syndic trouvé  {success: false, message: 'aucun parc enregistré'}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.get('/encours', postEncoursSelect);
 
 /**
  * Cette route permet de récupérer un ou plusieurs Syndics selon le type de compte, JWT necessaire.

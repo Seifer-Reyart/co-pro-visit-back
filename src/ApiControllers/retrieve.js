@@ -290,7 +290,7 @@ let getCopro = (req, res) => {
         res.status(401).send({success: false, message: 'accès refusé'});
 }
 
-/*** get Copros en cours de selection ***/
+/*** get list of Copros en cours de selection ***/
 
 let getEncoursSelect = (req, res) => {
     if (req.user.role === 'syndic')
@@ -298,7 +298,7 @@ let getEncoursSelect = (req, res) => {
             if (err)
                 res.status(400).send({success: false, message: 'erreur system', err});
             else if (!syndic)
-                res.status(404).send({success: false, message: 'aucun syndic enregistré'});
+                res.status(403).send({success: false, message: 'aucun syndic enregistré'});
             else
                 Copro.find({_id: {$in: syndic.enCoursSelect}}, (err, copros) => {
                     if (err)
@@ -314,7 +314,7 @@ let getEncoursSelect = (req, res) => {
             if (err)
                 res.status(400).send({success: false, message: 'erreur system', err});
             else if (!gestionnaire)
-                res.status(404).send({success: false, message: 'aucun gestionnaire enregistré'});
+                res.status(403).send({success: false, message: 'aucun gestionnaire enregistré'});
             else
                 Copro.find({_id: {$in: gestionnaire.enCoursSelect}}, (err, copros) => {
                     if (err)
@@ -323,6 +323,45 @@ let getEncoursSelect = (req, res) => {
                         res.status(404).send({success: false, message: 'aucune copro en cours de selection'});
                     else
                         res.status(200).send({success: true, enCours: copros});
+                })
+        });
+    else
+        res.status(401).send({success: false, message: 'accès refusé'});
+}
+
+/*** get one copro encours de selection ***/
+
+let postEncoursSelect = (req, res) => {
+    if (req.user.role === 'syndic')
+        Syndic.findOne({_id: req.user.id}, (err, syndic) => {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur system', err});
+            else if (!syndic)
+                res.status(403).send({success: false, message: 'aucun syndic enregistré'});
+            else
+                Copro.findOne({_id: req.body._id}, (err, copro) => {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur system', err});
+                    else if (!copro)
+                        res.status(404).send({success: false, message: 'aucune copro en cours de selection'});
+                    else
+                        res.status(200).send({success: true, coproEncours: copro});
+                })
+        });
+    else if (req.user.role === 'gestionnaire')
+        Gestionnaire.findOne({_id: req.user.id}, (err, gestionnaire) => {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur system', err});
+            else if (!gestionnaire)
+                res.status(403).send({success: false, message: 'aucun gestionnaire enregistré'});
+            else
+                Copro.findOne({_id: req.body._id}, (err, copro) => {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur system', err});
+                    else if (!copro)
+                        res.status(404).send({success: false, message: 'aucune copro en cours de selection'});
+                    else
+                        res.status(200).send({success: true, coproEncours: copro});
                 })
         });
     else
@@ -520,4 +559,5 @@ module.exports = {
     getGestionnaires,
     postGestionnaire,
     getEncoursSelect,
+    postEncoursSelect
 }
