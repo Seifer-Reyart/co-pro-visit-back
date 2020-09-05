@@ -17,7 +17,8 @@ let {
     registerPresidentCS,
     registerPrestataire,
     registerGestionnaire,
-    parseXlsThenStore
+    registerIncident,
+    parseXlsThenStore,
 } = require('../ApiControllers/create');
 
 let {
@@ -574,5 +575,36 @@ router.post('/batiment', registerBatiment);
  * @security JWT
  */
 router.post('/devis', registerDevis);
+
+/**
+ * @typedef INCIDENT
+ * @property {date} date - Date du constat de l'incident
+ * @property {string} metrages.required - surface à étudier
+ * @property {string} desordre.required - descriptif du désordre
+ * @property {string} situation.required - ???
+ * @property {string} description.required - Description de l'incident
+ * @property {string} corpsEtat.required - corps de métier associé au désordre
+ * @property {Array.<string>} images - Tableau contenant l'url des photographies de l'incident
+ */
+/**
+ * Cette route permet de créer un incident, JWT necessaire.
+ * @route POST /create/incident
+ * @group create
+ * @param {INCIDENT.model} date.body - Date du constat de l'incident
+ * @param {INCIDENT.model} metrages.body.required - surface à étudier
+ * @param {INCIDENT.model} desordre.body.required - descriptif du désordre
+ * @param {INCIDENT.model} situation.body - ??
+ * @param {INCIDENT.model} description.body - Description de l'incident
+ * @param {INCIDENT.model} corpsEtat.body - corps de métier associé au désordre
+ * @param {INCIDENT.model} images.body.required - Tableau contenant l'url des photographies de l'incident
+ * @returns {object} 200 - {success: true, message : "L'incident a bien été créé !"}
+ * @returns {Error}  400 - {success: false, message: 'Erreur système', err}
+ * @returns {Error}  401 - si dans token, role !== architecte  {success: false, message: 'accès interdit'}
+ * @returns {Error}  404 - Pas de copropriété associée {success: false, message: 'Pas de copropriété associée"}
+ * @produces application/json
+ * @consumes multipart/form-data
+ * @security JWT
+ */
+router.post('/incident', registerIncident);
 
 module.exports = router;

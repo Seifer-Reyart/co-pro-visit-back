@@ -35,7 +35,8 @@ let coprosSchema = new Schema({
     compagnie       : {
         assurance : String,
         echeance  : Date
-    }
+    },
+    incidentId      : [Schema.Types.ObjectId]
 });
 
 let copros = mongoose.model('copros', coprosSchema);

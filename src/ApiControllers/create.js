@@ -45,8 +45,9 @@ const   Syndic          = require('../MongoSchemes/syndics'),
 const   Copro       = require('../MongoSchemes/copros'),
         Batiment    = require('../MongoSchemes/batiments');
 
-const   Devis   = require('../MongoSchemes/devis');
-const   Visite  = require('../MongoSchemes/visites');
+const   Devis    = require('../MongoSchemes/devis');
+const   Visite   = require('../MongoSchemes/visites');
+const   Incident = require('../MongoSchemes/incidents');
 
 /************/
 /* Function */
@@ -600,6 +601,95 @@ let registerDevis = async (req, res) => {
     }
 }
 
+/* register new Incident */
+
+let storageIncidents = multer.diskStorage({
+    destination: function (req, file, cb) {
+        // Uploads is the Upload_folder_name
+        cb(null, "./src/uploads/incidents")
+    },
+    filename: function (req, file, cb) {
+        cb(null, req.user.id + "-" + file.originalname)
+    }
+})
+
+
+
+let uploadIncidentImage = multer({
+    storage: storageIncidents,
+    limits: { fileSize: maxSize },
+    fileFilter: function (req, file, cb){
+        // Set the filetypes, it is optional
+        let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
+        let mimetype = filetypes.test(file.mimetype);
+
+        let extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+
+        if (mimetype && extname) {
+            return cb(null, true);
+        }
+
+        cb("Error: File upload only supports the following filetypes - " + filetypes);
+    }
+
+// data is the name of file attribute sent in body
+}).array("images")//single("data");
+
+
+let registerIncident = async (req, res) => {
+    if (req.user.role !== 'architecte' && req.user.role !== 'admin') {
+        res.status(401).send({success: false, message: 'accès interdit'});
+    } else {
+        Copro.findOne({_id: req.body.coproId}, async (err, user) => {
+            if (!err && (!user || user?.length === 0)) {
+                res.status(404).send({ success: false, message: "Aucune copropriété associée"});
+            }
+            else if (err) {
+                res.status(400).send({ success: false, message: "Erreur lors de la récupération de la copropriété associée", err});
+            }
+            else {
+                uploadIncidentImage(req, res, function(err) {
+                    if (err) {
+                        // ERROR occured (here it can be occured due
+                        // to uploading file of size greater than
+                        // 5MB or uploading different file type)
+                        res.status(400).send({success: false, message: "erreur lors de l'upload des photos", err});
+                    } else {
+                        const { courtierId, gestionnaireId, visiteId, syndicId, coproId, date, metrages, desordre, situation, description, corpsEtat} = req.body;
+                        let incident = new Incident({
+                            date           ,
+                            metrages       ,
+                            desordre       ,
+                            situation      ,
+                            description    ,
+                            corpsEtat      ,
+                            courtierId     ,
+                            gestionnaireId ,
+                            visiteId       ,
+                            syndicId       ,
+                            coproId        ,
+                            images: req.files.map(e => e.filepath),
+                        });
+                        incident.save(function(err, incid) {
+                            if (err) {
+                                res.status(400).send({ success: false, message: "Erreur lors de la création de l'Incident", err});
+                            } else {
+                                Copro.findOneAndUpdate({_id: coproId}, {$push: {incidentId: incid._id}}, {new: true}, function (err, court) {
+                                    console.log('Copro.findOneAndUpdate err', err);
+                                    if (err || !court)
+                                        res.status(400).send({success: false, message: "Erreur lors de la mise à jour de la copropriété associée", err});
+                                    else
+                                        res.status(200).send({success: true, message: "L'incident a bien été créé", incident});
+                                })
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+}
+
 /* Export Functions */
 
 module.exports = {
@@ -614,5 +704,6 @@ module.exports = {
     registerCopro,
     registerBatiment,
     registerDevis,
-    parseXlsThenStore
+    registerIncident,
+    parseXlsThenStore,
 }

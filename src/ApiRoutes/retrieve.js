@@ -19,6 +19,8 @@ let {
     postCourtier,
     getArchitectes,
     postArchitecte,
+    postOneIncident,
+    postIncidentslist,
     getGestionnaires,
     postGestionnaire,
     getEncoursSelect
@@ -227,5 +229,42 @@ router.get('/visite', getVisites);
  * @security JWT
  */
 router.post('/visite', postVisite);
+
+/**
+ * Cette route permet de récupérer un Incidents via son _id, JWT necessaire.
+ * @route POST /retrieve/incident
+ * @group Get_Data
+ * @param {INCIDENT.model} _id.body.required - _id de l'incident
+ * @param {INCIDENT.model} coproId.body.required - _id de la copro
+ * @param {INCIDENT.model} architecteId.body - _id de l'architecte
+ * @param {INCIDENT.model} syndicId.body - _id du Syndic
+ * @param {INCIDENT.model} gestionnaireId.body - _id du gestionnaire
+ * @param {INCIDENT.model} courtierId.body - _id du courtier
+ * @returns {object} 200 - {success: true, incident: objet incident}
+ * @returns {Error}  400 - {success: false, message: error message, err: error system log from mongoose}
+ * @returns {Error}  401 - si dans token, role !== architecte, syndic, gestionnaire, courtier, pcs ou admin  {success: false, message: 'accès interdit'}
+ * @returns {Error}  404 - si aucun incident trouvée  {success: false, message: 'incident introuvable'}
+ * @produces application/json
+ * @security JWT
+ */
+router.post('/incident', postOneIncident);
+
+/**
+ * Cette route permet de récupérer la liste des Incidents, JWT necessaire.
+ * @route POST /retrieve/incident-list
+ * @group Get_Data
+ * @param {INCIDENT.model} coproId.body.required - _id de la copro
+ * @param {INCIDENT.model} architecteId.body - _id de l'architecte
+ * @param {INCIDENT.model} syndicId.body - _id du Syndic
+ * @param {INCIDENT.model} gestionnaireId.body - _id du gestionnaire
+ * @param {INCIDENT.model} courtierId.body - _id du courtier
+ * @returns {object} 200 - {success: true, incidents: array of incidents}
+ * @returns {Error}  400 - {success: false, message: error message, err: error system log from mongoose}
+ * @returns {Error}  401 - si dans token, role !== architecte, syndic, gestionnaire, courtier, pcs ou admin  {success: false, message: 'accès interdit'}
+ * @returns {Error}  404 - si aucun incident trouvée  {success: false, message: 'aucun incident enregistré'}
+ * @produces application/json
+ * @security JWT
+ */
+router.post('/incident-list', postIncidentslist);
 
 module.exports = router;
