@@ -655,7 +655,7 @@ let registerIncident = async (req, res) => {
                         // 5MB or uploading different file type)
                         res.status(400).send({success: false, message: "erreur lors de l'upload des photos", err});
                     } else {
-                        const { courtierId, gestionnaireId, visiteId, syndicId, coproId, date, metrages, desordre, situation, description, corpsEtat} = req.body;
+                        const { courtierId, architecteId, gestionnaireId, visiteId, syndicId, coproId, date, metrages, desordre, situation, description, corpsEtat} = req.body;
                         let incident = new Incident({
                             date           ,
                             metrages       ,
@@ -665,6 +665,7 @@ let registerIncident = async (req, res) => {
                             corpsEtat      ,
                             courtierId     ,
                             gestionnaireId ,
+                            architecteId   ,
                             visiteId       ,
                             syndicId       ,
                             coproId        ,

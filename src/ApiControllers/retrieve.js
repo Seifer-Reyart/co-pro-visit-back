@@ -481,7 +481,7 @@ let postArchitecte = (req,res) => {
             else if (!architecte)
                 res.status(403).send({success: false, message: "cet architecte n'existe pas"});
             else
-                res.status(200).send({success: true, architectes});
+                res.status(200).send({success: true, architecte});
         });
 }
 
