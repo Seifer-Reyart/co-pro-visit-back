@@ -80,7 +80,7 @@ router.post('/assign-visite', assignerVisite);
  * @consumes application/json
  * @security JWT
  */
-router.post('/unassign-visite', assignerVisite);
+router.post('/unassign-visite', desassignerVisite);
 
 /**
  * Cette route permet au Syndic de demander la création/assignation d'un courtier, JWT necessaire.
