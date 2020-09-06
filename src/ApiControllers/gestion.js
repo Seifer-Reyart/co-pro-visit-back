@@ -25,7 +25,7 @@ const   Copro       = require('../MongoSchemes/copros'),
         Batiment    = require('../MongoSchemes/batiments');
 
 const   Devis   = require('../MongoSchemes/devis'),
-        Visite  = require('../MongoSchemes/devis');
+        Visite  = require('../MongoSchemes/visites');
 
 /************/
 /* Function */

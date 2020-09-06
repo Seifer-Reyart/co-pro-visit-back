@@ -22,7 +22,7 @@ let router = express.Router();
 
 /**
  * @typedef VISITE
- * @property {string} architecteId.required - _id de l'architecte
+ * @property {string} architecteId - _id de l'architecte
  * @property {string} coproId.required - _id de la copro
  * @property {string} nomCopro.required - nom de la copro
  * @property {string} reference.required - reference/numero copro
