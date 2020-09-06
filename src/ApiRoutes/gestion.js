@@ -60,7 +60,7 @@ router.post('/demande-visite', demandeVisite);
  * @group gestion
  * @param {object} visites.body.required - {visites: [tableau des _id visite], architecteId: _id de l'architecte}
  * @returns {object} 200 - {success: true, message: 'visite(s) assignée(s)'}
- * @returns {Error}  400 - {success: true, message: 'une ou plusieurs visites non assignées', error}
+ * @returns {Error}  400 - {success: true, message: 'une ou plusieurs visites non assignées', error: tableau des _id visites non assignés}
  * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
  * @produces application/json
  * @consumes application/json
@@ -74,7 +74,7 @@ router.post('/assign-visite', assignerVisite);
  * @group gestion
  * @param {object} visites.body.required - {visites: [tableau des _id visite], architecteId: _id de l'architecte}
  * @returns {object} 200 - {success: true, message: 'visite(s) supprimée(s)'}
- * @returns {Error}  400 - {success: true, message: 'une ou plusieurs visites n'ont pû être supprimées', error}
+ * @returns {Error}  400 - {success: true, message: 'une ou plusieurs visites n'ont pû être supprimées', error: tableau des _id visites non supprimées }
  * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
  * @produces application/json
  * @consumes application/json
