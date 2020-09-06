@@ -4,8 +4,8 @@
 require('dotenv').config();
 const   express     = require('express'),
         cors        = require('cors'),
-        fs			= require('fs'),
-        https		= require('https'),
+        fs	    = require('fs'),
+        https	    = require('https'),
         http        = require('http'),
         bodyParser  = require('body-parser');
 
@@ -15,7 +15,7 @@ const   express     = require('express'),
 const jwt           = require('./src/Config/helperBackend');
 const errorHandler  = require('./src/Config/errorHandler');
 const mongoose      = require('./src/Config/mongoose');
-const Config 		= require('./src/Config/Config');
+const Config 	    = require('./src/Config/config');
 
 /************************/
 /* start mongoDB engine */
@@ -40,11 +40,11 @@ const expressSwagger = require('express-swagger-generator')(app);
 let options = {
     swaggerDefinition: {
         info: {
-            description: 'This is a sample server',
+            description: 'Backend Doc Pour Coprovist.fr',
             title: 'Swagger',
             version: '3.0.0',
         },
-        host: 'localhost:3001',
+        host: 'http://54.37.157.34:3018',
         basePath: '/',
         produces: [
             "application/json",
@@ -61,7 +61,7 @@ let options = {
         }
     },
     basedir: __dirname, //app absolute path
-    files: ['./src/ApiRoutes/*.js'] //Path to the API handle folder
+    files: ["./src/ApiRoutes/*.js"] //Path to the API handle folder
 };
 expressSwagger(options);
 
@@ -73,8 +73,9 @@ const serverPort = Config.HttpServer.port;
 //app.enable('view cache');
 app.use('/uploads', express.static(`${__dirname}/uploads`));
 
-app.use(bodyParser.json({limit: '5mb'}));
-app.use(bodyParser.urlencoded({ extended : true, limit : '5mb' }));
+app.use(bodyParser.json({limit: '10mb'}));
+app.use(bodyParser.urlencoded({ extended : true, limit : '10mb' }));
+app.use(bodyParser.raw({ extended : true, limit : '10mb' }));
 app.use(cors());
 
 /* Json Web Token Authentication */
@@ -108,10 +109,14 @@ app.get('/', async (request, response) => {
 let auth        = require('./src/ApiRoutes/auth');
 let create      = require('./src/ApiRoutes/create');
 let update      = require('./src/ApiRoutes/update');
+let gestion	= require('./src/ApiRoutes/gestion');
+let retrieve	= require('./src/ApiRoutes/retrieve');
 
 app.use('/auth', auth);
 app.use('/create', create);
 app.use('/update', update);
+app.use('/gestion', gestion);
+app.use('/retrieve', retrieve);
 
 /***********************************************************/
 /* start Api backend server and listen the network traffic */
@@ -136,7 +141,7 @@ app.listen(serverPort, serverIp, (err) => {
         return console.log('something bad happened', err)
     }
 
-    console.log(`server is listening on port: ${serverPort}`)
+    console.log(`server is listening on port ${serverPort} at ${new Date()}`)
 });
 
 /* 404 API CallBack */
@@ -147,3 +152,6 @@ app.use(function(req, res, next){
     // server respond with error message in case of '404 not found' error
     res.status(404).send('Page not found - request aborted') ;
 });
+
+/* Server Error Handler */
+//app.use(errorHandler);
