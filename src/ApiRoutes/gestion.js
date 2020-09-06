@@ -11,8 +11,10 @@ const express = require('express');
 let {
     demandeVisite,
     assignerVisite,
+    demandeCourtier,
     assignerCourtierToCopro,
     assignerCourtierToSyndic,
+    assignerPrestataireToSyndic,
 } = require('../ApiControllers/gestion');
 
 /***************/
@@ -67,6 +69,24 @@ router.post('/demande-visite', demandeVisite);
 router.post('/assign-visite', assignerVisite);
 
 /**
+ * Cette route permet au Syndic de demander la création/assignation d'un courtier, JWT necessaire.
+ * @route POST /gestion/demande-courtier
+ * @group gestion
+ * @param {string} nomSyndic.body.required - nom du Syndic
+ * @param {string} firstName.body.required - prenom responsable courtier
+ * @param {string} lastName.body.required - nom responsable courtier
+ * @param {string} email.body.required - email responsable courtier
+ * @param {string} phone.body.required - téléphone responsable courtier
+ * @param {string} company.body.required - raison sociale courtier
+ * @returns {object} 200 - {success: true, message: "le courtier a bien été assigné"}
+ * @returns {Error}  401 - si dans token, role !== syndic ou gestionnaire  {success: false, message: 'erreur assigniation dans syndic', err: mongoose system log error}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.post('/demande-courtier', demandeCourtier);
+
+/**
  * Cette route permet d'assigner un Courtier à une Copro, JWT necessaire.
  * @route POST /gestion/copro-courtier
  * @group gestion
@@ -97,6 +117,22 @@ router.post('/copro-courtier', assignerCourtierToCopro);
  * @security JWT
  */
 router.post('/syndic-courtier', assignerCourtierToSyndic);
+
+/**
+ * Cette route permet d'assigner un Prestataire à un Syndic, JWT necessaire.
+ * @route POST /gestion/syndic-prestataire
+ * @group gestion
+ * @param {string} syndicId.body.required - _id du Syndic
+ * @param {string} prestataireId.body.required - _id du prestataire
+ * @returns {object} 200 - {success: true, message: "le courtier a bien été assigné"}
+ * @returns {Error}  400 - {success: false, message: 'erreur assigniation dans prestataire', err: mongoose system log error}
+ * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'erreur assigniation dans syndic', err: mongoose system log error}
+ * @returns {Error}  403 - {success: false, message: 'erreur', err: mongoose system log error}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.post('/syndic-prestataire', assignerPrestataireToSyndic);
 
 module.exports = router;
 

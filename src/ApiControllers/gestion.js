@@ -10,6 +10,10 @@ let path    = require("path");
 /*** helpers ***/
 /***************/
 
+let {
+    sendDemandeCourtier,
+} = require('../Config/mailer');
+
 /****************************/
 /*** import Mongo Schemes ***/
 /****************************/
@@ -91,6 +95,15 @@ let assignerVisite = (req, res) => {
     }
 }
 
+let demandeCourtier = async (req, res) => {
+    if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else {
+        await sendDemandeCourtier(req.body);
+        res.status(200).send({success: true, message: "demande envoyé, un administrateur va l'étudier"})
+    }
+}
+
 let assignerCourtierToCopro = (req, res) => {
     let {copro, courtier} = req.body;
     if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
@@ -145,11 +158,42 @@ let assignerCourtierToSyndic = (req, res) => {
             })
 }
 
+let assignerPrestataireToSyndic = (req, res) => {
+    const {prestataireId, syndicId} = req.body;
+    if (req.user.role !== 'admin')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else if (!prestataireId || !syndicId)
+        res.status(403).send({success: false, message: 'syndicId et prestataireId requis'});
+    else
+        Syndic.findOneAndUpdate(
+            {_id: syndic},
+            {$push: {prestataires: prestataireId}},
+            {new: true},
+            function (err, synd) {
+                if (err || !synd)
+                    res.status(403).send({success: false, message: 'erreur assigniation dans syndic', err});
+                else {
+                    Prestataire.findOneAndUpdate(
+                        {_id: prestataireId},
+                        {$push: {syndics: syndicId}},
+                        {new: true},
+                        function (err, prest) {
+                            if (err || !prest)
+                                res.status(400).send({success: false, message: 'erreur assigniation dans prestataire', err});
+                            else
+                                res.status(200).send({success: true, message: "le prestataire a bien été assigné"})
+                        })
+                }
+            })
+}
+
 /* Export Functions */
 
 module.exports = {
     demandeVisite,
     assignerVisite,
+    demandeCourtier,
     assignerCourtierToCopro,
     assignerCourtierToSyndic,
+    assignerPrestataireToSyndic,
 }

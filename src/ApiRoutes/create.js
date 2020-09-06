@@ -60,6 +60,7 @@ let router = express.Router();
  * @property {Array.<string>} parc - id des copros affiliées
  * @property {Array.<string>} enCoursSelect - id des copros en cours de selection
  * @property {Array.<string>} courtiers - id des courtiers affiliés
+ * @property {Array.<string>} prestataires - id des prestataires affiliés
  * @property {string} role - type de compte - eg: syndic
  */
 /**
