@@ -11,6 +11,7 @@ const express = require('express');
 let {
     demandeVisite,
     assignerVisite,
+    desassignerVisite,
     demandeCourtier,
     assignerCourtierToCopro,
     assignerCourtierToSyndic,
@@ -66,6 +67,20 @@ router.post('/demande-visite', demandeVisite);
  * @security JWT
  */
 router.post('/assign-visite', assignerVisite);
+
+/**
+ * Cette route permet de désassigner une visite d'un architecte, JWT necessaire.
+ * @route POST /gestion/unassign-visite
+ * @group gestion
+ * @param {object} visites.body.required - {visites: [tableau des _id visite], architecteId: _id de l'architecte}
+ * @returns {object} 200 - {success: true, message: 'visite(s) supprimée(s)'}
+ * @returns {Error}  400 - {success: true, message: 'une ou plusieurs visites n'ont pû être supprimées', error}
+ * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.post('/unassign-visite', assignerVisite);
 
 /**
  * Cette route permet au Syndic de demander la création/assignation d'un courtier, JWT necessaire.

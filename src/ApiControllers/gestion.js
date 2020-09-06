@@ -100,6 +100,28 @@ let assignerVisite = async (req, res) => {
     }
 }
 
+let desassignerVisite = async (req, res) => {
+    if (req.user.role !== 'admin')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else {
+        let error = [];
+        await req.body.visites.map(visite => {
+            Visite.findOneAndUpdate(
+                {_id: visite._id},
+                {$set: {architecteId: null}},
+                {new: true},
+                function (err, visite) {
+                    if (err || !visite)
+                        error.push(visite)
+                })
+        });
+        if (error.length > 0)
+            res.status(400).send({success: true, message: "une ou plusieurs visites n'ont pû être supprimées", error});
+        else
+            res.status(200).send({success: true, message: 'visite(s) supprimée(s)'});
+    }
+}
+
 let demandeCourtier = async (req, res) => {
     if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
         res.status(401).send({success: false, message: 'accès interdit'});
@@ -197,6 +219,7 @@ let assignerPrestataireToSyndic = (req, res) => {
 module.exports = {
     demandeVisite,
     assignerVisite,
+    desassignerVisite,
     demandeCourtier,
     assignerCourtierToCopro,
     assignerCourtierToSyndic,
