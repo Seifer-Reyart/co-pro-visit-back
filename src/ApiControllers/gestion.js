@@ -78,20 +78,25 @@ let demandeVisite = (req, res) => {
     }
 }
 
-let assignerVisite = (req, res) => {
+let assignerVisite = async (req, res) => {
     if (req.user.role !== 'admin')
         res.status(401).send({success: false, message: 'accès interdit'});
     else {
-        Visite.findOneAndUpdate(
-            {_id: req.body._id},
-            {$set: {architecteId: req.body.architecteId}},
-            {new: true},
-            function (err, visite) {
-                if (err || !visite)
-                    res.status(400).send({success: false, message: 'erreur system', err});
-                else
-                    res.status(200).send({success: true, message: 'visite assignée'});
-            })
+        let error = [];
+        await req.body.visites.map(visite => {
+            Visite.findOneAndUpdate(
+                {_id: visite._id},
+                {$set: {architecteId: req.body.architecteId}},
+                {new: true},
+                function (err, visite) {
+                    if (err || !visite)
+                        error.push(visite)
+                })
+        });
+        if (error.length > 0)
+            res.status(400).send({success: true, message: 'une ou plusieurs visites non assignées', error});
+        else
+            res.status(200).send({success: true, message: 'visite(s) assignée(s)'});
     }
 }
 

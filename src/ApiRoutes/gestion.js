@@ -57,10 +57,9 @@ router.post('/demande-visite', demandeVisite);
  * Cette route permet d'assigner une visite à un architecte, JWT necessaire.
  * @route POST /gestion/assign-visite
  * @group gestion
- * @param {VISITE.model} coproId.body.required - _id de la copro
- * @param {Visite.model} architecteId.body.required - _id de l'architecte
- * @returns {object} 200 - {success: true, message: 'visite assignée'}
- * @returns {Error}  400 - {success: false, message: 'erreur system', err: mongoose system log error}
+ * @param {object} visites.body.required - {visites: [tableau des _id visite], architecteId: _id de l'architecte}
+ * @returns {object} 200 - {success: true, message: 'visite(s) assignée(s)'}
+ * @returns {Error}  400 - {success: true, message: 'une ou plusieurs visites non assignées', error}
  * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
  * @produces application/json
  * @consumes application/json
