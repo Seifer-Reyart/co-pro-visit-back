@@ -398,7 +398,7 @@ let postCopro = (req, res) => {
 }
 
 
-/*** get Visites list ***/
+/*** get all Visites list ***/
 
 let getVisites = (req, res) => {
     if (req.user.role === 'admin')
@@ -429,6 +429,29 @@ let getVisites = (req, res) => {
                         res.status(400).send({success: false, message: 'erreur system', err});
                     else if (!visites)
                         res.status(404).send({success: false, message: 'aucune visite enregistrée'});
+                    else
+                        res.status(200).send({success: true, visites});
+                })
+        })
+    else
+        res.status(401).send({success: false, message: 'accès refusé'});
+}
+
+/*** get Visites list ***/
+
+let getUnassignedVisites = (req, res) => {
+    if (req.user.role === 'admin')
+        Admin.findOne({_id: req.user.id}, (err, admin) => {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur system', err});
+            else if (!admin)
+                res.status(403).send({success: false, message: 'aucun admin enregistré'});
+            else
+                Visite.find({architecteId: null}, (err, visites) => {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur system', err});
+                    else if (!visites)
+                        res.status(403).send({success: false, message: 'aucune visite enregistrée'});
                     else
                         res.status(200).send({success: true, visites});
                 })
@@ -559,5 +582,6 @@ module.exports = {
     getGestionnaires,
     postGestionnaire,
     getEncoursSelect,
-    postEncoursSelect
+    postEncoursSelect,
+    getUnassignedVisites
 }

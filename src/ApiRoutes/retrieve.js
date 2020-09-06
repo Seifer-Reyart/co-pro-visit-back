@@ -24,7 +24,8 @@ let {
     getGestionnaires,
     postGestionnaire,
     getEncoursSelect,
-    postEncoursSelect
+    postEncoursSelect,
+    getUnassignedVisites
 } = require('../ApiControllers/retrieve');
 
 /***************/
@@ -230,6 +231,20 @@ router.post('/gestionnaire', postGestionnaire);
  * @security JWT
  */
 router.get('/visite', getVisites);
+
+/**
+ * Cette route permet de récupérer la liste des Visites non attribuée, JWT necessaire.
+ * @route GET /retrieve/visite-unassigned
+ * @group Get_Data
+ * @returns {object} 200 - {success: true, visites: array of visites}
+ * @returns {Error}  400 - {success: false, message: error message, err: error system log from mongoose}
+ * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
+ * @returns {Error}  403 - si le compte n'est pas enregistré {success: false, message: "ce compte n'existe pas!"}
+ * @returns {Error}  404 - si aucune visite trouvée  {success: false, message: 'aucune visite enregistrée'}
+ * @produces application/json
+ * @security JWT
+ */
+router.get('/visite-unassigned', getUnassignedVisites);
 
 /**
  * Cette route permet de récupérer la liste des visite via _id architecte, JWT necessaire.
