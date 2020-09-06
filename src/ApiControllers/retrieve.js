@@ -424,7 +424,7 @@ let getVisites = (req, res) => {
             else if (!architecte)
                 res.status(404).send({success: false, message: 'aucun architecte enregistré'});
             else
-                Visite.find({architeceId: req.user.id}, (err, visites) => {
+                Visite.find({architecteId: req.user.id}, (err, visites) => {
                     if (err)
                         res.status(400).send({success: false, message: 'erreur system', err});
                     else if (!visites)
