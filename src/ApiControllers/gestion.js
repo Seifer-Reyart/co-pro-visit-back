@@ -107,7 +107,7 @@ let desassignerVisite = async (req, res) => {
         let error = [];
         await req.body.visites.map(visite => {
             Visite.findOneAndUpdate(
-                {_id: visite._id},
+                {_id: visite},
                 {$set: {architecteId: null}},
                 {new: true},
                 function (err, visite) {
