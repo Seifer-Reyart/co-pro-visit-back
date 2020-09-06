@@ -443,7 +443,7 @@ let postVisite = (req,res) => {
     if (req.user.role !== 'architecte' && req.user.role !== 'admin')
         res.status(401).send({success: false, message: 'accès refusé'});
     else
-        Visite.find({_id: req.body._id}, function (err, visites) {
+        Visite.find({architecteId: req.body._id}, function (err, visites) {
             if (err)
                 res.status(400).send({success: false, message: 'erreur system', err});
             else if (!visites)
