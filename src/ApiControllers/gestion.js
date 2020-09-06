@@ -85,7 +85,7 @@ let assignerVisite = async (req, res) => {
         let error = [];
         await req.body.visites.map(visite => {
             Visite.findOneAndUpdate(
-                {_id: visite._id},
+                {_id: visite},
                 {$set: {architecteId: req.body.architecteId}},
                 {new: true},
                 function (err, visite) {
