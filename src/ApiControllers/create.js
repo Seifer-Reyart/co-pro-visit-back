@@ -669,7 +669,7 @@ let registerIncident = async (req, res) => {
                             visiteId       ,
                             syndicId       ,
                             coproId        ,
-                            images: req.files.map(e => e.filepath),
+                            images: req.files.map(e => e.filename),
                         });
                         incident.save(function(err, incid) {
                             if (err) {
