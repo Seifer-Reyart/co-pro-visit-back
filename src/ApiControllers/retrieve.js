@@ -437,19 +437,19 @@ let getVisites = (req, res) => {
         res.status(401).send({success: false, message: 'accès refusé'});
 }
 
-/*** get one Visite ***/
+/*** get list Visite by architecteId ***/
 
 let postVisite = (req,res) => {
     if (req.user.role !== 'architecte' && req.user.role !== 'admin')
         res.status(401).send({success: false, message: 'accès refusé'});
     else
-        Visite.findOne({_id: req.body._id}, function (err, visite) {
+        Visite.find({_id: req.body._id}, function (err, visites) {
             if (err)
                 res.status(400).send({success: false, message: 'erreur system', err});
-            else if (!visite)
+            else if (!visites)
                 res.status(404).send({success: false, message: 'aucune visite enregistrée'});
             else
-                res.status(200).send({success: true, visite});
+                res.status(200).send({success: true, visites});
         })
 }
 

@@ -232,10 +232,10 @@ router.post('/gestionnaire', postGestionnaire);
 router.get('/visite', getVisites);
 
 /**
- * Cette route permet de récupérer une visite via son _id, JWT necessaire.
+ * Cette route permet de récupérer la liste des visite via _id architecte, JWT necessaire.
  * @route POST /retrieve/visite
  * @group Get_Data
- * @param {VISITE.model} _id.body.required - _id
+ * @param {VISITE.model} _id.body.required - _id de l'architecte
  * @returns {object} 200 - {success: true, visites: array of visites}
  * @returns {Error}  400 - {success: false, message: error message, err: error system log from mongoose}
  * @returns {Error}  401 - si dans token, role !== architecte ou admin  {success: false, message: 'accès interdit'}
