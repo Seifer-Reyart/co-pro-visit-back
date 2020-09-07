@@ -504,7 +504,7 @@ router.post('/multi-copros', parseXlsThenStore);
 /**
  * Cette route permet de créer un ou plusieurs batiment dans une copro, un tableau de batiments est attendu dans le body, JWT necessaire.
  * @route POST /create/batiment
- * @group syndic et gestionnaire
+ * @group architecte
  * @param {BATIMENT.model} reference.body.required - reference - reference interne à la copro - eg: bat1, batA, batiment bleu... etc
  * @param {BATIMENT.model} surface.body.required - surface totale de du batiment
  * @param {BATIMENT.model} coproId.body.required - Id de la copro
@@ -524,7 +524,7 @@ router.post('/multi-copros', parseXlsThenStore);
  * @param {BATIMENT.model} coproId.body - _id de la copro
  * @returns {object} 200 - {success: true, message : 'Le batiment a bien été crée'}
  * @returns {Error}  400 - {success: false, message: error system log from mongoose}
- * @returns {Error}  401 - si dans token, role !== 'syndic' || role !== 'gestionnaire' || role !== 'architecte' {success: false, message: 'accès interdit'}
+ * @returns {Error}  401 - si dans token, role !== 'architecte' {success: false, message: 'accès interdit'}
  * @returns {Error}  403 - si email existe  {success: false, message: 'Le batiment existe déjà'}
  * @produces application/json
  * @consumes application/json
