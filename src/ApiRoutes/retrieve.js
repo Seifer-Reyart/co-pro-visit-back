@@ -225,7 +225,7 @@ router.post('/gestionnaire', postGestionnaire);
  * @group Get_Data
  * @returns {object} 200 - {success: true, visites: array of visites}
  * @returns {Error}  400 - {success: false, message: error message, err: error system log from mongoose}
- * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
+ * @returns {Error}  401 - si dans token, role !== admin ou architecte  {success: false, message: 'accès interdit'}
  * @returns {Error}  403 - si le compte n'est pas enregistré {success: false, message: "ce compte n'existe pas!"}
  * @returns {Error}  404 - si aucune visite trouvée  {success: false, message: 'aucune visite enregistrée'}
  * @produces application/json
@@ -254,7 +254,7 @@ router.get('/visite-unassigned', getVisitesUnassigned);
  * @param {VISITE.model} _id.body.required - _id de l'architecte
  * @returns {object} 200 - {success: true, visites: array of visites}
  * @returns {Error}  400 - {success: false, message: error message, err: error system log from mongoose}
- * @returns {Error}  401 - si dans token, role !== architecte ou admin  {success: false, message: 'accès interdit'}
+ * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
  * @returns {Error}  403 - si le compte n'est pas enregistré {success: false, message: "ce compte n'existe pas!"}
  * @returns {Error}  404 - si aucune visite trouvée  {success: false, message: 'aucune visite enregistrée'}
  * @produces application/json

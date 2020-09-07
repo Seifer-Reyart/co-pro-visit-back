@@ -463,7 +463,7 @@ let getVisitesUnassigned = (req, res) => {
 /*** get list Visite by architecteId ***/
 
 let getVisitesArchi = (req,res) => {
-    if (req.user.role !== 'architecte' && req.user.role !== 'admin')
+    if (req.user.role !== 'admin')
         res.status(401).send({success: false, message: 'accès refusé'});
     else
         Visite.find({architecteId: req.body._id}, function (err, visites) {
