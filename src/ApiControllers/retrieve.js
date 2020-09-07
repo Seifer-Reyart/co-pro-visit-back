@@ -400,7 +400,7 @@ let postCopro = (req, res) => {
 
 /*** get all Visites list ***/
 
-let getVisites = (req, res) => {
+let getVisitesAll = (req, res) => {
     if (req.user.role === 'admin')
         Admin.findOne({_id: req.user.id}, (err, admin) => {
             if (err)
@@ -439,7 +439,7 @@ let getVisites = (req, res) => {
 
 /*** get Visites list ***/
 
-let getUnassignedVisites = (req, res) => {
+let getVisitesUnassigned = (req, res) => {
     if (req.user.role === 'admin')
         Admin.findOne({_id: req.user.id}, (err, admin) => {
             if (err)
@@ -462,7 +462,7 @@ let getUnassignedVisites = (req, res) => {
 
 /*** get list Visite by architecteId ***/
 
-let postVisite = (req,res) => {
+let getVisitesArchi = (req,res) => {
     if (req.user.role !== 'architecte' && req.user.role !== 'admin')
         res.status(401).send({success: false, message: 'accès refusé'});
     else
@@ -474,6 +474,22 @@ let postVisite = (req,res) => {
             else
                 res.status(200).send({success: true, visites});
         })
+}
+
+/*** get One visite by its _id ***/
+
+let getOneVisite = (req,res) => {
+    if (req.user.role === 'admin' || req.user.role === 'architecte')
+        Visite.find({_id: req.body._id}, (err, visite) => {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur system', err});
+            else if (!visite)
+                res.status(404).send({success: false, message: 'aucune visite enregistrée'});
+            else
+                res.status(200).send({success: true, visite});
+        })
+    else
+        res.status(401).send({success: false, message: 'accès refusé'});
 }
 
 /*** get Architectes list ***/
@@ -571,8 +587,10 @@ module.exports = {
     postCopro,
     getSyndics,
     postSyndic,
-    getVisites,
-    postVisite,
+    getOneVisite,
+    getVisitesAll,
+    getVisitesArchi,
+    getVisitesUnassigned,
     getCourtiers,
     postCourtier,
     getArchitectes,
@@ -583,5 +601,4 @@ module.exports = {
     postGestionnaire,
     getEncoursSelect,
     postEncoursSelect,
-    getUnassignedVisites
 }
