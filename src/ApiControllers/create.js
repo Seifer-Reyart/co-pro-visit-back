@@ -640,14 +640,12 @@ let registerIncident = async (req, res) => {
     if (req.user.role !== 'architecte' && req.user.role !== 'admin') {
         res.status(401).send({success: false, message: 'accès interdit'});
     } else {
-        Copro.findOne({_id: req.body.coproId}, async (err, user) => {
-            if (!err && !user) {
-                res.status(404).send({ success: false, message: "Aucune copropriété associée"});
-            }
-            else if (err) {
-                res.status(400).send({ success: false, message: "Erreur lors de la récupération de la copropriété associée", err});
-            }
-            else {
+        Copro.findOne({_id: req.body.coproId}, async (err, copr) => {
+            if (err) {
+                res.status(400).send({ success: false, message: "Erreur lors de l'identification de la copropriété", err});
+            } else if (!copr) {
+                res.status(404).send({ success: false, message: "copropriété non identifée"});
+            } else {
                 uploadIncidentImage(req, res, function(err) {
                     if (err) {
                         // ERROR occured (here it can be occured due
@@ -657,7 +655,7 @@ let registerIncident = async (req, res) => {
                     } else {
                         const { courtierId, architecteId, gestionnaireId, visiteId, syndicId, coproId, date, metrages, desordre, situation, description, corpsEtat} = req.body;
                         let incident = new Incident({
-                            date           ,
+                            date: new Date(),
                             metrages       ,
                             desordre       ,
                             situation      ,

@@ -579,29 +579,36 @@ router.post('/devis', registerDevis);
 
 /**
  * @typedef INCIDENT
+ * @property {string} _id - _id de l'incident
  * @property {date} date - Date du constat de l'incident
  * @property {string} metrages.required - surface à étudier
  * @property {string} desordre.required - descriptif du désordre
  * @property {string} situation.required - ???
  * @property {string} description.required - Description de l'incident
  * @property {string} corpsEtat.required - corps de métier associé au désordre
+ * @property {string} visiteId.required - _id de la visite
+ * @property {string} coproId.required - _id de la visite
+ * @property {string} syndicId.required - _id du Syndic
+ * @property {string} gestionnaireId - _id du Gestionnaire
+ * @property {string} architecteId - _id de l'Architecte
+ * @property {string} courtierId - _id du Courtier
  * @property {Array.<string>} images - Tableau contenant l'url des photographies de l'incident
  */
 /**
  * Cette route permet de créer un incident, JWT necessaire.
  * @route POST /create/incident
  * @group architecte
- * @param {INCIDENT.model} date.body - Date du constat de l'incident
- * @param {INCIDENT.model} metrages.body.required - surface à étudier
- * @param {INCIDENT.model} desordre.body.required - descriptif du désordre
- * @param {INCIDENT.model} situation.body - ??
- * @param {INCIDENT.model} description.body - Description de l'incident
- * @param {INCIDENT.model} corpsEtat.body - corps de métier associé au désordre
- * @param {INCIDENT.model} images.body.required - Tableau contenant l'url des photographies de l'incident
+ * @param {string} coproId.body.required - _id de la copro
+ * @param {integer} metrages.body.required - surface à étudier
+ * @param {string} desordre.body.required - descriptif du désordre
+ * @param {string} situation.body.reqired - ??
+ * @param {string} description.body.required - Description de l'incident
+ * @param {string} corpsEtat.body.required - corps de métier associé au désordre
+ * @param {Array.<string>} images.body.required - Tableau contenant l'url des photographies de l'incident
  * @returns {object} 200 - {success: true, message : "L'incident a bien été créé !"}
  * @returns {Error}  400 - {success: false, message: 'Erreur système', err}
  * @returns {Error}  401 - si dans token, role !== architecte  {success: false, message: 'accès interdit'}
- * @returns {Error}  404 - Pas de copropriété associée {success: false, message: 'Pas de copropriété associée"}
+ * @returns {Error}  404 - Pas de copropriété associée {success: false, message: 'copropriété non identifée"}
  * @produces application/json
  * @consumes multipart/form-data
  * @security JWT
