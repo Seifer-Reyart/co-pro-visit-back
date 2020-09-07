@@ -479,7 +479,7 @@ let getVisitesArchi = (req,res) => {
 /*** get One visite by its _id ***/
 
 let getOneVisite = (req,res) => {
-    if (req.user.role === 'admin' || req.user.role === 'architecte')
+    if (req.user.role === 'admin')
         Visite.find({_id: req.body._id}, (err, visite) => {
             if (err)
                 res.status(400).send({success: false, message: 'erreur system', err});
@@ -488,7 +488,15 @@ let getOneVisite = (req,res) => {
             else
                 res.status(200).send({success: true, visite});
         })
-    else
+    else if (req.user.role === 'architecte')
+        Visite.find({$and: [{_id: req.body._id}, {architecteId: req.user.id}]}, (err, visite) => {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur system', err});
+            else if (!visite)
+                res.status(404).send({success: false, message: 'aucune visite enregistrée'});
+            else
+                res.status(200).send({success: true, visite});
+        })
         res.status(401).send({success: false, message: 'accès refusé'});
 }
 
