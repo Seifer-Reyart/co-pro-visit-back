@@ -497,6 +497,7 @@ let getOneVisite = (req,res) => {
             else
                 res.status(200).send({success: true, visite});
         })
+    else
         res.status(401).send({success: false, message: 'accès refusé'});
 }
 
