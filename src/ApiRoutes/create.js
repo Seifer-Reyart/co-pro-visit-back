@@ -3,7 +3,7 @@
 /************************************/
 
 const express = require('express');
-
+const multer  = require('multer');
 /************************/
 /* import local modules */
 /************************/
@@ -592,20 +592,20 @@ router.post('/devis', registerDevis);
  * @property {string} gestionnaireId - _id du Gestionnaire
  * @property {string} architecteId - _id de l'Architecte
  * @property {string} courtierId - _id du Courtier
- * @property {Array.<string>} images - Tableau contenant l'url des photographies de l'incident
+ * @property {Array.<string>} images - Fichiers à uploader , format acceptés: jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF
  */
 /**
- * Cette route permet de créer un incident, JWT necessaire.
+ * Cette route permet de créer un incident, JWT necessaire, multipart/form-data.
  * @route POST /create/incident
  * @group architecte
- * @param {string} coproId.body.required - _id de la copro
+ * @param {string}  coproId.body.required - _id de la copro
  * @param {integer} metrages.body.required - surface à étudier
- * @param {string} desordre.body.required - descriptif du désordre
- * @param {string} situation.body.reqired - ??
- * @param {string} description.body.required - Description de l'incident
- * @param {string} corpsEtat.body.required - corps de métier associé au désordre
+ * @param {string}  desordre.body.required - descriptif du désordre
+ * @param {string}  situation.body.reqired - ??
+ * @param {string}  description.body.required - Description de l'incident
+ * @param {string}  corpsEtat.body.required - corps de métier associé au désordre
  * @param {Array.<string>} images.body.required - Tableau contenant l'url des photographies de l'incident
- * @returns {object} 200 - {success: true, message : "L'incident a bien été créé !"}
+ * @returns {object} 200 - {success: true, message : "L'incident a bien été créé !", imagesUploadErrors: [{ imageTitle: "incident1", err: "Mauvais format, reçu text/plain, attends: /jpeg|jpg|pdf|JPEG|JPG|PNG|PDF/" }, { imageTitle: "incident2.png", err: "Erreur renvoyée par le système lors de la sauvegarde de l'image sur le serveur(il n'y aura pas marqué ca mais l'erreur en question a la place)" }}]
  * @returns {Error}  400 - {success: false, message: 'Erreur système', err}
  * @returns {Error}  401 - si dans token, role !== architecte  {success: false, message: 'accès interdit'}
  * @returns {Error}  404 - Pas de copropriété associée {success: false, message: 'copropriété non identifée"}
@@ -613,6 +613,7 @@ router.post('/devis', registerDevis);
  * @consumes multipart/form-data
  * @security JWT
  */
-router.post('/incident', registerIncident);
+
+router.post('/incident', multer().any(), registerIncident);
 
 module.exports = router;
