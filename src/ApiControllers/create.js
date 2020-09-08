@@ -516,16 +516,20 @@ let parseXlsThenStore = (req, res) => {
 
 let saveBatiment = (batiment) => {
     Batiment.findOne({$and: [{reference: batiment.reference}, {coproId: batiment.coproId}]}, async (err, Bat) => {
-        if (err)
+        if (err) {
+            console.log('save err: ', err)
             return {success: false, message: err};
-        else if (Bat)
-            return {success: false, message: 'Le batiment existe déjà - reference: '+Bat.reference};
-        else {
-            let bat = new Batiment(batiment)
+        } else if (Bat) {
+            console.log('batiment: ', Bat)
+            return {success: false, message: 'Le batiment existe déjà - reference: ' + Bat.reference};
+        } else {
+            let bat = new Batiment(batiment);
             bat.save(function(err, b) {
                 if (err) {
+                    console.log('err mongo save: ', err);
                     return { success: false, message: "Erreur lors de la création du Batiment "+bat.reference, err};
                 } else {
+                    console.log('mongo save ok!!: '+b._id);
                     return {success: true, _id: b._id}
                 }
             });
@@ -535,6 +539,7 @@ let saveBatiment = (batiment) => {
 
 let registerBatiment = async (req, res) => {
     const {batiments, coproId} = req.body;
+    console.log("body: ", req.body);
     if (req.user.role !== 'admin' && req.user.role !== 'architecte') {
         res.status(401).send({success: false, message: 'accès interdit'});
     } else {
@@ -542,6 +547,7 @@ let registerBatiment = async (req, res) => {
         let failed = [];
         await batiments.map(async (batiment) => {
             let resp = await saveBatiment(batiment);
+            console.log('resp: ', resp)
             if (resp.success)
                 succeded.push(resp._id);
             else
@@ -549,12 +555,17 @@ let registerBatiment = async (req, res) => {
         });
 
         if (failed.length > 0) {
-            await Batiment.delete({_id: {$in: succeded}});
+            await Batiment.delete({_id: {$in: succeded}}, function (err) {
+                if (err)
+                    console.log('err delete: ', err)
+            });
             res.status(400).send({success: false, message: "l'enregistrement a échoué, des erreurs requièrent votre attention!!!", failed});
         } else {
             await Visite.findOneAndUpdate({coproId}, {$set: {faiteLe: new Date(), done: true}}, {new: false}, function (err) {
-                if (err)
+                if (err) {
                     failed.push({err})
+                    console.log('update err: ', err)
+                }
             });
             res.status(200).send({success: true, message: "fiche(s) enregistrée(s)"});
         }
