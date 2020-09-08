@@ -547,13 +547,18 @@ let registerBatiment = async (req, res) => {
     } else {
         let succeded = [];
         let failed = [];
-        await batiments.map(async (batiment) => {
-            let resp = await saveBatiment(batiment);
-            console.log('resp: ', resp)
-            if (resp.success)
-                succeded.push(resp._id);
-            else
-                failed.push(resp);
+        await batiments.map((batiment) => {
+            return new Promise(async resolve => {
+                let resp = await saveBatiment(batiment);
+                console.log('resp: ', resp)
+                if (resp.success) {
+                    succeded.push(resp._id);
+                    resolve();
+                } else {
+                    failed.push(resp);
+                    resolve();
+                }
+            })
         });
 
         console.log('failed: ', failed);
