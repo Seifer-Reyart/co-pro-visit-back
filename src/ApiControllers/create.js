@@ -526,7 +526,7 @@ let saveBatiment = (batiment) => {
                 if (err) {
                     return { success: false, message: "Erreur lors de la création du Batiment "+bat.reference, err};
                 } else {
-                    return b._id;
+                    return {success: true, _id: b._id}
                 }
             });
         }
@@ -543,14 +543,14 @@ let registerBatiment = async (req, res) => {
         await batiments.map(async (batiment) => {
             let resp = await saveBatiment(batiment);
             if (resp.success)
-                succeded.push(resp);
+                succeded.push(resp._id);
             else
                 failed.push(resp);
         });
 
         if (failed.length > 0) {
             await Batiment.delete({_id: {$in: succeded}});
-            res.status(409).send({success: false, message: "l'enregistrement a échoué, des erreurs requièrent votre attention!!!", failed});
+            res.status(400).send({success: false, message: "l'enregistrement a échoué, des erreurs requièrent votre attention!!!", failed});
         } else {
             await Visite.findOneAndUpdate({coproId}, {$set: {faiteLe: new Date(), done: true}}, {new: false}, function (err) {
                 if (err)
