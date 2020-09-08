@@ -637,7 +637,7 @@ let registerIncident = async (req, res) => {
                             } else {
                                 imagesUploadErrors.push({
                                     imageTitle: file.originalname,
-                                    err: "Mauvais format, reçu " + file.mimetype + ", attends: " + filetypes
+                                    err: "Mauvais format, reçu " + file.mimetype + ", attendu: " + filetypes
                                 });
                                 resolve()
                             }
@@ -670,7 +670,6 @@ let registerIncident = async (req, res) => {
                                 res.status(400).send({success: false, message: "Erreur lors de la mise à jour de la copropriété associée", err});
                             else {
                                 Prestataire.updateMany({corpsEtat: { $elemMatch: { $eq: corpsEtat } }, syndics: { $elemMatch: { $eq: syndicId } }}, {$push: {incidentId: incid._id}}, {new: true}, function (err, prest) {
-                                    console.log('Prestataire.updateMany err', err, prest);
                                     if (err)
                                         res.status(400).send({success: false, message: "Erreur lors de la mise à jour de la liste des prestataires", err});
                                     else

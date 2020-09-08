@@ -604,7 +604,7 @@ router.post('/devis', registerDevis);
  * @param {string}  situation.body.reqired - ??
  * @param {string}  description.body.required - Description de l'incident
  * @param {string}  corpsEtat.body.required - corps de métier associé au désordre
- * @param {Array.<string>} images.body.required - Tableau contenant l'url des photographies de l'incident
+ * @param {Array.<string>} images.body.required - Tableau contenant des photographies de l'incident
  * @returns {object} 200 - {success: true, message : "L'incident a bien été créé !", imagesUploadErrors: [{ imageTitle: "incident1", err: "Mauvais format, reçu text/plain, attends: /jpeg|jpg|pdf|JPEG|JPG|PNG|PDF/" }, { imageTitle: "incident2.png", err: "Erreur renvoyée par le système lors de la sauvegarde de l'image sur le serveur(il n'y aura pas marqué ca mais l'erreur en question a la place)" }}]
  * @returns {Error}  400 - {success: false, message: 'Erreur système', err}
  * @returns {Error}  401 - si dans token, role !== architecte  {success: false, message: 'accès interdit'}
