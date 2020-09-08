@@ -565,7 +565,7 @@ let registerBatiment = async (req, res) => {
         console.log('failed: ', failed);
         console.log('length: ', failed.length)
         if (failed.length > 0) {
-            await Batiment.delete({_id: {$in: succeded}}, function (err) {
+            await Batiment.deleteMany({_id: {$in: succeded}}, function (err) {
                 if (err)
                     console.log('err delete: ', err)
             });
