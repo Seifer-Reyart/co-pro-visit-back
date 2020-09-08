@@ -550,7 +550,7 @@ let registerBatiment = async (req, res) => {
         await batiments.map(async (batiment) => {
             let resp = await saveBatiment(batiment);
             console.log('resp: ', resp)
-            if (response.success)
+            if (resp.success)
                 succeded.push(resp._id);
             else
                 failed.push(resp);
