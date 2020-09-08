@@ -547,7 +547,8 @@ let registerBatiment = async (req, res) => {
     } else {
         let succeded = [];
         let failed = [];
-        await batiments.map((batiment) => {
+        let promises = null;
+        promises = await batiments.map((batiment) => {
             return new Promise(async resolve => {
                 let resp = await saveBatiment(batiment);
                 console.log('resp: ', resp)
@@ -560,7 +561,7 @@ let registerBatiment = async (req, res) => {
                 }
             })
         });
-
+        await Promise.all(promises);
         console.log('failed: ', failed);
         console.log('length: ', failed.length)
         if (failed.length > 0) {
