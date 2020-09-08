@@ -111,7 +111,7 @@ let login = async (req, res) => {
                                                         }
                                                     });
                                                 }
-                                            });
+                                            }).populate({ model: 'incidents', path: 'incidentId' });
                                         }
                                     });
                                 }
