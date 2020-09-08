@@ -515,25 +515,27 @@ let parseXlsThenStore = (req, res) => {
 /* register new Batiment */
 
 let saveBatiment = (batiment) => {
-    Batiment.findOne({$and: [{reference: batiment.reference}, {coproId: batiment.coproId}]}, async (err, Bat) => {
-        if (err) {
-            console.log('save err: ', err)
-            return {success: false, message: err};
-        } else if (Bat) {
-            console.log('batiment: ', Bat)
-            return {success: false, message: 'Le batiment existe déjà - reference: ' + Bat.reference};
-        } else {
-            let bat = new Batiment(batiment);
-            bat.save(function(err, b) {
-                if (err) {
-                    console.log('err mongo save: ', err);
-                    return { success: false, message: "Erreur lors de la création du Batiment "+bat.reference, err};
-                } else {
-                    console.log('mongo save ok!!: '+b._id);
-                    return {success: true, _id: b._id}
-                }
-            });
-        }
+    return new Promise(resolve => {
+        Batiment.findOne({$and: [{reference: batiment.reference}, {coproId: batiment.coproId}]}, async (err, Bat) => {
+            if (err) {
+                console.log('save err: ', err)
+                resolve({success: false, message: err});
+            } else if (Bat) {
+                console.log('batiment: ', Bat)
+                resolve({success: false, message: 'Le batiment existe déjà - reference: ' + Bat.reference});
+            } else {
+                let bat = new Batiment(batiment);
+                bat.save(function(err, b) {
+                    if (err) {
+                        console.log('err mongo save: ', err);
+                        resolve({ success: false, message: "Erreur lors de la création du Batiment "+bat.reference, err});
+                    } else {
+                        console.log('mongo save ok!!: '+b._id);
+                        resolve({success: true, _id: b._id});
+                    }
+                });
+            }
+        })
     })
 }
 
@@ -547,7 +549,6 @@ let registerBatiment = async (req, res) => {
         let failed = [];
         await batiments.map(async (batiment) => {
             let resp = await saveBatiment(batiment);
-            let response = await resp.json()
             console.log('resp: ', resp)
             if (response.success)
                 succeded.push(resp._id);
