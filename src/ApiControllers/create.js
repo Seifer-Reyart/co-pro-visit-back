@@ -574,7 +574,7 @@ let registerBatiment = async (req, res) => {
             await Copro.findOneAndUpdate(
                 {_id: coproId},
                 {$set: {batiments: succeded}},
-                {new: false},
+                {new: true},
                 function (err) {
                     if (err)
                         console.log(err)
@@ -698,7 +698,12 @@ let registerIncident = async (req, res) => {
                             if (err || !court)
                                 res.status(400).send({success: false, message: "Erreur lors de la mise à jour de la copropriété associée", err});
                             else {
-                                Prestataire.updateMany({corpsEtat: { $elemMatch: { $eq: corpsEtat } }, syndics: { $elemMatch: { $eq: syndicId } }}, {$push: {incidentId: incid._id}}, {new: true}, function (err, prest) {
+                                Prestataire.updateMany({
+                                    $and: [
+                                        {corpsEtat: {$elemMatch: {$eq: corpsEtat}}},
+                                        {syndics: {$elemMatch: {$eq: copr.syndicNominated}}}
+                                        ]
+                                }, {$push: {incidentId: incid._id}}, {new: true}, function (err, prest) {
                                     if (err)
                                         res.status(400).send({success: false, message: "Erreur lors de la mise à jour de la liste des prestataires", err});
                                     else
