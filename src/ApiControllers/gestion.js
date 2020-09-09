@@ -47,32 +47,40 @@ let demandeVisite = (req, res) => {
             else if (visite)
                 res.status(403).send({success: false, message: 'une visite a déjà été demandé'});
             else {
-                let visite;
-                if (req.user.role !== 'syndic')
-                    visite = new Visite({
-                        coproId    	    : req.body.coproId,
-                        nomCopro        : req.body.nomCopro,
-                        reference       : req.body.reference,
-                        syndicId        : req.body.syndicId,
-                        demandeLe       : new Date(),
-                        done            : false
-                    });
-                else
-                    visite = new Visite({
-                        coproId    	    : req.body.coproId,
-                        nomCopro        : req.body.nomCopro,
-                        reference       : req.body.reference,
-                        syndicId        : req.body.syndicId,
-                        gestionnaireId  : req.body.gestionnaireId,
-                        demandeLe       : new Date(),
-                        done            : false
-                    });
-                visite.save(function(err, v) {
-                    if (err || !v)
+                Copro.findOne({_id: req.body.coproId}, function (err, copro) {
+                    if (err)
                         res.status(400).send({success: false, message: 'erreur system', err});
-                    else
-                        res.send(200).send({success: true, message: 'requête visite envoyée'})
-                });
+                    if (!copro)
+                        res.status(403).send({success: false, message: "la Copro n'existe pas"});
+                    else {
+                        let visite;
+                        if (req.user.role !== 'syndic')
+                            visite = new Visite({
+                                coproId    	    : copro._id,
+                                nomCopro        : copro.nomCopro,
+                                reference       : copro.reference,
+                                syndicId        : copro.syndicNominated,
+                                demandeLe       : new Date(),
+                                done            : false
+                            });
+                        else
+                            visite = new Visite({
+                                coproId    	    : copro._id,
+                                nomCopro        : copro.nomCopro,
+                                reference       : copro.reference,
+                                syndicId        : copro.syndicNominated,
+                                gestionnaireId  : copro.gestionnaire,
+                                demandeLe       : new Date(),
+                                done            : false
+                            });
+                        visite.save(function(err, v) {
+                            if (err || !v)
+                                res.status(400).send({success: false, message: 'erreur system', err});
+                            else
+                                res.send(200).send({success: true, message: 'requête visite envoyée'})
+                        });
+                    }
+                })
             }
         })
     }
