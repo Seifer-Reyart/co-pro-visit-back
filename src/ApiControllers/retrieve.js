@@ -388,6 +388,8 @@ let postCopro = (req, res) => {
                 model: 'gestionnaires'
             })
             .then((copro, err) => {
+                console.log(copro)
+                console.log(err)
                 if (err)
                     res.status(400).send({success: false, message: 'erreur system', err});
                 else if (!copro)
