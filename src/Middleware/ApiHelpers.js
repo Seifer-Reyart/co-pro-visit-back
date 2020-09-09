@@ -62,7 +62,7 @@ let checkEmailExist = async (req, res, next) => {
                                                             })
                                                         else {
                                                             next();
-							}
+							                            }
                                                     })
                                             })
                                     })

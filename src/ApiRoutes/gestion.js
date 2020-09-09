@@ -16,6 +16,8 @@ let {
     assignerCourtierToCopro,
     assignerCourtierToSyndic,
     assignerPrestataireToSyndic,
+    assignerGestionnaireToCopro,
+    desassignerGestionnaireToCopro,
 } = require('../ApiControllers/gestion');
 
 /***************/
@@ -140,13 +142,47 @@ router.post('/syndic-courtier', assignerCourtierToSyndic);
  * @param {string} prestataireId.body.required - _id du prestataire
  * @returns {object} 200 - {success: true, message: "le courtier a bien été assigné"}
  * @returns {Error}  400 - {success: false, message: 'erreur assigniation dans prestataire', err: mongoose system log error}
- * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'erreur assigniation dans syndic', err: mongoose system log error}
+ * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
  * @returns {Error}  403 - {success: false, message: 'erreur', err: mongoose system log error}
  * @produces application/json
  * @consumes application/json
  * @security JWT
  */
 router.post('/syndic-prestataire', assignerPrestataireToSyndic);
+
+/**
+ * Cette route permet d'assigner un Gestionnaire à une Copro, JWT necessaire.
+ * @route POST /gestion/assign-gestionnaire
+ * @group gestion
+ * @param {string} gestionnaireId.body.required - _id du Gestionnaire
+ * @param {string} coproId.body.required - _id de la Copro
+ * @param {boolean} isParc.body.required - variable indiquant si Copro est dans parc si 'true', dans enCoursSelect si 'false'
+ * @returns {object} 200 - {success: true, message: "La copropriété ("+copro.nomCopro+") a bien été ajouté à la liste de "+gest.firstName"}
+ * @returns {Error}  400 - {success: false, message: 'erreur systeme', err: mongoose system log error}
+ * @returns {Error}  401 - si dans token, role !== syndic  {success: false, message: 'accès interdit'}
+ * @returns {Error}  404 - {success: false, message: 'ressource (copro ou Gestionnaire) introuvable'}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.post('/assign-gestionnaire', assignerGestionnaireToCopro);
+
+/**
+ * Cette route permet de désassigner un Gestionnaire d'une Copro, JWT necessaire.
+ * @route POST /gestion/unassign-gestionnaire
+ * @group gestion
+ * @param {string} gestionnaireId.body.required - _id du Gestionnaire
+ * @param {string} coproId.body.required - _id de la Copro
+ * @param {boolean} isParc.body.required - variable indiquant si Copro est dans parc si 'true', dans enCoursSelect si 'false'
+ * @returns {object} 200 - {success: true, message: "La copropriété ("+copro.nomCopro+") a bien été supprimé de la liste de "+gest.firstName"}
+ * @returns {Error}  400 - {success: false, message: 'erreur systeme', err: mongoose system log error}
+ * @returns {Error}  401 - si dans token, role !== syndic  {success: false, message: 'accès interdit'}
+ * @returns {Error}  404 - {success: false, message: 'ressource (copro ou Gestionnaire) introuvable'}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.post('/unassign-gestionnaire', assignerGestionnaireToCopro);
 
 module.exports = router;
 

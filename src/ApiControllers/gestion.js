@@ -214,6 +214,114 @@ let assignerPrestataireToSyndic = (req, res) => {
             })
 }
 
+let assignerGestionnaireToCopro = (req, res) => {
+    const {gestionnaireId, coproId, isParc} = req.body;
+    if (req.user.role !== 'syndic')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else
+        Copro.findOneAndUpdate(
+            {$and: [{_id: coproId},{$or: [{syndicNominated: req.user.id}, {syndicEnCours: req.user.id}]}]},
+            {$set: {gestionnaire: gestionnaireId}},
+            {new: true}, function (err, copro) {
+                if (err)
+                    res.status(400).send({success: false, message: 'erreur système', err});
+                else if (!copro)
+                    res.status(404).send({success: false, message: "cette Copropriété n'existe pas"});
+                else {
+                    if (isParc)
+                        Gestionnaire.findOneAndUpdate(
+                            {$and: [{_id: gestionnaireId},{syndic: req.user.id}]},
+                            {$push: {parc: coproId}},
+                            {new: true},
+                            function (err, gest) {
+                                if (err)
+                                    res.status(400).send({success: false, message: 'erreur système', err});
+                                else if (!gest)
+                                    res.status(404).send({success: false, message: "ce Gestionnaire n'existe pas"});
+                                else
+                                    res.status(200).send(
+                                        {
+                                            success: true,
+                                            message: "La copropriété ("+copro.nomCopro+") a bien été ajouté au parc de "+gest.firstName
+                                        })
+                            }
+                        )
+                    else
+                        Gestionnaire.findOneAndUpdate(
+                            {$and: [{_id: gestionnaireId},{syndic: req.user.id}]},
+                            {$push: {enCoursSelect: coproId}},
+                            {new: true},
+                            function (err, gest) {
+                                if (err)
+                                    res.status(400).send({success: false, message: 'erreur système', err});
+                                else if (!gest)
+                                    res.status(404).send({success: false, message: "ce Gestionnaire n'existe pas"});
+                                else
+                                    res.status(200).send(
+                                        {
+                                            success: true,
+                                            message: "La copropriété ("+copro.nomCopro+") a bien été ajouté à la liste 'en cours de selection' de "+gest.firstName
+                                        })
+                            }
+                        )
+                }
+            })
+}
+
+let desassignerGestionnaireToCopro = (req, res) => {
+    const {gestionnaireId, coproId, isParc} = req.body;
+    if (req.user.role !== 'syndic')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else
+        Copro.findOneAndUpdate(
+            {$and: [{_id: coproId},{$or: [{syndicNominated: req.user.id}, {syndicEnCours: req.user.id}]}]},
+            {$set: {gestionnaire: null}},
+            {new: true}, function (err, copro) {
+                if (err)
+                    res.status(400).send({success: false, message: 'erreur système', err});
+                else if (!copro)
+                    res.status(404).send({success: false, message: "cette Copropriété n'existe pas"});
+                else {
+                    if (isParc)
+                        Gestionnaire.findOneAndUpdate(
+                            {$and: [{_id: gestionnaireId},{syndic: req.user.id}]},
+                            {$pull: {parc: coproId}},
+                            {new: true},
+                            function (err, gest) {
+                                if (err)
+                                    res.status(400).send({success: false, message: 'erreur système', err});
+                                else if (!gest)
+                                    res.status(404).send({success: false, message: "ce Gestionnaire n'existe pas"});
+                                else
+                                    res.status(200).send(
+                                        {
+                                            success: true,
+                                            message: "La copropriété ("+copro.nomCopro+") a bien été supprimée du parc de "+gest.firstName
+                                        })
+                            }
+                        )
+                    else
+                        Gestionnaire.findOneAndUpdate(
+                            {$and: [{_id: gestionnaireId},{syndic: req.user.id}]},
+                            {$pull: {enCoursSelect: coproId}},
+                            {new: true},
+                            function (err, gest) {
+                                if (err)
+                                    res.status(400).send({success: false, message: 'erreur système', err});
+                                else if (!gest)
+                                    res.status(404).send({success: false, message: "ce Gestionnaire n'existe pas"});
+                                else
+                                    res.status(200).send(
+                                        {
+                                            success: true,
+                                            message: "La copropriété ("+copro.nomCopro+") a bien été supprimée de la liste 'en cours de selection' de "+gest.firstName
+                                        })
+                            }
+                        )
+                }
+            })
+}
+
 /* Export Functions */
 
 module.exports = {
@@ -224,4 +332,6 @@ module.exports = {
     assignerCourtierToCopro,
     assignerCourtierToSyndic,
     assignerPrestataireToSyndic,
+    assignerGestionnaireToCopro,
+    desassignerGestionnaireToCopro,
 }

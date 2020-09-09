@@ -589,10 +589,10 @@ let registerDevis = async (req, res) => {
     if (req.user.role !== 'admin' && req.user.role !== 'prestataire') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
-        Devis.findOne({$and: [{copro}, {prestataire}, {syndic}, {copro}]}, async (err, Batiment) => {
+        Devis.findOne({$and: [{copro}, {prestataire}, {syndic}]}, async (err, Devis) => {
             if (err)
                 res.status(400).send({success: false, message: err});
-            else if (copro)
+            else if (Devis)
                 res.status(403).send({success: false, message: 'Un devis a déjà été crée'});
             else {
                 let devis = new Devis({
