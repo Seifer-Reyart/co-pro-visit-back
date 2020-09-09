@@ -571,6 +571,14 @@ let registerBatiment = async (req, res) => {
             });
             res.status(400).send({success: false, message: "l'enregistrement a échoué, des erreurs requièrent votre attention!!!", failed});
         } else {
+            await Copro.findOneAndUpdate(
+                {_id: coproId},
+                {$set: {batiments: succeded}},
+                {new: false},
+                function (err) {
+                    if (err)
+                        console.log(err)
+                });
             await Visite.findOneAndUpdate({coproId}, {$set: {faiteLe: new Date(), done: true}}, {new: false}, function (err) {
                 if (err) {
                     failed.push({err})
