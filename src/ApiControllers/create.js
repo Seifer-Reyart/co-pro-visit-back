@@ -524,6 +524,7 @@ let saveBatiment = (batiment) => {
                 console.log('batiment: ', Bat)
                 resolve({success: false, message: 'Le batiment existe déjà - reference: ' + Bat.reference});
             } else {
+                batiment.faitLe = new Date();
                 let bat = new Batiment(batiment);
                 bat.save(function(err, b) {
                     if (err) {

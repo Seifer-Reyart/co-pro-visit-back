@@ -107,6 +107,7 @@ let batimentsSchema = new Schema({
         contiguite      : [String]
     },
     coproId    	        : Schema.Types.ObjectId,
+    faitLe              : Date,
 });
 
 let batiments = mongoose.model('batiments', batimentsSchema);
