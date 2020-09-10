@@ -8,6 +8,7 @@ let visitesSchema = new Schema({
     reference       : String,
     syndicId        : Schema.Types.ObjectId,
     gestionnaireId  : Schema.Types.ObjectId,
+    codePostal      : String,
     demandeLe       : Date,
     faiteLe         : Date,
     done            : Boolean

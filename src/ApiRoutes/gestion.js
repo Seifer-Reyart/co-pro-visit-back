@@ -13,6 +13,7 @@ let {
     demandeVisite,
     assignerVisite,
     desassignerVisite,
+    demandePrestataire,
     demandeCourtier,
     assignerCourtierToCopro,
     assignerCourtierToSyndic,
@@ -199,6 +200,21 @@ router.post('/unassign-gestionnaire', desassignerGestionnaireToCopro);
  * @security JWT
  */
 router.post('/delete-syndic', deleteSyndic);
+
+/**
+ * Cette route permet de demander la création d'un prestataire, JWT necessaire.
+ * @route POST /gestion/demande-prestataire
+ * @group gestion
+ * @param {object} object.body.required - informations non mises à jour
+ * @returns {object} 200 - {success: true, message: "le courtier a bien été assigné"}
+ * @returns {Error}  400 - {success: false, message: 'erreur assigniation dans prestataire', err: mongoose system log error}
+ * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
+ * @returns {Error}  403 - {success: false, message: 'erreur', err: mongoose system log error}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.post('/demande-prestataire', demandePrestataire);
 
 module.exports = router;
 

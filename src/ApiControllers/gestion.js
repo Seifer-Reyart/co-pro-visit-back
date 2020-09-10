@@ -12,6 +12,7 @@ let path    = require("path");
 
 let {
     sendDemandeCourtier,
+    sendDemandePrestataire,
 } = require('../Config/mailer');
 
 /****************************/
@@ -60,6 +61,7 @@ let demandeVisite = (req, res) => {
                                 nomCopro        : copro.nomCopro,
                                 reference       : copro.reference,
                                 syndicId        : copro.syndicNominated,
+                                codePostal      : copro.codePostal,
                                 demandeLe       : new Date(),
                                 done            : false
                             });
@@ -70,14 +72,17 @@ let demandeVisite = (req, res) => {
                                 reference       : copro.reference,
                                 syndicId        : copro.syndicNominated,
                                 gestionnaireId  : copro.gestionnaire,
+                                codePostal      : copro.codePostal,
                                 demandeLe       : new Date(),
                                 done            : false
                             });
-                        visite.save(function(err, v) {
+                        visite.save(async function(err, v) {
                             if (err || !v)
                                 res.status(400).send({success: false, message: 'erreur system', err});
-                            else
+                            else {
+                                await Copro.updateOne({_id: copro._id}, {$set: {dateDemandeVisite: new Date()}});
                                 res.send(200).send({success: true, message: 'requête visite envoyée'})
+                            }
                         });
                     }
                 })
@@ -136,6 +141,25 @@ let demandeCourtier = async (req, res) => {
     else {
         await sendDemandeCourtier(req.body);
         res.status(200).send({success: true, message: "demande envoyé, un administrateur va l'étudier"})
+    }
+}
+
+let demandePrestataire = (req, res) => {
+    if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else {
+        Syndic.findOne({_id: req.user.id}, async function (err, synd) {
+            if (err || !synd)
+                res.status(400).send({success: false, message: "erreur système", err});
+            else {
+                let body = {
+                    ...req.body,
+                    nomSyndic: synd.nomSyndic
+                }
+                await sendDemandePrestataire(body);
+                res.status(200).send({success: true, message: "demande envoyée"});
+            }
+        })
     }
 }
 
@@ -394,6 +418,7 @@ module.exports = {
     demandeVisite,
     assignerVisite,
     desassignerVisite,
+    demandePrestataire,
     demandeCourtier,
     assignerCourtierToCopro,
     assignerCourtierToSyndic,

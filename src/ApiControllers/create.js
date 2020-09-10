@@ -563,8 +563,6 @@ let registerBatiment = async (req, res) => {
             })
         });
         await Promise.all(promises);
-        console.log('failed: ', failed);
-        console.log('length: ', failed.length)
         if (failed.length > 0) {
             await Batiment.deleteMany({_id: {$in: succeded}}, function (err) {
                 if (err)
@@ -574,7 +572,7 @@ let registerBatiment = async (req, res) => {
         } else {
             await Copro.findOneAndUpdate(
                 {_id: coproId},
-                {$set: {batiments: succeded}},
+                {$set: {batiments: succeded, dateVisite: new Date()}},
                 {new: true},
                 function (err) {
                     if (err)
