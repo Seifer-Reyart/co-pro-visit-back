@@ -330,9 +330,67 @@ let desassignerGestionnaireToCopro = (req, res) => {
             })
 }
 
+let deleteSyndic = (req, res) => {
+    if (req.user.role !== 'admin')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else
+        Syndic.findOne({_id: req.body._id}, async function (err, synd) {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur système', err});
+            else if (!synd)
+                res.status(404).send({success: false, message: "ce Syndic n'existe pas"});
+            else {
+                await Gestionnaire.deleteMany({syndic: synd._id}, function (err) {
+                    if (err)
+                        console.log('delete Gestionnaire error: ', err);
+                });
+                await Copro.find({syndicNominated: synd._id}, function (err, copros) {
+                    if (err)
+                        console.log('find Copros error: ', err);
+                });
+                await Batiment.deleteMany({coproId: {$in: synd.parc}}, function (err) {
+                    if (err)
+                        console.log('delete Batiment error: ', err);
+                });
+                await Courtier.updateMany(
+                    {syndics: {$elemMatch: {$eq: synd._id}}},
+                    {$pull: {syndics: synd._id}},
+                    function (err) {
+                        if (err)
+                            console.log('update Courtier err: ', err)
+                    });
+                await Architecte.updateMany(
+                    {copros: {$elemMatch: {$in: synd.parc}}},
+                    {$pull: {copros: {$in: synd.parc}}},
+                    function (err) {
+                        if (err)
+                            console.log('update architecte err: ', err)
+                    });
+                await Visite.deleteMany({syndicId: synd._id}, function (err) {
+                    if (err)
+                        console.log('delete Visites error: ', err);
+                });
+                await Prestataire.updateMany(
+                    {syndics: {$elemMatch: {$eq: synd._id}}},
+                    {$pull: {syndics: synd._id}},
+                    function (err) {
+                        if (err)
+                            console.log('update Prestataire error: ', err)
+                    });
+                Syndic.deleteOne({_id: synd._id}, function (err) {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur système', err});
+                    else
+                        res.status(200).send({success: false, message: 'Syndic supprimé avec succès'});
+                });
+            }
+        })
+}
+
 /* Export Functions */
 
 module.exports = {
+    deleteSyndic,
     demandeVisite,
     assignerVisite,
     desassignerVisite,

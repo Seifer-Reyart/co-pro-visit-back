@@ -9,6 +9,7 @@ const express = require('express');
 /************************/
 
 let {
+    deleteSyndic,
     demandeVisite,
     assignerVisite,
     desassignerVisite,
@@ -182,7 +183,22 @@ router.post('/assign-gestionnaire', assignerGestionnaireToCopro);
  * @consumes application/json
  * @security JWT
  */
-router.post('/unassign-gestionnaire', assignerGestionnaireToCopro);
+router.post('/unassign-gestionnaire', desassignerGestionnaireToCopro);
+
+/**
+ * Cette route permet de supprimer un Syndic et tout ce qui le concerne, JWT necessaire.
+ * @route POST /gestion/delete-syndic
+ * @group gestion
+ * @param {string} _id.body.required - _id du Syndic
+ * @returns {object} 200 - {success: true, message: "le courtier a bien été assigné"}
+ * @returns {Error}  400 - {success: false, message: 'erreur assigniation dans prestataire', err: mongoose system log error}
+ * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
+ * @returns {Error}  403 - {success: false, message: 'erreur', err: mongoose system log error}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.post('/delete-syndic', deleteSyndic);
 
 module.exports = router;
 
