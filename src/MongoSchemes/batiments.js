@@ -9,39 +9,67 @@ let batimentsSchema = new Schema({
     precisezConstr          : String,
     nbEtages                : Number,
     facadeRue               : {
-        etatGen     : String,
-        commerces   : Boolean,
+        etatGen     : {
+            type: String,
+            enum: ['bon', 'moyen', 'mauvais', 'dangereux']
+        },
+        commerces   : {
+            type: Boolean,
+            default: false
+        },
         natCommerce : String
     },
     facadeArriere           : {
         access      : Boolean,
-        etatGen     : String
+        etatGen     : {
+            type: String,
+            enum: ['bon', 'moyen', 'mauvais']
+        }
     },
     entrees                 : [
         {
             refEntree       : String,
-            specEntree      : String,
-            codeAccess      : String,
             porteVitree     : Boolean,
-            codeAccess2     : Boolean,
-            specCodeAccess2 : String,
-            cameraVideo     : Boolean
+            specAccess1     : String,   //Interphone/digicode/aucun contrôle/autre (préciser)
+            specAutre1      : String,
+            isAccess2       : Boolean,
+            specAccess2     : String,   //Interphone/digicode/aucun contrôle/autre (préciser)
+            specAutre2      : String,
+            cameraVideo     : Boolean,
+            planEvacHall    : Boolean,
+            cmdDesenfumage  : Boolean,
+            alarmeIncendie  : Boolean,
+            Ascenceur       : Boolean,
+            etatAscenceur   : {
+                type: String,
+                enum: ['bon', 'moyen', 'mauvais']
+            },
+            escalier                : {
+                natureMarches       : {
+                    type: String,
+                    enum: ['bois', 'En dur']
+                },
+                naturePaliers       : {
+                    type: String,
+                    enum: ['bois','en dur', 'bois et en dur']
+                },
+                etatGenMurs         : {
+                    type: String,
+                    enum: ['bon', 'moyen', 'mauvais']
+                },
+                etatGenPlafonds     : {
+                    type: String,
+                    enum: ['bon', 'moyen', 'mauvais']
+                },
+                etatGenEscaliers    : {
+                    type: String,
+                    enum: ['bon', 'moyen', 'mauvais']
+                },
+                extincteurs         : Boolean,
+                visite12mois        : Boolean
+            },
         }
     ],
-    planEvacHall            : Boolean,
-    cmdDesenfumage          : Boolean,
-    alarmeIncendie          : Boolean,
-    Ascenceur               : Boolean,
-    etatAscenceur           : String,
-    escalier                : {
-        natureMarches       : String,
-        naturePaliers       : String,
-        etatGenMurs         : String,
-        etatGenPlafonds     : String,
-        etatGenEscaliers    : String,
-        extincteurs         : Boolean,
-        visite12mois        : Boolean
-    },
     cleCabinet              : {
       type      : Boolean,
       default   : false
@@ -71,7 +99,10 @@ let batimentsSchema = new Schema({
             type      : Boolean,
             default   : false
         },
-        encombrement  : String,
+        encombrement  : {
+            type: String,
+            enum: ['bon', 'moyen', 'mauvais']
+        },
         nbSousSol     : Number,
         extincteurs   : Boolean,
         visite12mois  : Boolean
@@ -86,25 +117,29 @@ let batimentsSchema = new Schema({
     },
     chaufferie              : {
         collective      : Boolean,
+        visite12mois    : Boolean,  // à remplir si chaufferie collective
+        exitincteursExt : Boolean,  // à remplir si chaufferie collective
+        exitincteursInt : Boolean,  // à remplir si chaufferie collective
+        Access          : Boolean,  // à remplir si chaufferie collective
+        carnet          : Boolean,  // à remplir si chaufferie collective
+        dateLastVisite  : Date,     // à remplir si chaufferie collective
         individuelle    : Boolean,
         genre           : {
             type: String,
-            enum: ['Fuel', 'Gaz', 'Cpu', 'Electrique']
-        },
-        visite12mois    : Boolean,
-        dateLastVisite  : Date,
-        exitincteursExt : Boolean,
-        exitincteursInt : Boolean,
-        Access          : Boolean
+            enum: ['Fuel', 'Gaz', 'Cpu', 'Electrique']  // Fuel ou gaz ou cpu si Collective
+        },                                              // Électrique ou gaz si Individuelle
     },
     images                  : {
-        front           : [String],
-        entrees         : [String],
-        back            : [String],
-        etages          : [String],
-        parking         : [String],
-        environnement   : [String],
-        contiguite      : [String]
+        ParcelleCadastrale : String,
+        VueGenGoogle       : String,
+        facadeRue          : [String],
+        facadeArriere      : [String],
+        entrees            : [String],
+        etages             : [String],
+        caves              : [String],
+        parking            : [String],
+        environnement      : [String],
+        contiguite         : [String]
     },
     coproId    	        : Schema.Types.ObjectId,
     faitLe              : Date,
