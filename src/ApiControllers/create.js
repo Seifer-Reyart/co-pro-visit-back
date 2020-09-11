@@ -165,6 +165,7 @@ console.log("create architecte")
                     address         : req.body.address,
                     codePostal      : req.body.codePostal,
                     ville           : req.body.ville,
+                    zoneInter       : req.body.zoneInter,
                     role        	: 'architecte'
                 })
                 architecte.save(function(err) {

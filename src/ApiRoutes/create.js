@@ -170,6 +170,7 @@ router.post('/courtier', checkEmailExist, registerCourtier);
  * @property {string} codePostal.required - code postal du siege social - eg: 75001
  * @property {string} ville.required - ville du siege social - eg: Paris
  * @property {string} phone.required - N° contact Architecte - eg: 0123456789
+ * @property {Array.<string>} zoneInter.required - Tableau contenant les Codes Postaux où l'Architecte peut intervenir
  * @property {Array.<string>} copros - array contenant les Id des copropriétés affiliées
  * @property {string} role - type de compte - eg: architecte
  *
@@ -187,6 +188,7 @@ router.post('/courtier', checkEmailExist, registerCourtier);
  * @param {ARCHITECTE.model} codePostal.body.required - code postal du cabinet
  * @param {ARCHITECTE.model} ville.body.required - ville du cabinet
  * @param {ARCHITECTE.model} phone.body.required - Téléphone contact de l'Architecte
+ * @param {ARCHITECTE.model} zoneInter.body.required - Tableau contenant les Codes Postaux où l'Architecte peut intervenir
  * @returns {object} 200 - {success: true, message : "L'ARCHITECTE a bien été créé"}
  * @returns {Error}  400 - {success: false, message: error system log from mongoose}
  * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}

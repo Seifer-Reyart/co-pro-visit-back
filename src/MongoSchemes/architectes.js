@@ -13,6 +13,7 @@ let architectesSchema = new Schema({
     codePostal      : String,
     ville           : String,
     image           : String,
+    zoneInter       : [String],
     copros          : [Schema.Types.ObjectId],
     role        	: {
         type: String,
