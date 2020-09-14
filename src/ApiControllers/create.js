@@ -278,8 +278,9 @@ let storage = multer.diskStorage({
         // Uploads is the Upload_folder_name
         cb(null, "./src/uploads/RC-files")
     },
-    filename: function (req, file, cb) {
-        cb(null, req.user.id + "-" + file.originalname)
+    filename: async function (req, file, cb) {
+        let name = await generateP();
+        cb(null, req.user.id + "-" + name)
     }
 })
 
@@ -316,10 +317,19 @@ let uploadRCProfessionnelle = (req, res) => {
                 // ERROR occured (here it can be occured due
                 // to uploading file of size greater than
                 // 5MB or uploading different file type)
-                res.status(400).send({success: false, message: err})
+                res.status(400).send({success: false, message: err});
             } else {
                 // SUCCESS, file successfully uploaded
-                res.status(200).send({success: true, message:"RCProfessionnelle uploadé!", RCProfessionnelle: req.file.filename})
+                Prestataire.findOneAndUpdate(
+                    {_id: req.user.id},
+                    {$set: {RCProfessionnelle: '/uploads/RC-files/'+req.file.filename}},
+                    {new: false},
+                    function (err) {
+                        if (err)
+                            res.status(400).send({success: false, message: err})
+                        else
+                            res.status(200).send({success: true, message:"RCProfessionnelle uploadé!", RCProfessionnelle: req.file.filename})
+                    })
             }
         })
 }
@@ -338,7 +348,18 @@ let uploadRCDecennale = (req, res) => {
                 res.status(400).send({success: false, message: err})
             } else {
                 // SUCCESS, file successfully uploaded
-                res.status(200).send({success: true, message:"RCDecennale uploadé!", RCDecennale: req.file.filename})
+                // SUCCESS, file successfully uploaded
+                Prestataire.findOneAndUpdate(
+                    {_id: req.user.id},
+                    {$set: {RCDecennale: '/uploads/RC-files/'+req.file.filename}},
+                    {new: false},
+                    function (err) {
+                        if (err)
+                            res.status(400).send({success: false, message: err})
+                        else
+                            res.status(200).send({success: true, message:"RCDecennale uploadé!", RCDecennale: req.file.filename});
+                    })
+
             }
         })
 }
@@ -516,7 +537,8 @@ let parseXlsThenStore = (req, res) => {
 /* register new Batiment */
 
 let saveBatiment = (batiment, index, id) => {
-    return new Promise(resolve => {
+    return new Promise(async (resolve) => {
+        batiment.reference = 'bat-'+index+'-'+id;
         Batiment.findOne({$and: [{reference: batiment.reference}, {coproId: batiment.coproId}]}, async (err, Bat) => {
             if (err) {
                 console.log('save err: ', err)
@@ -526,7 +548,7 @@ let saveBatiment = (batiment, index, id) => {
                 resolve({success: false, message: 'Le batiment existe déjà - reference: ' + Bat.reference});
             } else {
                 batiment.faitLe = new Date();
-                batiment.reference = 'bat-'+index+'-'+id;
+
                 let bat = new Batiment(batiment);
                 bat.save(function(err, b) {
                     if (err) {
@@ -590,6 +612,38 @@ let registerBatiment = async (req, res) => {
     }
 }
 
+/* upload an xls/xlsx file of copros, parse it and store elements in DB */
+/* upload RCProfessionnelle & RCDecennale */
+let storageDevis = multer.diskStorage({
+    destination: function (req, file, cb) {
+        // Uploads is the Upload_folder_name
+        cb(null, "./src/uploads/devis")
+    },
+    filename: async function (req, file, cb) {
+        let name = await generateP();
+        cb(null, req.user + "-" + name);
+    }
+})
+
+let uploadDevis = multer({
+    storage: storageDevis,
+    fileFilter: function (req, file, cb){
+        // Set the filetypes, it is optional
+        let filetypes = /pdf|PDF|jpg|JPG|jpeg|JPEG|png|PNG/;
+        let exttypes = /pdf|PDF|jpg|JPG|jpeg|JPEG|png|PNG/
+        let mimetype = filetypes.test(file.mimetype);
+        let extname = exttypes.test(path.extname(file.originalname).toLowerCase());
+
+        if (mimetype && extname) {
+            return cb(null, true);
+        }
+
+        cb("Error: Assurez vous de transmettre un fichier au format - " + exttypes);
+    }
+
+// data is the name of file attribute sent in body
+}).single("data");
+
 /* register new Devis */
 
 let registerDevis = async (req, res) => {
@@ -603,29 +657,40 @@ let registerDevis = async (req, res) => {
             else if (Devis)
                 res.status(403).send({success: false, message: 'Un devis a déjà été crée'});
             else {
-                let devis = new Devis({
-                    reference       : req.body.reference,
-                    descriptif      : req.body.descriptif,
-                    naturetravaux   : req.body.naturetravaux,
-                    support         : req.body.support,
-                    hauteur         : req.body.hauteur,
-                    couleur         : req.body.couleur,
-                    photos          : req.body.photos,
-                    evaluationTTC   : req.body.evaluationTTC,
-                    copro    	    : req.body.copro,
-                    Batiment        : req.body.Batiment,
-                    prestataire     : req.body.prestataire,
-                    syndic          : req.body.syndic,
-                    gestionnaire    : req.body.gestionnaire,
-                    pcs             : req.body.pcs,
-                })
-                devis.save(function(err) {
-                    if (err) {
-                        res.send({ success: false, message: "Erreur lors de la création du Devis", err});
+                uploadDevis(req, res, function(err) {
+                    if(err) {
+                        // ERROR occured (here it can be occured due
+                        // to uploading file of size greater than
+                        // 5MB or uploading different file type)
+                        res.status(400).send({success: false, message: err})
                     } else {
-                        res.send({ success: true, message : "Le Devis a bien été créé"});
+                        // SUCCESS, file successfully uploaded
+                        let devis = new Devis({
+                            reference       : req.body.reference,
+                            descriptif      : req.body.descriptif,
+                            naturetravaux   : req.body.naturetravaux,
+                            support         : req.body.support,
+                            hauteur         : req.body.hauteur,
+                            couleur         : req.body.couleur,
+                            photos          : req.body.photos,
+                            evaluationTTC   : req.body.evaluationTTC,
+                            copro    	    : req.body.copro,
+                            Batiment        : req.body.Batiment,
+                            prestataire     : req.body.prestataire,
+                            syndic          : req.body.syndic,
+                            gestionnaire    : req.body.gestionnaire,
+                            pcs             : req.body.pcs,
+                        })
+                        devis.save(function(err) {
+                            if (err) {
+                                res.send({ success: false, message: "Erreur lors de la création du Devis", err});
+                            } else {
+                                res.send({ success: true, message : "Le Devis a bien été créé"});
+                            }
+                        });
+                        res.status(200).send({success: true, message:"devis uploadé!", RCDecennale: req.file.filename})
                     }
-                });
+                })
             }
         })
     }
