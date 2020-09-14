@@ -545,39 +545,36 @@ router.post('/batiment', registerBatiment);
  * @property {integer} evaluationTTC.required - montant du devis
  * @property {string} coproId.required - Id de la copro
  * @property {string} batimentId - Id du batiment le cas échéant
- * @property {string} prestataireId - Id du prestataire
+ * @property {string} prestataireId.required - Id du prestataire
  * @property {string} syndicId - Id du Syndic
  * @property {string} gestionnaireId - Id du Gestionnaire
  * @property {string} pcsId - Id du président du conseil syndical
- * @property {Array.<string>} photos - photos divers pour le devis
+ * @property {file} document - Document au format PDF (accepte: /pdf|PDF/)
+ * @property {Array.<file>} photos - photos divers pour le devis (accepte: /jpeg|jpg|png|JPEG|JPG|PNG/)
  */
 /**
  * Cette route permet de créer un devis, JWT necessaire.
  * @route POST /create/devis
  * @group prestataire
- * @param {DEVIS.model} reference.body.required - reference interne au prestataire
- * @param {DEVIS.model} descriptif.body.required - bref descriptif de l'intervention
- * @param {DEVIS.model} naturetravaux.body.required - tableau contenant les types de travaux - eg: peinture, maçonnerie... etc
- * @param {DEVIS.model} support.body - type de support - eg: beton
- * @param {DEVIS.model} hauteur.body - hauteur de plafon
- * @param {DEVIS.model} couleur.body - la couleur à utiliser
- * @param {DEVIS.model} evaluationTTC.body.required - montant du devis
  * @param {DEVIS.model} coproId.body.required - Id de la copro
  * @param {DEVIS.model} batimentId.body - Id du batiment le cas échéant
- * @param {DEVIS.model} prestataireId.body - Id du prestataire
- * @param {DEVIS.model} syndicId.body - Id du Syndic
- * @param {DEVIS.model} gestionnaireId.body - Id du Gestionnaire
+ * @param {DEVIS.model} prestataireId.body.required - Id du prestataire
+ * @param {DEVIS.model} syndicId.body.required - Id du Syndic
  * @param {DEVIS.model} pcsId.body - Id du président du conseil syndical
- * @param {DEVIS.model} photos.body - photos divers pour le devis
- * @returns {object} 200 - {success: true, message : "Le PCS a bien été crée"}
+ * @param {DEVIS.model} document.body - Document au format PDF (accepte: /pdf|PDF/)
+ * @param {DEVIS.model} photos.body - photos divers pour le devis (accepte: /jpeg|jpg|png|JPEG|JPG|PNG/)
+ * @returns {object} 200 - {success: true, message : "Le devis a bien été crée", document: "nomDuPdf.pdf", photos: ["NomPhoto.jpg", "NomPhoto2.png"], photosUploadError: [{imageTitle: "NomImage.jpg", err: <upload error> }, {imageTitle: "NomImage2.png", err: <upload error> }], documentUploadError: {imageTitle: "NomDocument.pdf", err: <upload error> }
  * @returns {Error}  400 - {success: false, message: error system log from mongoose}
- * @returns {Error}  401 - si dans token, role !== prestataire  {success: false, message: 'accès interdit'}
- * @returns {Error}  403 - si email existe  {success: false, message: 'email déjà utilisé'}
+ * @returns {Error}  401 - si dans token, role !== prestataire ou admin  {success: false, message: 'accès interdit'}
  * @produces application/json
- * @consumes application/json
+ * @consumes multipart/form-data
  * @security JWT
  */
-router.post('/devis', registerDevis);
+router.post('/devis', multer().fields([{
+    name: 'document'
+}, {
+    name: 'photos'
+}]), registerDevis);
 
 /**
  * @typedef INCIDENT

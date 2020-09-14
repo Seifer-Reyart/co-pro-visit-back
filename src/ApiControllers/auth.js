@@ -118,7 +118,8 @@ let login = async (req, res) => {
                                                         }
                                                     });
                                                 }
-                                            }).populate({ model: 'incidents', path: 'incidentId' });
+                                            }).populate({ model: 'incidents', path: 'incidentId' })
+                                              .populate({model: 'devis', path: 'devisId'});
                                         }
                                     });
                                 }
