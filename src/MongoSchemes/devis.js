@@ -26,7 +26,10 @@ let devisSchema = new Schema({
         type: Schema.Types.ObjectId,
         required: true,
     },
-    syndicId        : Schema.Types.ObjectId,
+    syndicId        : {
+        type: Schema.Types.ObjectId,
+        required: true,
+    },
     gestionnaireId  : Schema.Types.ObjectId,
     pcsId           : Schema.Types.ObjectId,
 });

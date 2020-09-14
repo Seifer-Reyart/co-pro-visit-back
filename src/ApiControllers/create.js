@@ -278,8 +278,9 @@ let storage = multer.diskStorage({
         // Uploads is the Upload_folder_name
         cb(null, "./src/uploads/RC-files")
     },
-    filename: function (req, file, cb) {
-        cb(null, req.user.id + "-" + file.originalname)
+    filename: async function (req, file, cb) {
+        let name = await generateP();
+        cb(null, req.user.id + "-" + name)
     }
 })
 
@@ -316,10 +317,19 @@ let uploadRCProfessionnelle = (req, res) => {
                 // ERROR occured (here it can be occured due
                 // to uploading file of size greater than
                 // 5MB or uploading different file type)
-                res.status(400).send({success: false, message: err})
+                res.status(400).send({success: false, message: err});
             } else {
                 // SUCCESS, file successfully uploaded
-                res.status(200).send({success: true, message:"RCProfessionnelle uploadé!", RCProfessionnelle: req.file.filename})
+                Prestataire.findOneAndUpdate(
+                    {_id: req.user.id},
+                    {$set: {RCProfessionnelle: '/uploads/RC-files/'+req.file.filename}},
+                    {new: false},
+                    function (err) {
+                        if (err)
+                            res.status(400).send({success: false, message: err})
+                        else
+                            res.status(200).send({success: true, message:"RCProfessionnelle uploadé!", RCProfessionnelle: req.file.filename})
+                    })
             }
         })
 }
@@ -338,7 +348,18 @@ let uploadRCDecennale = (req, res) => {
                 res.status(400).send({success: false, message: err})
             } else {
                 // SUCCESS, file successfully uploaded
-                res.status(200).send({success: true, message:"RCDecennale uploadé!", RCDecennale: req.file.filename})
+                // SUCCESS, file successfully uploaded
+                Prestataire.findOneAndUpdate(
+                    {_id: req.user.id},
+                    {$set: {RCDecennale: '/uploads/RC-files/'+req.file.filename}},
+                    {new: false},
+                    function (err) {
+                        if (err)
+                            res.status(400).send({success: false, message: err})
+                        else
+                            res.status(200).send({success: true, message:"RCDecennale uploadé!", RCDecennale: req.file.filename});
+                    })
+
             }
         })
 }
@@ -516,7 +537,8 @@ let parseXlsThenStore = (req, res) => {
 /* register new Batiment */
 
 let saveBatiment = (batiment, index, id) => {
-    return new Promise(resolve => {
+    return new Promise(async (resolve) => {
+        batiment.reference = 'bat-'+index+'-'+id;
         Batiment.findOne({$and: [{reference: batiment.reference}, {coproId: batiment.coproId}]}, async (err, Bat) => {
             if (err) {
                 console.log('save err: ', err)
@@ -526,7 +548,7 @@ let saveBatiment = (batiment, index, id) => {
                 resolve({success: false, message: 'Le batiment existe déjà - reference: ' + Bat.reference});
             } else {
                 batiment.faitLe = new Date();
-                batiment.reference = 'bat-'+index+'-'+id;
+
                 let bat = new Batiment(batiment);
                 bat.save(function(err, b) {
                     if (err) {
@@ -608,8 +630,8 @@ let registerDevis = async (req, res) => {
         batimentId,
         prestataireId,
         syndicId,
-        gestionnaire,
-        pcsId } = req.body;
+        pcsId
+    } = req.body;
     if (req.user.role !== 'admin' && req.user.role !== 'prestataire') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
@@ -636,20 +658,19 @@ let registerDevis = async (req, res) => {
                         const photos = resolvedPhotosUpload?.map(i => i.imagesUploaded).filter(im => im) ?? null;
 
                         let devis = new Devis({
-                            reference,
+                            /*reference,
                             descriptif,
                             naturetravaux,
                             support,
                             hauteur,
-                            couleur,
+                            evaluationTTC,
+                            couleur,*/
                             document,
                             photos,
-                            evaluationTTC,
                             coproId,
                             batimentId,
                             prestataireId,
                             syndicId,
-                            gestionnaire,
                             pcsId,
                         })
                         devis.save(function (err, devisSaved) {
