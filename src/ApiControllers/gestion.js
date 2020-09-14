@@ -51,7 +51,7 @@ let demandeVisite = (req, res) => {
                 Copro.findOne({_id: req.body.coproId}, function (err, copro) {
                     if (err)
                         res.status(400).send({success: false, message: 'erreur system', err});
-                    if (!copro)
+                    else if (!copro)
                         res.status(403).send({success: false, message: "la Copro n'existe pas"});
                     else {
                         let visite;
