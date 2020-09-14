@@ -8,7 +8,12 @@ const   Admin           = require('../MongoSchemes/admins'),
         PresidentCS     = require('../MongoSchemes/presidentCS'),
         Prestataire     = require('../MongoSchemes/prestataires'),
         Gestionnaire    = require('../MongoSchemes/gestionnaires');
+/************************/
+/* import external modules */
+/************************/
 
+const   crypto = require('crypto')
+const   fs = require('fs');
 /************************/
 
 let checkEmailExist = async (req, res, next) => {
@@ -72,6 +77,61 @@ let checkEmailExist = async (req, res, next) => {
     })
 }
 
+const uploadFile = (filesArray, dest, filetypes) => {
+    return filesArray?.length ? filesArray.map( file => {
+        return new Promise((resolve) => {
+            let mimetype = filetypes.test(file.mimetype);
+            if (mimetype) {
+                const hash = crypto.createHash('sha1')
+                let hashedBuffer = file.buffer;
+                hash.update(hashedBuffer);
+                let extension = file.mimetype.match(filetypes);
+                extension = extension?.length ? extension[0] : null;
+                const savedFileName = `${hash.digest('hex')}.${extension}`
+                fs.writeFile(`${dest}${savedFileName}`, file.buffer, (err) => {
+                    if (err) {
+                        resolve({
+                            imagesUploadErrors: {
+                                imageTitle: file.originalname,
+                                err
+                            },
+                            imagesUploaded: null
+                        });
+                    }
+                    else {
+                        resolve({
+                            imagesUploadErrors: null,
+                            imagesUploaded: savedFileName
+                        });
+
+                    }
+                })
+            } else {
+                resolve({
+                    imagesUploadErrors: {
+                        imageTitle: file.originalname,
+                        err: "Mauvais format, reçu " + file.mimetype + ", attendu: " + filetypes
+                    },
+                    imagesUploaded: null
+                });
+            }
+        })
+    }) : null
+}
+
+
+const identityCheck = (_id, userType, callBack, extraQuery, res) => {
+    userType.findOne({ _id, ...extraQuery}, function (err, user) {
+        if (err)
+            res.status(400).send({success: false, message: "erreur system", err});
+        else if (!user)
+            res.status(401).send({success: false, message: 'accès refusé'});
+        else
+            callBack()
+    })
+};
 module.exports = {
-    checkEmailExist
+    checkEmailExist,
+    uploadFile,
+    identityCheck,
 };
