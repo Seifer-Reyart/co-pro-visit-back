@@ -10,7 +10,7 @@ let fs      = require('fs');
 /***************/
 /*** helpers ***/
 /***************/
-
+const { uploadFile }    = require('../Middleware/ApiHelpers');
 const {sendCredentials} = require('../Config/mailer');
 
 /*** generate password ***/
@@ -27,7 +27,7 @@ function generateP() {
     return pass;
 }
 
-/**** slat to crypt password ****/
+/**** salt to crypt password ****/
 let salt = bcrypt.genSaltSync(10);
 
 
@@ -593,41 +593,95 @@ let registerBatiment = async (req, res) => {
 /* register new Devis */
 
 let registerDevis = async (req, res) => {
-    const {name, codePostal, ville, copro} = req.body;
+    const {
+        name,
+        codePostal,
+        ville,
+        reference,
+        descriptif,
+        naturetravaux,
+        support,
+        hauteur,
+        couleur,
+        evaluationTTC,
+        coproId,
+        batimentId,
+        prestataireId,
+        syndicId,
+        gestionnaire,
+        pcsId } = req.body;
     if (req.user.role !== 'admin' && req.user.role !== 'prestataire') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
-        Devis.findOne({$and: [{copro}, {prestataire}, {syndic}]}, async (err, Devis) => {
+        Copro.findOne({_id: coproId}, async (err, searchedCopro) => {
             if (err)
-                res.status(400).send({success: false, message: err});
-            else if (Devis)
-                res.status(403).send({success: false, message: 'Un devis a déjà été crée'});
-            else {
-                let devis = new Devis({
-                    reference       : req.body.reference,
-                    descriptif      : req.body.descriptif,
-                    naturetravaux   : req.body.naturetravaux,
-                    support         : req.body.support,
-                    hauteur         : req.body.hauteur,
-                    couleur         : req.body.couleur,
-                    photos          : req.body.photos,
-                    evaluationTTC   : req.body.evaluationTTC,
-                    copro    	    : req.body.copro,
-                    Batiment        : req.body.Batiment,
-                    prestataire     : req.body.prestataire,
-                    syndic          : req.body.syndic,
-                    gestionnaire    : req.body.gestionnaire,
-                    pcs             : req.body.pcs,
+                res.status(400).send({
+                    success: false,
+                    message: "Erreur lors de la récupération de la copropriété associée"
                 })
-                devis.save(function(err) {
-                    if (err) {
-                        res.send({ success: false, message: "Erreur lors de la création du Devis", err});
-                    } else {
-                        res.send({ success: true, message : "Le Devis a bien été créé"});
+            else if (!searchedCopro)
+                res.status(404).send({ success: false, message: "La copropriété associée est introuvable" })
+            else {
+                Devis.findOne({$and: [{coproId}, {prestataireId}, {syndicId}]}, async (err, devisSearched) => {
+                    if (err)
+                        res.status(400).send({success: false, message: err});
+                    else if (devisSearched)
+                        res.status(403).send({success: false, message: 'Un devis a déjà été crée'});
+                    else {
+                        const imagesUploaded = uploadFile(req.files.photos, './src/uploads/devis/', /jpeg|jpg|png|JPEG|JPG|PNG/)
+                        const documentUploaded = uploadFile(req.files.document, './src/uploads/devis/', /pdf|PDF/)
+                        const resolvedDocumentUpload = documentUploaded ? await Promise.all(documentUploaded) : null;
+                        const resolvedPhotosUpload = imagesUploaded ? await Promise.all(imagesUploaded) : null;
+                        const document = resolvedDocumentUpload?.map(i => i.imagesUploaded).filter(im => im)[0] ?? null
+                        const photos = resolvedPhotosUpload?.map(i => i.imagesUploaded).filter(im => im) ?? null;
+
+                        let devis = new Devis({
+                            reference,
+                            descriptif,
+                            naturetravaux,
+                            support,
+                            hauteur,
+                            couleur,
+                            document,
+                            photos,
+                            evaluationTTC,
+                            coproId,
+                            batimentId,
+                            prestataireId,
+                            syndicId,
+                            gestionnaire,
+                            pcsId,
+                        })
+                        devis.save(function (err, devisSaved) {
+                            if (err) {
+                                res.send({success: false, message: "Erreur lors de la création du Devis", err});
+                            } else {
+                                Copro.findOneAndUpdate({_id: coproId}, {$push: {devisId: devisSaved._id}},  async (err, searchedCopro) => {
+                                    if (err)
+                                        res.status(400).send({
+                                            success: false,
+                                            message: "Erreur lors de la récupération de la copropriété associée"
+                                        })
+                                    else if (!searchedCopro)
+                                        res.status(404).send({ success: false, message: "La copropriété associée est introuvable" })
+                                    else
+                                        res.status(200).send({
+                                            success: true,
+                                            message: "Le Devis a bien été créé",
+                                            document,
+                                            photos,
+                                            photosUploadError: resolvedPhotosUpload?.map(i => i.imagesUploadErrors).filter(im => im) ?? null,
+                                            documentUploadError: resolvedDocumentUpload?.map(i => i.imagesUploadErrors).filter(im => im) ?? null,
+
+                                        });
+
+                                })
+                            }
+                        });
                     }
                 });
             }
-        })
+        });
     }
 }
 

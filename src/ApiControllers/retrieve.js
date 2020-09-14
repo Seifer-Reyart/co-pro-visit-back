@@ -2,14 +2,14 @@
 /* import modules from node_modules */
 /************************************/
 
-let bcrypt  = require('bcryptjs');
-let jwt     = require('jsonwebtoken');
+let bcrypt   = require('bcryptjs');
+let jwt      = require('jsonwebtoken');
 
 /************************/
 /* import local modules */
 /************************/
-
-const   secretExpr      = require('../Config/tsconfig.json');
+const  { identityCheck }  = require('../Middleware/ApiHelpers');
+const   secretExpr        = require('../Config/tsconfig.json');
 
 /************************/
 /* import Mongo Schemes */
@@ -236,7 +236,10 @@ let getCopro = (req, res) => {
                         res.status(404).send({success: false, message: 'aucun parc enregistré'});
                     else
                         res.status(200).send({success: true, parc: copros});
-                })
+                }).populate({
+                    model: 'devis',
+                    path: 'devisId'
+                });
         });
     else if (req.user.role === 'gestionnaire')
         Gestionnaire.findOne({_id: req.user.id}, (err, gestionnaire) => {
@@ -252,7 +255,10 @@ let getCopro = (req, res) => {
                         res.status(404).send({success: false, message: 'aucun parc enregistré'});
                     else
                         res.status(200).send({success: true, parc: copros});
-                })
+                }).populate({
+                    model: 'devis',
+                    path: 'devisId'
+                });
         });
     else if (req.user.role === 'courtier')
         Courtier.findOne({_id: req.user.id}, (err, courtier) => {
@@ -307,7 +313,10 @@ let getEncoursSelect = (req, res) => {
                         res.status(404).send({success: false, message: 'aucune copro en cours de selection'});
                     else
                         res.status(200).send({success: true, enCours: copros});
-                })
+                }).populate({
+                    model: 'devis',
+                    path: 'devisId'
+                });
         });
     else if (req.user.role === 'gestionnaire')
         Gestionnaire.findOne({_id: req.user.id}, (err, gestionnaire) => {
@@ -323,7 +332,10 @@ let getEncoursSelect = (req, res) => {
                         res.status(404).send({success: false, message: 'aucune copro en cours de selection'});
                     else
                         res.status(200).send({success: true, enCours: copros});
-                })
+                }).populate({
+                    model: 'devis',
+                    path: 'devisId'
+                });
         });
     else
         res.status(401).send({success: false, message: 'accès refusé'});
@@ -346,7 +358,10 @@ let postEncoursSelect = (req, res) => {
                         res.status(404).send({success: false, message: 'aucune copro en cours de selection'});
                     else
                         res.status(200).send({success: true, coproEncours: copro});
-                })
+                }).populate({
+                    model: 'devis',
+                    path: 'devisId'
+                });
         });
     else if (req.user.role === 'gestionnaire')
         Gestionnaire.findOne({_id: req.user.id}, (err, gestionnaire) => {
@@ -362,7 +377,10 @@ let postEncoursSelect = (req, res) => {
                         res.status(404).send({success: false, message: 'aucune copro en cours de selection'});
                     else
                         res.status(200).send({success: true, coproEncours: copro});
-                })
+                }).populate({
+                    model: 'devis',
+                    path: 'devisId'
+                });
         });
     else
         res.status(401).send({success: false, message: 'accès refusé'});
@@ -386,6 +404,10 @@ let postCopro = (req, res) => {
             .populate({
                 path: 'gestionnaire',
                 model: 'gestionnaires'
+            })
+            .populate({
+                model: 'devis',
+                path: 'devisId'
             })
             .populate({
                 path: 'incidentId',
@@ -580,7 +602,6 @@ let postOneIncident = (req,res) => {
         else
             res.status(404).send({success: false, message: 'incident introuvable'});
     };
-
     if (req.user.role === 'admin')
         Incident.findOne({_id}, this.resolveIncidents);
     else if (req.user.role === 'architecte' && architecteId)
@@ -597,6 +618,83 @@ let postOneIncident = (req,res) => {
         res.status(401).send({success: false, message: 'accès refusé'});
 }
 
+/*** fetch One Devis ***/
+
+let postOneDevis = (req,res) => {
+    const { _id, coproId } = req.body;
+    const userId = req.user._id;
+    this.resolveDevis = function (err, devis) {
+        if (err)
+            res.status(400).send({success: false, message: 'erreur system', err});
+        else if (devis)
+            res.status(200).send({success: true, devis});
+        else
+            res.status(404).send({success: false, message: 'aucun devis enregistré'});
+    };
+    Copro.findOne(req.user.role === "prestataire" ? {_id: coproId} : {
+            _id: coproId,
+            $or: [{syndicNominated: userId}, {gestionnaire: userId} ]
+        }, (err, copro) => {
+        if (err)
+            res.status(400).send({success: false, message: 'Erreur lors de la récupération de la copropriété', err})
+        else if (!copro)
+            res.status(404).send({success: false, message: 'Copropriété introuvable'});
+        else if (req.user.role === 'admin')
+            Devis.findOne({_id}, this.resolveDevis);
+        else {
+            if (req.user.role === 'prestataire')
+                identityCheck(userId, Prestataire, () => Devis.findOne({_id, coproId: copro._id, prestataireId: userId}, resolveDevis), {syndics: {$elemMatch: { $eq: copro.syndicNominated?._id }}}, res);
+            else if (req.user.role === 'gestionnaire')
+                identityCheck(userId, Gestionnaire, () => Devis.findOne({_id, coproId: copro._id}, resolveDevis), { syndic: copro.syndicNominated?._id }, res);
+            else if (req.user.role === 'syndic')
+                identityCheck(userId, Syndic, () => Devis.findOne({_id, coproId: copro._id}, resolveDevis), {_id: copro.syndicNominated?._id}, res);
+            else
+                res.status(401).send({success: false, message: 'accès refusé'});
+        }
+    })
+}
+
+/*** fetch Devis list ***/
+
+let postDevisList = (req,res) => {
+    const { coproId } = req.body;
+    const userId = req.user._id;
+    let resolveDevis = function (err, devis) {
+        if (err)
+            res.status(400).send({success: false, message: 'erreur system', err});
+        else if (devis && devis.length > 0)
+            res.status(200).send({success: true, devis});
+        else
+            res.status(404).send({success: false, message: 'aucun devis enregistré'});
+    };
+    if (req.user.role === 'admin')
+        Devis.find({}, resolveDevis);
+    else
+        Copro.findOne(req.user.role === "prestataire" ? {_id: coproId} : {
+            _id: coproId,
+            $or: [{syndicNominated: userId}, {gestionnaire: userId} ]
+            },
+            async function (err, copro) {
+                if (err)
+                    res.status(400).send({success: false, message: 'Erreur lors de la récupération de la copropriété', err})
+                else if (!copro || copro?.length === 0)
+                    res.status(404).send({success: false, message: 'Copropriété introuvable'});
+                else {
+                     if (req.user.role === 'prestataire')
+                         identityCheck(userId, Prestataire, () => Devis.find({prestataireId: userId, coproId: copro._id}, resolveDevis), {syndics: {$elemMatch: { $eq: copro.syndicNominated?._id }}}, res);
+                    else if (req.user.role === 'gestionnaire')
+                         identityCheck(userId, Gestionnaire, () => Devis.find({coproId: copro._id}, resolveDevis), { syndic: copro.syndicNominated?._id }, res);
+                    else if (req.user.role === 'syndic') {
+                         identityCheck(userId, Syndic, () => Devis.find({coproId: copro._id}, resolveDevis), {_id: copro.syndicNominated?._id}, res);
+                     }
+                    else
+                        res.status(401).send({success: false, message: 'accès refusé'});
+                }
+        }).populate({
+            path: 'syndicNominated',
+            model: 'syndics'
+        });
+}
 module.exports = {
     getCopro,
     postCopro,
@@ -616,4 +714,6 @@ module.exports = {
     postGestionnaire,
     getEncoursSelect,
     postEncoursSelect,
+    postDevisList,
+    postOneDevis,
 }

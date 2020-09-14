@@ -27,9 +27,11 @@ let {
     postGestionnaire,
     getEncoursSelect,
     postEncoursSelect,
-} = require('../ApiControllers/retrieve');
+    postDevisList,
+    postOneDevis,
+ } = require('../ApiControllers/retrieve');
 
-/***************/
+ /***************/
 /* init router */
 /***************/
 let router = express.Router();
@@ -315,5 +317,33 @@ router.post('/incident', postOneIncident);
  * @security JWT
  */
 router.post('/incident-list', postIncidentslist);
+
+/**
+ * Cette route permet de récupérer un incident, JWT necessaire.
+ * @route POST /retrieve/devis
+ * @group Get_Data
+ * @param {INCIDENT.model} coproId.body.required - _id de la copro
+ * @returns {object} 200 - {success: true, devis: Devis recherché}
+ * @returns {Error}  400 - {success: false, message: error message, err: error system log from mongoose} {success: false, message: 'Erreur lors de la récupération de la copropriété', err}
+ * @returns {Error}  401 - si dans token, !== syndic, gestionnaire, prestataire ou admin  {success: false, message: 'accès interdit'}
+ * @returns {Error}  404 - si aucun devis trouvé ou la copropriété n'a pas pu être récupérée  {success: false, message: 'aucun devis enregistré'} {success: false, message: 'Copropriété introuvable'}
+ * @produces application/json
+ * @security JWT
+ */
+router.post('/devis', postOneDevis);
+
+/**
+ * Cette route permet de récupérer la liste des Incidents, JWT necessaire.
+ * @route POST /retrieve/devis-list
+ * @group Get_Data
+ * @param {INCIDENT.model} coproId.body.required - _id de la copro
+ * @returns {object} 200 - {success: true, devis: [tableau de devis]}
+ * @returns {Error}  400 - {success: false, message: error message, err: error system log from mongoose} {success: false, message: 'Erreur lors de la récupération de la copropriété', err}
+ * @returns {Error}  401 - si dans token, !== syndic, gestionnaire, prestataire ou admin  {success: false, message: 'accès interdit'}
+ * @returns {Error}  404 - si aucun devis trouvé ou la copropriété n'a pas pu être récupérée  {success: false, message: 'aucun devis enregistré'} {success: false, message: 'Copropriété introuvable'}
+ * @produces application/json
+ * @security JWT
+ */
+router.post('/devis-list', postDevisList);
 
 module.exports = router;
