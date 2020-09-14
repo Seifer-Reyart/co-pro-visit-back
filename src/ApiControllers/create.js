@@ -515,7 +515,7 @@ let parseXlsThenStore = (req, res) => {
 
 /* register new Batiment */
 
-let saveBatiment = (batiment) => {
+let saveBatiment = (batiment, index, id) => {
     return new Promise(resolve => {
         Batiment.findOne({$and: [{reference: batiment.reference}, {coproId: batiment.coproId}]}, async (err, Bat) => {
             if (err) {
@@ -526,6 +526,7 @@ let saveBatiment = (batiment) => {
                 resolve({success: false, message: 'Le batiment existe déjà - reference: ' + Bat.reference});
             } else {
                 batiment.faitLe = new Date();
+                batiment.reference = 'bat-'+index+'-'+id;
                 let bat = new Batiment(batiment);
                 bat.save(function(err, b) {
                     if (err) {
@@ -550,10 +551,9 @@ let registerBatiment = async (req, res) => {
         let succeded = [];
         let failed = [];
         let promises = null;
-        promises = await batiments.map((batiment) => {
+        promises = await batiments.map((batiment, index) => {
             return new Promise(async resolve => {
-                let resp = await saveBatiment(batiment);
-                console.log('resp: ', resp)
+                let resp = await saveBatiment(batiment, index, coproId);
                 if (resp.success) {
                     succeded.push(resp._id);
                     resolve();
