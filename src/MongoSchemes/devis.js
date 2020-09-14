@@ -2,14 +2,8 @@ let mongoose    = require('mongoose'),
     Schema      = mongoose.Schema;
 
 let devisSchema = new Schema({
-    reference       : {
-        type: String,
-        required: true,
-    },
-    descriptif      : {
-        type: String,
-        required: true
-    },
+    reference       : String,
+    descriptif      : String,
     naturetravaux   : [String],
     support         : String,
     hauteur         : String,
@@ -26,7 +20,10 @@ let devisSchema = new Schema({
         type: Schema.Types.ObjectId,
         required: true,
     },
-    syndicId        : Schema.Types.ObjectId,
+    syndicId        : {
+        type: Schema.Types.ObjectId,
+        required: true,
+    },
     gestionnaireId  : Schema.Types.ObjectId,
     pcsId           : Schema.Types.ObjectId,
 });

@@ -556,18 +556,10 @@ router.post('/batiment', registerBatiment);
  * Cette route permet de créer un devis, JWT necessaire.
  * @route POST /create/devis
  * @group prestataire
- * @param {DEVIS.model} reference.body.required - reference interne au prestataire
- * @param {DEVIS.model} descriptif.body.required - bref descriptif de l'intervention
- * @param {DEVIS.model} naturetravaux.body.required - tableau contenant les types de travaux - eg: peinture, maçonnerie... etc
- * @param {DEVIS.model} support.body - type de support - eg: beton
- * @param {DEVIS.model} hauteur.body - hauteur de plafon
- * @param {DEVIS.model} couleur.body - la couleur à utiliser
- * @param {DEVIS.model} evaluationTTC.body.required - montant du devis
  * @param {DEVIS.model} coproId.body.required - Id de la copro
  * @param {DEVIS.model} batimentId.body - Id du batiment le cas échéant
- * @param {DEVIS.model} prestataireId.body - Id du prestataire
- * @param {DEVIS.model} syndicId.body - Id du Syndic
- * @param {DEVIS.model} gestionnaireId.body - Id du Gestionnaire
+ * @param {DEVIS.model} prestataireId.body.required - Id du prestataire
+ * @param {DEVIS.model} syndicId.body.required - Id du Syndic
  * @param {DEVIS.model} pcsId.body - Id du président du conseil syndical
  * @param {DEVIS.model} document.body - Document au format PDF (accepte: /pdf|PDF/)
  * @param {DEVIS.model} photos.body - photos divers pour le devis (accepte: /jpeg|jpg|png|JPEG|JPG|PNG/)

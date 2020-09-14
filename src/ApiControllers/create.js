@@ -630,8 +630,8 @@ let registerDevis = async (req, res) => {
         batimentId,
         prestataireId,
         syndicId,
-        gestionnaire,
-        pcsId } = req.body;
+        pcsId
+    } = req.body;
     if (req.user.role !== 'admin' && req.user.role !== 'prestataire') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
@@ -658,20 +658,19 @@ let registerDevis = async (req, res) => {
                         const photos = resolvedPhotosUpload?.map(i => i.imagesUploaded).filter(im => im) ?? null;
 
                         let devis = new Devis({
-                            reference,
+                            /*reference,
                             descriptif,
                             naturetravaux,
                             support,
                             hauteur,
-                            couleur,
+                            evaluationTTC,
+                            couleur,*/
                             document,
                             photos,
-                            evaluationTTC,
                             coproId,
                             batimentId,
                             prestataireId,
                             syndicId,
-                            gestionnaire,
                             pcsId,
                         })
                         devis.save(function (err, devisSaved) {
