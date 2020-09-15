@@ -74,6 +74,7 @@ let router = express.Router();
  * @param {SYNDIC.model} siren.body.required - N° Siren du Syndic
  * @param {SYNDIC.model} address.body.required - Adresse du Syndic (N° et nom de rue)
  * @param {SYNDIC.model} codePostal.body.required - code postal du Syndic
+ * @param {SYNDIC.model} image.files - image
  * @param {SYNDIC.model} ville.body.required - ville du Syndic
  * @param {SYNDIC.model} phone.body.required - Téléphone contact du Syndic
  * @returns {object} 200 - {success: true, message : 'Le Syndic a bien été créé'}
@@ -81,10 +82,10 @@ let router = express.Router();
  * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
  * @returns {Error}  403 - si email existe  {success: false, message: 'email déjà utilisé'}
  * @produces application/json
- * @consumes application/json
+ * @consumes multipart/form-data
  * @security JWT
  */
-router.post('/syndic', checkEmailExist, registerSyndic);
+router.post('/syndic', multer().fields([{name: 'image'}]), checkEmailExist, registerSyndic);
 
 /**
  * @typedef GESTIONNAIRE
@@ -108,6 +109,7 @@ router.post('/syndic', checkEmailExist, registerSyndic);
  * @param {GESTIONNAIRE.model} lastName.body.required - Nom utilisateur
  * @param {GESTIONNAIRE.model} syndic.body.required - Object Id du Syndic
  * @param {GESTIONNAIRE.model} phone.body.required - Téléphone contact du Syndic
+ * @param {GESTIONNAIRE.model} image.files - image
  * @param {GESTIONNAIRE.model} parc.body - tableau Ids des copros affiliées
  * @param {GESTIONNAIRE.model} enCourSelect.body - tableau Ids des copros en cours de selection
  * @param {GESTIONNAIRE.model} permissions.body - contient des entiers de 0 à 6 chacun correspondant à une permission spécifique
@@ -116,10 +118,10 @@ router.post('/syndic', checkEmailExist, registerSyndic);
  * @returns {Error}  401 - si dans token, role !== syndic  {success: false, message: 'accès interdit'}
  * @returns {Error}  403 - si email existe  {success: false, message: 'email déjà utilisé'}
  * @produces application/json
- * @consumes application/json
+ * @consumes multipart/form-data
  * @security JWT
  */
-router.post('/gestionnaire', checkEmailExist, registerGestionnaire);
+router.post('/gestionnaire', multer().fields([{name: 'image'}]), checkEmailExist, registerGestionnaire);
 
 /**
  * @typedef COURTIER
@@ -145,6 +147,7 @@ router.post('/gestionnaire', checkEmailExist, registerGestionnaire);
  * @param {COURTIER.model} lastName.body.required - Nom utilisateur
  * @param {COURTIER.model} company.body - Nom/raison sociale du Courtier
  * @param {COURTIER.model} address.body.required - Adresse du Courtier (N° et nom de rue)
+ * @param {COURTIER.model} image.files - Image du courtier
  * @param {COURTIER.model} codePostal.body.required - code postal du Courtier
  * @param {COURTIER.model} ville.body.required - ville du Courtier
  * @param {COURTIER.model} phone.body.required - Téléphone contact du Courtier
@@ -153,10 +156,10 @@ router.post('/gestionnaire', checkEmailExist, registerGestionnaire);
  * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
  * @returns {Error}  403 - si email existe  {success: false, message: 'email déjà utilisé'}
  * @produces application/json
- * @consumes application/json
+ * @consumes multipart/form-data
  * @security JWT
  */
-router.post('/courtier', checkEmailExist, registerCourtier);
+router.post('/courtier', multer().fields([{name: 'image'}]), checkEmailExist, registerCourtier);
 
 /**
  * @typedef ARCHITECTE
@@ -189,15 +192,16 @@ router.post('/courtier', checkEmailExist, registerCourtier);
  * @param {ARCHITECTE.model} ville.body.required - ville du cabinet
  * @param {ARCHITECTE.model} phone.body.required - Téléphone contact de l'Architecte
  * @param {ARCHITECTE.model} zoneInter.body.required - Tableau contenant les Codes Postaux où l'Architecte peut intervenir
- * @returns {object} 200 - {success: true, message : "L'ARCHITECTE a bien été créé"}
+ * @param {ARCHITECTE.model} image.files - Image de l'architecte
+ * @returns {object} 200 - {success: true, message : "L'ARCHITECTE a bien été créé", image, imageUploadError}
  * @returns {Error}  400 - {success: false, message: error system log from mongoose}
  * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
  * @returns {Error}  403 - si email existe  {success: false, message: 'email déjà utilisé'}
  * @produces application/json
- * @consumes application/json
+ * @consumes multipart/form-data
  * @security JWT
  */
-router.post('/architecte', checkEmailExist, registerArchitecte);
+router.post('/architecte', multer().fields([{name: 'image'}]), checkEmailExist, registerArchitecte);
 
 /**
  * @typedef PCS
@@ -218,6 +222,7 @@ router.post('/architecte', checkEmailExist, registerArchitecte);
  * @param {PCS.model} email.body.required - email
  * @param {PCS.model} firstName.body.required - prenom utilisateur
  * @param {PCS.model} lastName.body.required - Nom utilisateur
+ * @param {PCS.model} image.files - Image du PCS
  * @param {PCS.model} phone.body.required - Téléphone contact de PCS
  * @param {PCS.model} coproId.body.required - Object Id de la copro affiliée
  * @returns {object} 200 - {success: true, message : "Le PCS a bien été crée"}
@@ -225,10 +230,10 @@ router.post('/architecte', checkEmailExist, registerArchitecte);
  * @returns {Error}  401 - si dans token, role !== 'syndic' || role !== 'gestionnaire' || role !== 'admin' {success: false, message: 'accès interdit'}
  * @returns {Error}  403 - si email existe  {success: false, message: 'email déjà utilisé'}
  * @produces application/json
- * @consumes application/json
+ * @consumes multipart/form-data
  * @security JWT
  */
-router.post('/pcs', checkEmailExist, registerPresidentCS);
+router.post('/pcs', multer().fields([{name: 'image'}]), checkEmailExist, registerPresidentCS);
 
 /**
  * @typedef RCDECENNALE
@@ -303,6 +308,7 @@ router.post('/rcprofessionnelle', uploadRCProfessionnelle);
  * @param {PRESTATAIRE.model} codePostal.body.required - code postal de l'enreprise
  * @param {PRESTATAIRE.model} ville.body.required - ville de l'entreprise
  * @param {PRESTATAIRE.model} phone.body.required - Téléphone contact prestataire
+ * @param {PRESTATAIRE.model} image.files - image
  * @param {PRESTATAIRE.model} nbSalaries.body - nombre de salariés dans l'entreprise
  * @param {PRESTATAIRE.model} RCProfessionnelle.body.required - path vers le fichier RC-Professionnelle
  * @param {PRESTATAIRE.model} RCDecennale.body.required - path vers le fichier RC-Decennale
@@ -314,10 +320,10 @@ router.post('/rcprofessionnelle', uploadRCProfessionnelle);
  * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
  * @returns {Error}  403 - si email existe  {success: false, message: 'email déjà utilisé'}
  * @produces application/json
- * @consumes application/json
+ * @consumes multipart/form-data
  * @security JWT
  */
-router.post('/prestataire', checkEmailExist, registerPrestataire);
+router.post('/prestataire', multer().fields([{name: 'image'}]), checkEmailExist, registerPrestataire);
 
 /**
  * @typedef COPRO
@@ -327,7 +333,7 @@ router.post('/prestataire', checkEmailExist, registerPrestataire);
  * @property {string} codePostal.required - code postal du siege social - eg: 78000
  * @property {string} ville.required - ville de la copro - eg: Versailles
  * @property {integer} nbBatiments.required - nombre de batiments dans la copro (1 par defaut)
- * @property {string} image - path vers l'image principale de la copro
+ * @property {string} image - nom de l'image principale de la copro;
  * @property {Array.<string>} batiments - id des batiments dans cette copro
  * @property {integer} surface.required - surface totale de la copro
  * @property {integer} nbrLot.required - nombre de lot
@@ -358,7 +364,7 @@ router.post('/prestataire', checkEmailExist, registerPrestataire);
  * @param {COPRO.model} codePostal.body.required - code postal du siege social - eg: 78000
  * @param {COPRO.model} ville.body.required - ville de la copro - eg: Versailles
  * @param {COPRO.model} nbBatiments.body.required - nombre de batiments dans la copro (1 par defaut)
- * @param {COPRO.model} imgCopro.body - path vers l'image principale de la copro
+ * @param {COPRO.model} image.files - image principale de la copro
  * @param {COPRO.model} batiments.body - id des batiments dans cette copro
  * @param {COPRO.model} surface.body.required - surface totale de la copro
  * @param {COPRO.model} nbrLot.body.required - nombre de lot
@@ -377,10 +383,10 @@ router.post('/prestataire', checkEmailExist, registerPrestataire);
  * @returns {Error}  401 - si dans token, role !== 'syndic' || role !== 'gestionnaire'  {success: false, message: 'accès interdit'}
  * @returns {Error}  403 - si email existe  {success: false, message: 'email déjà utilisé'}
  * @produces application/json
- * @consumes application/json
+ * @consumes multipart/form-data
  * @security JWT
  */
-router.post('/copro', registerCopro);
+router.post('/copro', multer().fields([{name: 'image'}]), registerCopro);
 
 /**
  * @typedef COPROS-FROM-XLS

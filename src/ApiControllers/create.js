@@ -71,7 +71,12 @@ let registerSyndic = async (req, res) => {
                     res.status(403).send({success: false, message: 'siren déjà utilisé'});
             } else {
                 let password = await generateP();
-                let syndic = new Syndic({
+                const imageUploaded = uploadFile(req.files.image, './src/uploads/syndic/', /jpeg|jpg|png|JPEG|JPG|PNG/)
+                const resolvedPhotosUpload = imageUploaded ? await Promise.all(imageUploaded) : null;
+                const image = resolvedPhotosUpload?.map(i => i.imagesUploaded).filter(im => im) ?? null;
+                const imageUploadError = resolvedPhotosUpload?.map(i => i.imagesUploadErrors).filter(im => im) ?? null;
+
+                    let syndic = new Syndic({
                     email       	: req.body.email.toLowerCase(),
                     firstName   	: req.body.firstName,
                     lastName    	: req.body.lastName,
@@ -82,6 +87,7 @@ let registerSyndic = async (req, res) => {
                     codePostal      : req.body.codePostal,
                     ville           : req.body.ville,
                     phone           : req.body.phone,
+                    image           : imageUploadError.length === 0 && imageUploaded.length ? image[0] : null,
                     parc            : [],
                     enCoursSelect   : [],
                     role        	: 'syndic'
@@ -91,13 +97,18 @@ let registerSyndic = async (req, res) => {
                         res.status(400).send({ success: false, message: 'Erreur lors de la création du Syndic', err});
                     } else {
                         sendCredentials(req.body.email.toLowerCase(), password);
-                        res.status(200).send({ success: true, message : 'Le Syndic a bien été créé'});
+                        res.status(200).send({
+                            success: true,
+                            message : 'Le Syndic a bien été créé',
+                            image,
+                            imageUploadError,
+                        });
                     }
                 });
             }
         })
     }
-}
+} // Testag
 
 /* register new courtier */
 
@@ -113,12 +124,17 @@ let registerCourtier = async (req, res) => {
                 res.status(403).send({success: false, message: 'email déjà utilisé'});
             else {
                 let password = await generateP();
-                let courtier = new Courtier({
+                const imageUploaded = uploadFile(req.files.image, './src/uploads/courtier/', /jpeg|jpg|png|JPEG|JPG|PNG/)
+                const resolvedPhotosUpload = imageUploaded ? await Promise.all(imageUploaded) : null;
+                const image = resolvedPhotosUpload?.map(i => i.imagesUploaded).filter(im => im) ?? null;
+                const imageUploadError = resolvedPhotosUpload?.map(i => i.imagesUploadErrors).filter(im => im) ?? null;
+                    let courtier = new Courtier({
                     email       	: req.body.email.toLowerCase(),
                     firstName   	: req.body.firstName,
                     lastName    	: req.body.lastName,
                     password    	: bcrypt.hashSync(password, salt),
                     phone           : req.body.phone,
+                    image           : imageUploadError.length === 0 && imageUploaded.length ? image[0] : null,
                     company         : req.body.company,
                     role        	: 'courtier'
                 })
@@ -127,13 +143,18 @@ let registerCourtier = async (req, res) => {
                         res.send({ success: false, message: 'Erreur lors de la création du Courtier', err});
                     } else {
                         sendCredentials(req.body.email.toLowerCase(), password);
-                        res.send({ success: true, message : 'Le Courtier a bien été créé'});
+                        res.send({
+                            success: true,
+                            message : 'Le Courtier a bien été créé',
+                            image,
+                            imageUploadError,
+                        });
                     }
                 });
             }
         })
     }
-}
+} //Testag
 
 /* register new architecte */
 
@@ -152,6 +173,10 @@ console.log("create architecte")
                 else if (user.siren === siren)
                     res.status(403).send({success: false, message: 'siren déjà utilisé'});
             } else {
+                const imageUploaded = uploadFile(req.files.image, './src/uploads/architecte/', /jpeg|jpg|png|JPEG|JPG|PNG/)
+                const resolvedPhotosUpload = imageUploaded ? await Promise.all(imageUploaded) : null;
+                const image = resolvedPhotosUpload?.map(i => i.imagesUploaded).filter(im => im) ?? null;
+                const imageUploadError = resolvedPhotosUpload?.map(i => i.imagesUploadErrors).filter(im => im) ?? null;
                 let password = await generateP();
                 let architecte = new Architecte({
                     email       	: req.body.email.toLowerCase(),
@@ -166,6 +191,7 @@ console.log("create architecte")
                     codePostal      : req.body.codePostal,
                     ville           : req.body.ville,
                     zoneInter       : req.body.zoneInter,
+                    image           : imageUploadError.length === 0 && imageUploaded.length ? image[0] : null,
                     role        	: 'architecte'
                 })
                 architecte.save(function(err) {
@@ -174,13 +200,13 @@ console.log("create architecte")
                         res.send({ success: false, message: "Erreur lors de la création de L'Architecte", err});
                     } else {
                         sendCredentials(req.body.email.toLowerCase(), password);
-                        res.send({ success: true, message : "L'Architecte a bien été créé"});
+                        res.send({ success: true, message : "L'Architecte a bien été créé", image, imageUploadError});
                     }
                 });
             }
         })
     }
-}
+} /// TESTAG
 
 /* register new president conseil syndical */
 
@@ -196,12 +222,17 @@ let registerPresidentCS = async (req, res) => {
                 res.status(403).send({success: false, message: 'email déjà utilisé'});
             else {
                 let password = await generateP();
+                const imageUploaded = uploadFile(req.files.image, './src/uploads/presidentCS/', /jpeg|jpg|png|JPEG|JPG|PNG/)
+                const resolvedPhotosUpload = imageUploaded ? await Promise.all(imageUploaded) : null;
+                const image = resolvedPhotosUpload?.map(i => i.imagesUploaded).filter(im => im) ?? null;
+                const imageUploadError = resolvedPhotosUpload?.map(i => i.imagesUploadErrors).filter(im => im) ?? null;
                 let pcs = new PresidentCS({
                     email       	: req.body.email.toLowerCase(),
                     firstName   	: req.body.firstName,
                     lastName    	: req.body.lastName,
                     password    	: bcrypt.hashSync(password, salt),
                     phone           : req.body.phone,
+                    image           : imageUploadError.length === 0 && imageUploaded.length ? image[0] : null,
                     BatimentId      : req.body.BatimentId,
                     permissions     : {label: 'Lecture seule', value: 0},
                     role        	: 'pcs'
@@ -211,13 +242,18 @@ let registerPresidentCS = async (req, res) => {
                         res.send({ success: false, message: "Erreur lors de la création du PCS", err});
                     } else {
                         sendCredentials(req.body.email.toLowerCase(), password);
-                        res.send({ success: true, message : "Le PCS a bien été créé"});
+                        res.send({
+                            success: true,
+                            message : "Le PCS a bien été créé",
+                            image,
+                            imageUploadError,
+                        });
                     }
                 });
             }
         })
     }
-}
+} // Testag
 
 /* register new prestataire */
 
@@ -236,6 +272,11 @@ let registerPrestataire = async (req, res) => {
                     res.status(403).send({success: false, message: 'siret déjà utilisé'});
             } else {
                 let password = await generateP();
+                const imageUploaded = uploadFile(req.files.image, './src/uploads/prestataire/', /jpeg|jpg|png|JPEG|JPG|PNG/)
+                const resolvedPhotosUpload = imageUploaded ? await Promise.all(imageUploaded) : null;
+                const image = resolvedPhotosUpload?.map(i => i.imagesUploaded).filter(im => im) ?? null;
+                const imageUploadError = resolvedPhotosUpload?.map(i => i.imagesUploadErrors).filter(im => im) ?? null;
+
                 let prestataire = new Prestataire({
                     email       	    : req.body.email.toLowerCase(),
                     password    	    : bcrypt.hashSync(password, salt),
@@ -254,6 +295,7 @@ let registerPrestataire = async (req, res) => {
                         phone           : req.body.phone,
                         email           : req.body.email.toLowerCase(),
                     },
+                    image               : imageUploadError.length === 0 && imageUploaded.length ? image[0] : null,
                     corpsEtat           : req.body.corpsEtat,
                     RCProfessionnelle   : req.body.RCProfessionnelle,
                     RCDecennale         : req.body.RCDecennale,
@@ -264,13 +306,18 @@ let registerPrestataire = async (req, res) => {
                         res.send({ success: false, message: "Erreur lors de la création du Prestataire", err});
                     } else {
                         sendCredentials(req.body.email.toLowerCase(), password);
-                        res.send({ success: true, message : "Le Prestataire a bien été créé"});
+                        res.send({
+                            success: true,
+                            message : "Le Prestataire a bien été créé",
+                            image,
+                            imageUploadError
+                        });
                     }
                 });
             }
         })
     }
-}
+} //Testag
 
 /* upload RCProfessionnelle & RCDecennale */
 let storage = multer.diskStorage({
@@ -378,6 +425,11 @@ let registerGestionnaire = async (req, res) => {
                 res.status(403).send({success: false, message: 'email déjà utilisé'});
             else {
                 let password = await generateP();
+                const imageUploaded = uploadFile(req.files.image, './src/uploads/gestionnaire/', /jpeg|jpg|png|JPEG|JPG|PNG/)
+                const resolvedPhotosUpload = imageUploaded ? await Promise.all(imageUploaded) : null;
+                const image = resolvedPhotosUpload?.map(i => i.imagesUploaded).filter(im => im) ?? null;
+                const imageUploadError = resolvedPhotosUpload?.map(i => i.imagesUploadErrors).filter(im => im) ?? null;
+
                 let gestionnaire = new Gestionnaire({
                         email       	: req.body.email.toLowerCase(),
                         civility        : req.body.civility,
@@ -386,6 +438,7 @@ let registerGestionnaire = async (req, res) => {
                         password    	: bcrypt.hashSync(password, salt),
                         syndic          : req.body.syndic,
                         phone           : req.body.phone,
+                        image           : imageUploadError.length === 0 && imageUploaded.length ? image[0] : null,
                         parc            : req.body.parc && req.body.parc.length > 0 ? req.body.parc : [],
                         enCoursSelect   : req.body.enCoursSelect && req.body.enCoursSelect.length > 0 ? req.body.enCoursSelect : [],
                         permissions     : req.body.permissions,
@@ -400,7 +453,12 @@ let registerGestionnaire = async (req, res) => {
                                 res.send({ success: false, message: "Erreur lors de l'ajout du Gestionnaire au Syndic", err});
                             else {
                                 sendCredentials(req.body.email.toLowerCase(), password);
-                                res.send({ success: true, message : "Le Gestionnaire a bien été créé"});
+                                res.send({
+                                    success: true,
+                                    message : "Le Gestionnaire a bien été créé",
+                                    image,
+                                    imageUploadError,
+                                });
                             }
                         })
                     }
@@ -408,13 +466,13 @@ let registerGestionnaire = async (req, res) => {
             }
         })
     }
-}
+} // Testagg
 
 /* register new Copro without batiment */
 
 let registerCopro = (req, res) => {
     const {name, codePostal, ville} = req.body;
-    if (req.user.role !== 'gestionnaire' && req.user.role !== 'syndic') {
+    if (req.user.role !== 'gestionnaire' && req.user.role !== 'syndic' && req.user.role !== 'admin') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
         Copro.findOne({$and: [{name}, {codePostal}, {ville}]}, async (err, copro) => {
@@ -423,12 +481,18 @@ let registerCopro = (req, res) => {
             else if (copro)
                 res.status(403).send({success: false, message: 'La Copro existe déjà'});
             else {
+                const imageUploaded = uploadFile(req.files.image, './src/uploads/copro-img/', /jpeg|jpg|png|JPEG|JPG|PNG/)
+                const resolvedPhotosUpload = imageUploaded ? await Promise.all(imageUploaded) : null;
+                const image = resolvedPhotosUpload?.map(i => i.imagesUploaded).filter(im => im) ?? null;
+                const imageUploadError = resolvedPhotosUpload?.map(i => i.imagesUploadErrors).filter(im => im) ?? null;
+
                 let copro = new Copro({
                     nomCopro       	: req.body.nomCopro,
                     reference       : req.body.reference,
                     address    	    : req.body.address,
                     codePostal      : req.body.codePostal,
                     ville    	    : req.body.ville,
+                    image           : imageUploadError.length === 0 && imageUploaded.length ? image[0] : null,
                     nbBatiments     : req.body.nbBatiments,
                     surface         : req.body.surface,
                     nbrLot          : req.body.nbrLot,
@@ -445,7 +509,12 @@ let registerCopro = (req, res) => {
                             await Syndic.updateOne({_id: req.body.syndicNominated}, {$push: {parc: cpr._id}});
                         else
                             await Syndic.updateOne({_id: req.body.syndicEnCours}, {$push: {enCoursSelect: cpr._id}});
-                        res.send({ success: true, message : "La Copro a bien été créée"});
+                        res.send({
+                            success: true,
+                            message : "La Copro a bien été créée",
+                            image,
+                            imageUploadError,
+                        });
                     }
                 });
             }
@@ -534,9 +603,14 @@ let parseXlsThenStore = (req, res) => {
     }
 }
 
+/* upload batiment image */
+
+let saveBatimentImage = (files) => {
+
+}
 /* register new Batiment */
 
-let saveBatiment = (batiment, index, id) => {
+let saveBatiment = (batiment, index, id, files) => {
     return new Promise(async (resolve) => {
         batiment.reference = 'bat-'+index+'-'+id;
         Batiment.findOne({$and: [{reference: batiment.reference}, {coproId: batiment.coproId}]}, async (err, Bat) => {
@@ -575,7 +649,7 @@ let registerBatiment = async (req, res) => {
         let promises = null;
         promises = await batiments.map((batiment, index) => {
             return new Promise(async resolve => {
-                let resp = await saveBatiment(batiment, index, coproId);
+                let resp = await saveBatiment(batiment, index, coproId, req.files);
                 if (resp.success) {
                     succeded.push(resp._id);
                     resolve();
