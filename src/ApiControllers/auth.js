@@ -28,91 +28,56 @@ const   Admin           = require('../MongoSchemes/admins'),
 /************/
 
 let login = async (req, res) => {
-    const {email, password} = req.body;
+    const {email} = req.body;
 
-    Admin.findOne({email: email.toLowerCase()}, async (err, user) => {
+    Admin.findOne({email: email.toLowerCase()}, {password: 0}, async (err, user) => {
         if (err)
             res.status(400).send({success: false, message: err});
         else if (user) {
-            if (!bcrypt.compareSync(password, user.password))
-                res.status(403).send({success: false, message: "mot de passe incorrect"});
-            else {
-                let token = await jwt.sign({id: user._id, role: user.role}, secretExpr.secret, {expiresIn: 60 * 60 * 24 * 30});
-                delete user.password;
-                res.status(200).send({success: true, message: 'connexion réussie', user, token});
-            }
+            let token = await jwt.sign({id: user._id, role: user.role}, secretExpr.secret, {expiresIn: 60 * 60 * 24 * 30});
+            res.status(200).send({success: true, message: 'connexion réussie', user, token});
         } else {
-            Syndic.findOne({email: email.toLowerCase()}, async (err, user) => {
+            Syndic.findOne({email: email.toLowerCase()}, {password: 0}, async (err, user) => {
                 if (err)
                     res.status(400).send({success: false, message: err});
                 else if (user) {
-                    if (!bcrypt.compareSync(password, user.password))
-                        res.status(403).send({success: false, message: "mot de passe incorrect"});
-                    else {
-                        let token = await jwt.sign({id: user._id, role: user.role}, secretExpr.secret, {expiresIn: 60 * 60 * 24 * 30});
-                        delete user.password;
-                        res.status(200).send({success: true, message: 'connexion réussie', user, token});
-                    }
+                    let token = await jwt.sign({id: user._id, role: user.role}, secretExpr.secret, {expiresIn: 60 * 60 * 24 * 30});
+                    res.status(200).send({success: true, message: 'connexion réussie', user, token});
                 } else {
-                    Courtier.findOne({email: email.toLowerCase()}, async (err, user) => {
+                    Courtier.findOne({email: email.toLowerCase()}, {password: 0}, async (err, user) => {
                         if (err)
                             res.status(400).send({success: false, message: err});
                         else if (user) {
-                            if (!bcrypt.compareSync(password, user.password))
-                                res.status(403).send({success: false, message: "mot de passe incorrect"});
-                            else {
-                                let token = await jwt.sign({id: user._id, role: user.role}, secretExpr.secret, {expiresIn: 60 * 60 * 24 * 30});
-                                delete user.password;
-                                res.status(200).send({success: true, message: 'connexion réussie', user, token});
-                            }
+                            let token = await jwt.sign({id: user._id, role: user.role}, secretExpr.secret, {expiresIn: 60 * 60 * 24 * 30});
+                            res.status(200).send({success: true, message: 'connexion réussie', user, token});
                         } else {
-                            Architecte.findOne({email: email.toLowerCase()}, async (err, user) => {
+                            Architecte.findOne({email: email.toLowerCase()}, {password: 0}, async (err, user) => {
                                 if (err)
                                     res.status(400).send({success: false, message: err});
                                 else if (user) {
-                                    if (!bcrypt.compareSync(password, user.password))
-                                        res.status(403).send({success: false, message: "mot de passe incorrect"});
-                                    else {
-                                        let token = await jwt.sign({id: user._id, role: user.role}, secretExpr.secret, {expiresIn: 60 * 60 * 24 * 30});
-                                        delete user.password;
-                                        res.status(200).send({success: true, message: 'connexion réussie', user, token});
-                                    }
+                                    let token = await jwt.sign({id: user._id, role: user.role}, secretExpr.secret, {expiresIn: 60 * 60 * 24 * 30});
+                                    res.status(200).send({success: true, message: 'connexion réussie', user, token});
                                 } else {
-                                    PresidentCS.findOne({email: email.toLowerCase()}, async (err, user) => {
+                                    PresidentCS.findOne({email: email.toLowerCase()}, {password: 0}, async (err, user) => {
                                         if (err)
                                             res.status(400).send({success: false, message: err});
                                         else if (user) {
-                                            if (!bcrypt.compareSync(password, user.password))
-                                                res.status(403).send({success: false, message: "mot de passe incorrect"});
-                                            else {
-                                                let token = await jwt.sign({id: user._id, role: user.role}, secretExpr.secret, {expiresIn: 60 * 60 * 24 * 30});
-                                                delete user.password;
-                                                res.status(200).send({success: true, message: 'connexion réussie', user, token});
-                                            }
+                                            let token = await jwt.sign({id: user._id, role: user.role}, secretExpr.secret, {expiresIn: 60 * 60 * 24 * 30});
+                                            res.status(200).send({success: true, message: 'connexion réussie', user, token});
                                         } else {
-                                            Prestataire.findOne({email: email.toLowerCase()}, async (err, user) => {
+                                            Prestataire.findOne({email: email.toLowerCase()}, {password: 0}, async (err, user) => {
                                                 if (err)
                                                     res.status(400).send({success: false, message: err});
                                                 else if (user) {
-                                                    if (!bcrypt.compareSync(password, user.password))
-                                                        res.status(403).send({success: false, message: "mot de passe incorrect"});
-                                                    else {
-                                                        let token = await jwt.sign({id: user._id, role: user.role}, secretExpr.secret, {expiresIn: 60 * 60 * 24 * 30});
-                                                        delete user.password;
-                                                        res.status(200).send({success: true, message: 'connexion réussie', user, token});
-                                                    }
+                                                    let token = await jwt.sign({id: user._id, role: user.role}, secretExpr.secret, {expiresIn: 60 * 60 * 24 * 30});
+                                                    res.status(200).send({success: true, message: 'connexion réussie', user, token});
                                                 } else {
-                                                    Gestionnaire.findOne({email: email.toLowerCase()}, async (err, user) => {
+                                                    Gestionnaire.findOne({email: email.toLowerCase()}, {password: 0}, async (err, user) => {
                                                         if (err)
                                                             res.status(400).send({success: false, message: err});
                                                         else if (user) {
-                                                            if (!bcrypt.compareSync(password, user.password))
-                                                                res.status(403).send({success: false, message: "mot de passe incorrect"});
-                                                            else {
-                                                                let token = await jwt.sign({id: user._id, role: user.role}, secretExpr.secret, {expiresIn: 60 * 60 * 24 * 30});
-                                                                delete user.password;
-                                                                res.status(200).send({success: true, message: 'connexion réussie', user, token});
-                                                            }
+                                                            let token = await jwt.sign({id: user._id, role: user.role}, secretExpr.secret, {expiresIn: 60 * 60 * 24 * 30});
+                                                            res.status(200).send({success: true, message: 'connexion réussie', user, token});
                                                         } else {
                                                             res.status(404).send({success: false, message: 'utilisateur introuvable'});
                                                         }

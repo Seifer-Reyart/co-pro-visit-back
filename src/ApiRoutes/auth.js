@@ -10,6 +10,8 @@ const express = require('express');
 
 const {login, createAdmin} = require('../ApiControllers/auth');
 
+const {checkPassword} = require('../Middleware/ApiHelpers');
+
 /***************/
 /* init router */
 /***************/
@@ -36,10 +38,11 @@ let router = express.Router();
  * @consumes application/json
  */
 
-router.post('/login', login);
+router.post('/login', checkPassword, login);
 
 /*create Admin*/
 router.post('/admin', createAdmin)
-/* Export '/auth' routes */
+
+/* export */
 
 module.exports = router;

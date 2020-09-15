@@ -1,6 +1,6 @@
-/************************/
-/* import local modules */
-/************************/
+/**********************************/
+/***    import local modules    ***/
+/**********************************/
 const   Admin           = require('../MongoSchemes/admins'),
         Syndic          = require('../MongoSchemes/syndics'),
         Courtier        = require('../MongoSchemes/courtiers'),
@@ -8,13 +8,16 @@ const   Admin           = require('../MongoSchemes/admins'),
         PresidentCS     = require('../MongoSchemes/presidentCS'),
         Prestataire     = require('../MongoSchemes/prestataires'),
         Gestionnaire    = require('../MongoSchemes/gestionnaires');
-/************************/
-/* import external modules */
-/************************/
 
-const   crypto = require('crypto')
-const   fs = require('fs');
-/************************/
+/**************************************/
+/***    import external modules     ***/
+/**************************************/
+
+const crypto    = require('crypto');
+const fs        = require('fs');
+const bcrypt    = require('bcryptjs');
+
+/**************************************/
 
 let checkEmailExist = async (req, res, next) => {
     let {email} = req.body;
@@ -119,6 +122,89 @@ const uploadFile = (filesArray, dest, filetypes) => {
     }) : null
 }
 
+const checkPassword = (req, res, next) => {
+    const {email, password} = req.body;
+
+    Admin.findOne({email: email.toLowerCase()}, async (err, user) => {
+        if (err)
+            res.status(400).send({success: false, message: err});
+        else if (user) {
+            if (!bcrypt.compareSync(password, user.password))
+                res.status(403).send({success: false, message: "mot de passe incorrect"});
+            else
+                next();
+        } else {
+            Syndic.findOne({email: email.toLowerCase()}, async (err, user) => {
+                if (err)
+                    res.status(400).send({success: false, message: err});
+                else if (user) {
+                    if (!bcrypt.compareSync(password, user.password))
+                        res.status(403).send({success: false, message: "mot de passe incorrect"});
+                    else
+                        next();
+                } else {
+                    Courtier.findOne({email: email.toLowerCase()}, async (err, user) => {
+                        if (err)
+                            res.status(400).send({success: false, message: err});
+                        else if (user) {
+                            if (!bcrypt.compareSync(password, user.password))
+                                res.status(403).send({success: false, message: "mot de passe incorrect"});
+                            else
+                                next();
+                        } else {
+                            Architecte.findOne({email: email.toLowerCase()}, async (err, user) => {
+                                if (err)
+                                    res.status(400).send({success: false, message: err});
+                                else if (user) {
+                                    if (!bcrypt.compareSync(password, user.password))
+                                        res.status(403).send({success: false, message: "mot de passe incorrect"});
+                                    else
+                                        next()
+                                } else {
+                                    PresidentCS.findOne({email: email.toLowerCase()}, async (err, user) => {
+                                        if (err)
+                                            res.status(400).send({success: false, message: err});
+                                        else if (user) {
+                                            if (!bcrypt.compareSync(password, user.password))
+                                                res.status(403).send({success: false, message: "mot de passe incorrect"});
+                                            else
+                                                next()
+                                        } else {
+                                            Prestataire.findOne({email: email.toLowerCase()}, async (err, user) => {
+                                                if (err)
+                                                    res.status(400).send({success: false, message: err});
+                                                else if (user) {
+                                                    if (!bcrypt.compareSync(password, user.password))
+                                                        res.status(403).send({success: false, message: "mot de passe incorrect"});
+                                                    else
+                                                        next()
+                                                } else {
+                                                    Gestionnaire.findOne({email: email.toLowerCase()}, async (err, user) => {
+                                                        if (err)
+                                                            res.status(400).send({success: false, message: err});
+                                                        else if (user) {
+                                                            if (!bcrypt.compareSync(password, user.password))
+                                                                res.status(403).send({success: false, message: "mot de passe incorrect"});
+                                                            else
+                                                                next()
+                                                        } else {
+                                                            res.status(404).send({success: false, message: 'utilisateur introuvable'});
+                                                        }
+                                                    });
+                                                }
+                                            })
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    });
+}
+
 
 const identityCheck = (_id, userType, callBack, extraQuery, res) => {
     userType.findOne({ _id, ...extraQuery}, function (err, user) {
@@ -133,5 +219,6 @@ const identityCheck = (_id, userType, callBack, extraQuery, res) => {
 module.exports = {
     checkEmailExist,
     uploadFile,
+    checkPassword,
     identityCheck,
 };
