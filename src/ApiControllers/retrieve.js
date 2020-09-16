@@ -479,7 +479,13 @@ let getVisitesArchi = (req,res) => {
                 res.status(404).send({success: false, message: 'aucune visite enregistrée'});
             else
                 res.status(200).send({success: true, visites});
-        })
+        }).populate({
+            model: 'copros',
+            path: 'coproId'
+        }).populate({
+            model: 'gestionnaires',
+            path: 'gestionnaireId'
+        });
 }
 
 /*** get One visite by its _id ***/
