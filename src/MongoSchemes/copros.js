@@ -5,7 +5,7 @@ let coprosSchema = new Schema({
     nomCopro    	: String,
     reference       : String,
     address    	    : String,
-    codePostal      : String,
+    codePostal      : Number,
     ville    	    : String,
     nbBatiments     : {
         type    : Number,
