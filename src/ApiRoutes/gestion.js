@@ -15,6 +15,7 @@ let {
     desassignerVisite,
     demandePrestataire,
     demandeCourtier,
+    changeStatusCopro,
     assignerCourtierToCopro,
     assignerCourtierToSyndic,
     assignerPrestataireToSyndic,
@@ -215,6 +216,21 @@ router.post('/delete-syndic', deleteSyndic);
  * @security JWT
  */
 router.post('/demande-prestataire', demandePrestataire);
+
+/**
+ * Cette route permet de changer le statut d'une Copro (parc <--> en cours selection), JWT necessaire.
+ * @route POST /gestion/nomination
+ * @group gestion
+ * @param {string} coproId.body.required - _id d'une Copro
+ * @param {boolean} isParc.body.required - true = ajouter au parc, false = ajouter à en cours de sélection
+ * @returns {object} 200 - {success: true, message: "changement de statut effectué"}
+ * @returns {Error}  400 - {success: false, message: 'erreur système', err: mongoose system log error}
+ * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.post('/nomination', changeStatusCopro);
 
 module.exports = router;
 
