@@ -110,7 +110,7 @@ let batimentsSchema = new Schema({
             enum: ['Fuel', 'Gaz', 'Cpu', 'Electrique']  // Fuel ou gaz ou cpu si Collective
         },                                              // Électrique ou gaz si Individuelle
     },
-    images                  : {
+    image                  : {
         ParcelleCadastrale : String,
         VueGenGoogle       : String,
         facadeRue          : [String],
