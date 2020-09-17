@@ -23,7 +23,7 @@ let updateCopro = (req, res) => {
             if (err)
                 res.status(400).send({success: false, message: err});
             else
-                res.status(200).send({success: false, message: 'La Copro a été mise à jour', copro});
+                res.status(200).send({success: true, message: 'La Copro a été mise à jour', copro});
         });
     }
 }
