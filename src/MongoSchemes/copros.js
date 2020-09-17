@@ -38,6 +38,7 @@ let coprosSchema = new Schema({
     },
     devisId         : [Schema.Types.ObjectId],
     incidentId      : [Schema.Types.ObjectId],
+    assignableImage : [String],
 });
 
 let copros = mongoose.model('copros', coprosSchema);

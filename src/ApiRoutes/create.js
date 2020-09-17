@@ -23,7 +23,8 @@ let {
 
 let {
     uploadRCDecennale,
-    uploadRCProfessionnelle
+    uploadRCProfessionnelle,
+    uploadBatImage,
 } = require('../ApiControllers/create');
 
 let registerCopro       = require('../ApiControllers/create').registerCopro,
@@ -430,7 +431,7 @@ router.post('/multi-copros', parseXlsThenStore);
  * @property {object} cave - spécificité des caves
  * @property {object} parkingST - spécificités du parking sous terrain si existe
  * @property {object} chaufferie - spécificités de la chaufferie
- * @property {object} images - sous objet contenant des tableaux d'images pour certaines parties du batiment
+ * @property {object} image - sous objet contenant des tableaux d'images pour certaines parties du batiment
  */
 /**
  * @typedef FACADERUE
@@ -500,13 +501,16 @@ router.post('/multi-copros', parseXlsThenStore);
  * @property {boolean} Access - accès à la chaufferie possible ?
  */
 /**
- * @typedef IMAGES
- * @property {Array.<string>} front - tableau des images façade rue
- * @property {Array.<string>} back - tableau des images façade arrière
+ * @typedef IMAGE
+ * @property {string} ParcelleCadastrale - Image de la parcelle cadastrale
+ * @property {string} VueGenGoogle - Image de la vue générale Google (maps ?)
+ * @property {Array.<string>} facadeRue - tableau des images façade rue
+ * @property {Array.<string>} facadeArriere - tableau des images façade arrière
  * @property {Array.<string>} entrees - tableau des images des entrées
  * @property {Array.<string>} etages - tableau des images des étages
- * @property {Array.<string>} parking - tableau des images du parking ST
- * @property {Array.<string>} environnement - tableau des images de l'environnement en général
+ * @property {Array.<string>} caves - tableau des images des caves
+ * @property {Array.<string>} parking - tableau des images du parking
+ * @property {Array.<string>} environnement - tableau des images de l'environnement
  * @property {Array.<string>} contiguite - tableau des images si contiguité
  */
 /**
@@ -516,6 +520,7 @@ router.post('/multi-copros', parseXlsThenStore);
  * @param {BATIMENT.model} reference.body.required - reference - reference interne à la copro - eg: bat1, batA, batiment bleu... etc
  * @param {BATIMENT.model} surface.body.required - surface totale de du batiment
  * @param {BATIMENT.model} coproId.body.required - Id de la copro
+ * @param {IMAGE.model} image.body - Objet contenant toutes les noms des images telles qu'enregistrées sur le serveur, information précédemment renvoyées par la route /create/batImage
  * @param {BATIMENT.model} natureConstruction.body - type de construction
  * @param {BATIMENT.model} precisezConstr.body - Précisez la nature de la construction
  * @param {BATIMENT.model} facadeEtCanalisations.body - etat façade et canalisation - eq: bon, mauvais... etc
@@ -620,5 +625,28 @@ router.post('/devis', multer().fields([{
  */
 
 router.post('/incident', multer().any(), registerIncident);
+
+/**
+ * @typedef BATIMAGE
+ * @property {string} coproId.required - _id de la copropriété
+ * @property {string} image.required - image à uploader , format acceptés: jpeg|jpg|png|JPEG|JPG|PNG|
+ */
+/**
+ * Cette route permet un upload individuel d'image lors de la visite, au moment où l'utilisateur les sélectionne, JWT necessaire, multipart/form-data. Renvoie le nom de l'image sauvegardée sur le serveur (à conserver pour formatter la requête de création des batiments).
+ * @route POST /create/batImage
+ * @group architecte
+ * @param {string}  coproId.body.required - _id de la copro
+ * @param {string} image.required - image à uploader , format acceptés: jpeg|jpg|png|JPEG|JPG|PNG|
+ * @returns {object} 200 - {success: true, image: '1a34231432b.jpg'}
+ * @returns {Error}  400 - {success: false, message: 'Erreur système', err}
+ * @returns {Error}  401 - si dans token, role !== architecte ou admin  {success: false, message: 'accès interdit'}
+ * @returns {Error}  404 - Pas de copropriété associée {success: false, message: 'Pas de copropriété associée'}
+ * @returns {Error}  424 - L'upload a échoué {success: false, imageUploadError: imageUploadError}
+ * @produces application/json
+ * @consumes multipart/form-data
+ * @security JWT
+ */
+
+router.post('/batImage', multer().fields([{name: 'image'}]), uploadBatImage);
 
 module.exports = router;
