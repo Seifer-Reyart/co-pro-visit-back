@@ -459,7 +459,13 @@ let getVisitesAll = (req, res) => {
                         res.status(404).send({success: false, message: 'aucune visite enregistrée'});
                     else
                         res.status(200).send({success: true, visites});
-                })
+                }).populate({
+                    model: 'copros',
+                    path: 'coproId'
+                }).populate({
+                    model: 'gestionnaires',
+                    path: 'gestionnaireId'
+                });
         })
     else
         res.status(401).send({success: false, message: 'accès refusé'});

@@ -3,11 +3,9 @@ let mongoose    = require('mongoose'),
 
 let batimentsSchema = new Schema({
     reference               : String,
-    surface                 : Number,
-    natureConstruction      : String,
-    etatFacadeCanal         : String,
-    precisezConstr          : String,
     nbEtages                : Number,
+    localisation            : String,
+    bacAsable               : Boolean,
     facadeRue               : {
         etatGen     : {
             type: String,
@@ -70,26 +68,6 @@ let batimentsSchema = new Schema({
             },
         }
     ],
-    cleCabinet              : {
-      type      : Boolean,
-      default   : false
-    },
-    occupation      : {
-        habitation  : {
-            type      : Boolean,
-            default   : false
-        },
-        bureaux             : {
-            type      : Boolean,
-            default   : false
-        },
-        habPro  : {
-            type      : Boolean,
-            default   : false
-        },
-        occupant            : String,
-        nbNiveaux           : Number,
-    },
     cave                    : {
         presence        : {
             type      : Boolean,
@@ -112,8 +90,11 @@ let batimentsSchema = new Schema({
         nbNiveaux     : Number,
         visite12mois  : Boolean,
         controlAccess : Boolean,
-        etatPorte     : String,
-        planEvac      : Boolean
+        etatPorte     : {
+            type: String,
+            enum: ['bon', 'moyen', 'mauvais']
+        },
+        planEvac      : Boolean,
     },
     chaufferie              : {
         collective      : Boolean,
