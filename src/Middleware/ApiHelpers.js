@@ -11,6 +11,16 @@ const   Admin           = require('../MongoSchemes/admins'),
 
 /************************/
 
+/**************************************/
+/***    import external modules     ***/
+/**************************************/
+
+const crypto    = require('crypto');
+const fs        = require('fs');
+const bcrypt    = require('bcryptjs');
+
+/**************************************/
+
 let checkEmailExist = async (req, res, next) => {
     let {email} = req.body;
     Admin.findOne({email}, (err, user) => {
@@ -62,7 +72,7 @@ let checkEmailExist = async (req, res, next) => {
                                                             })
                                                         else {
                                                             next();
-							                            }
+                                                        }
                                                     })
                                             })
                                     })
@@ -72,6 +82,145 @@ let checkEmailExist = async (req, res, next) => {
     })
 }
 
+const uploadFile = (filesArray, dest, filetypes) => {
+    return filesArray?.length ? filesArray.map( file => {
+        return new Promise((resolve) => {
+            let mimetype = filetypes.test(file.mimetype);
+            if (mimetype) {
+                const hash = crypto.createHash('sha1')
+                let hashedBuffer = file.buffer;
+                hash.update(hashedBuffer);
+                let extension = file.mimetype.match(filetypes);
+                extension = extension?.length ? extension[0] : null;
+                const savedFileName = `${hash.digest('hex')}.${extension}`
+                fs.writeFile(`${dest}${savedFileName}`, file.buffer, (err) => {
+                    if (err) {
+                        resolve({
+                            imagesUploadErrors: {
+                                imageTitle: file.originalname,
+                                err
+                            },
+                            imagesUploaded: null
+                        });
+                    }
+                    else {
+                        resolve({
+                            imagesUploadErrors: null,
+                            imagesUploaded: savedFileName
+                        });
+
+                    }
+                })
+            } else {
+                resolve({
+                    imagesUploadErrors: {
+                        imageTitle: file.originalname,
+                        err: "Mauvais format, reçu " + file.mimetype + ", attendu: " + filetypes
+                    },
+                    imagesUploaded: null
+                });
+            }
+        })
+    }) : null
+}
+
+const checkPassword = (req, res, next) => {
+    const {email, password} = req.body;
+
+    Admin.findOne({email: email.toLowerCase()}, async (err, user) => {
+        if (err)
+            res.status(400).send({success: false, message: err});
+        else if (user) {
+            if (!bcrypt.compareSync(password, user.password))
+                res.status(403).send({success: false, message: "mot de passe incorrect"});
+            else
+                next();
+        } else {
+            Syndic.findOne({email: email.toLowerCase()}, async (err, user) => {
+                if (err)
+                    res.status(400).send({success: false, message: err});
+                else if (user) {
+                    if (!bcrypt.compareSync(password, user.password))
+                        res.status(403).send({success: false, message: "mot de passe incorrect"});
+                    else
+                        next();
+                } else {
+                    Courtier.findOne({email: email.toLowerCase()}, async (err, user) => {
+                        if (err)
+                            res.status(400).send({success: false, message: err});
+                        else if (user) {
+                            if (!bcrypt.compareSync(password, user.password))
+                                res.status(403).send({success: false, message: "mot de passe incorrect"});
+                            else
+                                next();
+                        } else {
+                            Architecte.findOne({email: email.toLowerCase()}, async (err, user) => {
+                                if (err)
+                                    res.status(400).send({success: false, message: err});
+                                else if (user) {
+                                    if (!bcrypt.compareSync(password, user.password))
+                                        res.status(403).send({success: false, message: "mot de passe incorrect"});
+                                    else
+                                        next()
+                                } else {
+                                    PresidentCS.findOne({email: email.toLowerCase()}, async (err, user) => {
+                                        if (err)
+                                            res.status(400).send({success: false, message: err});
+                                        else if (user) {
+                                            if (!bcrypt.compareSync(password, user.password))
+                                                res.status(403).send({success: false, message: "mot de passe incorrect"});
+                                            else
+                                                next()
+                                        } else {
+                                            Prestataire.findOne({email: email.toLowerCase()}, async (err, user) => {
+                                                if (err)
+                                                    res.status(400).send({success: false, message: err});
+                                                else if (user) {
+                                                    if (!bcrypt.compareSync(password, user.password))
+                                                        res.status(403).send({success: false, message: "mot de passe incorrect"});
+                                                    else
+                                                        next()
+                                                } else {
+                                                    Gestionnaire.findOne({email: email.toLowerCase()}, async (err, user) => {
+                                                        if (err)
+                                                            res.status(400).send({success: false, message: err});
+                                                        else if (user) {
+                                                            if (!bcrypt.compareSync(password, user.password))
+                                                                res.status(403).send({success: false, message: "mot de passe incorrect"});
+                                                            else
+                                                                next()
+                                                        } else {
+                                                            res.status(404).send({success: false, message: 'utilisateur introuvable'});
+                                                        }
+                                                    });
+                                                }
+                                            })
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    });
+}
+
+
+const identityCheck = (_id, userType, callBack, extraQuery, res) => {
+    userType.findOne({ _id, ...extraQuery}, function (err, user) {
+        if (err)
+            res.status(400).send({success: false, message: "erreur system", err});
+        else if (!user)
+            res.status(401).send({success: false, message: 'accès refusé'});
+        else
+            callBack()
+    })
+};
 module.exports = {
-    checkEmailExist
+    checkEmailExist,
+    uploadFile,
+    checkPassword,
+    identityCheck,
 };

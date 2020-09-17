@@ -11,6 +11,7 @@ let fs      = require('fs');
 /*** helpers ***/
 /***************/
 
+const { uploadFile, identityCheck }    = require('../Middleware/ApiHelpers');
 const {sendCredentials} = require('../Config/mailer');
 
 /*** generate password ***/
@@ -534,9 +535,57 @@ let parseXlsThenStore = (req, res) => {
     }
 }
 
+/* upload batiment images */
+
+let uploadBatImage = async (req, res) => {
+    if (req.user.role !== 'architecte' && req.user.role !== 'admin') {
+        res.status(401).send({success: false, message: 'accès interdit'});
+    } else {
+        const userId = req.user.id;
+        const { coproId } = req.body;
+        Copro.findOne({_id: coproId}, (err, copr) => {
+            console.log('Copro.findOne', err , !copr)
+            if (err)
+                res.status(400).send({success: false, message: 'Erreur système', err});
+            else if (!copr)
+                res.status(404).send({success: false, message: 'Pas de copropriété associée'});
+            else {
+                Architecte.findOne({_id: userId, copros: {$elemMatch: {$eq: copr._id}} }, async (err, archi) => {
+                    console.log('Architecte.findOne', err , !archi)
+                    if (err)
+                        res.status(400).send({success: false, message: 'Erreur système', err});
+                    else if (!archi)
+                        res.status(401).send({success: false, message: 'Accès refusé'});
+                    else {
+                        const imageUploaded = uploadFile(req.files.image, './src/uploads/batiment/', /jpeg|jpg|png|JPEG|JPG|PNG/)
+                        const resolvedPhotosUpload = imageUploaded ? await Promise.all(imageUploaded) : null;
+                        const image = resolvedPhotosUpload?.map(i => i.imagesUploaded).filter(im => im) ?? null;
+                        const imageUploadError = resolvedPhotosUpload?.map(i => i.imagesUploadErrors).filter(im => im) ?? null;
+                        if (imageUploadError.length > 0 || !image.length)
+                            res.status(424).send({success: false, imageUploadError: imageUploadError[0]})
+                        else {
+                            Copro.findOneAndUpdate({_id: copr._id}, {$push: {assignableImage: image[0]}}, (err, copro) => {
+                                console.log('Copro.findOneAndUpdate', err , copro)
+                                console.log('Copro.findOneAndUpdate image', image)
+                                if (err)
+                                    res.status(400).send({success: false, message: 'Erreur système', err});
+                                else if (!copro)
+                                    res.status(404).send({success: false, message: 'Pas de copropriété associée'});
+                                else
+                                    res.status(200).send({success: true, image: image[0]})
+                            })
+                        }
+
+                    }
+                })
+            }
+        })
+    }
+}
+
 /* register new Batiment */
 
-let saveBatiment = (batiment, index, id) => {
+let saveBatiment = async (batiment, index, id, images) => {
     return new Promise(async (resolve) => {
         batiment.reference = 'bat-'+index+'-'+id;
         Batiment.findOne({$and: [{reference: batiment.reference}, {coproId: batiment.coproId}]}, async (err, Bat) => {
@@ -548,6 +597,32 @@ let saveBatiment = (batiment, index, id) => {
                 resolve({success: false, message: 'Le batiment existe déjà - reference: ' + Bat.reference});
             } else {
                 batiment.faitLe = new Date();
+
+                const imageFormatted = batiment.image;
+                const batImages = {
+                    ParcelleCadastrale : images.find(e => e === imageFormatted.ParcelleCadastrale),
+                    VueGenGoogle       : images.find(e => e === imageFormatted.VueGenGoogle),
+                    facadeRue          : images.filter(e => imageFormatted.facadeRue.find(img => img === e)),
+                    facadeArriere      : images.filter(e => imageFormatted.facadeArriere.find(img => img === e)),
+                    entrees            : images.filter(e => imageFormatted.entrees.find(img => img === e)),
+                    etages             : images.filter(e => imageFormatted.etages.find(img => img === e)),
+                    caves              : images.filter(e => imageFormatted.caves.find(img => img === e)),
+                    parking            : images.filter(e => imageFormatted.parking.find(img => img === e)),
+                    environnement      : images.filter(e => imageFormatted.environnement.find(img => img === e)),
+                    contiguite         : images.filter(e => imageFormatted.contiguite.find(img => img === e)),
+                };
+                let toBeRemoved = [];
+                console.log(batImages)
+                for (prop in batImages) {
+                    if (batImages[prop].length >= 0)
+                        toBeRemoved = toBeRemoved.concat(batImages[prop]);
+                    else
+                        toBeRemoved.push(batImages[prop]);
+                }
+                Copro.findOneAndUpdate({_id: id}, {
+                    assignableImage: images.filter(img => !toBeRemoved.find(im => im === img ))
+                });
+                batiment.image = batImages
 
                 let bat = new Batiment(batiment);
                 bat.save(function(err, b) {
@@ -570,45 +645,54 @@ let registerBatiment = async (req, res) => {
     if (req.user.role !== 'admin' && req.user.role !== 'architecte') {
         res.status(401).send({success: false, message: 'accès interdit'});
     } else {
-        let succeded = [];
-        let failed = [];
-        let promises = null;
-        promises = await batiments.map((batiment, index) => {
-            return new Promise(async resolve => {
-                let resp = await saveBatiment(batiment, index, coproId);
-                if (resp.success) {
-                    succeded.push(resp._id);
-                    resolve();
-                } else {
-                    failed.push(resp);
-                    resolve();
-                }
-            })
-        });
-        await Promise.all(promises);
-        if (failed.length > 0) {
-            await Batiment.deleteMany({_id: {$in: succeded}}, function (err) {
-                if (err)
-                    console.log('err delete: ', err)
-            });
-            res.status(400).send({success: false, message: "l'enregistrement a échoué, des erreurs requièrent votre attention!!!", failed});
-        } else {
-            await Copro.findOneAndUpdate(
-                {_id: coproId},
-                {$set: {batiments: succeded, dateVisite: new Date()}},
-                {new: true},
-                function (err) {
-                    if (err)
-                        console.log(err)
+        Copro.findOne({_id: coproId}, async (err, copr) => {
+            if (err)
+                res.status(400).send({success: false, message: err});
+            else if (!copr)
+                res.status(403).send({success: false, message: 'Pas de copropriété associée'});
+            else {
+                let succeded = [];
+                let failed = [];
+                let promises = null;
+                promises = await batiments.map((batiment, index) => {
+                    return new Promise(async resolve => {
+                        let resp = await saveBatiment(batiment, index, coproId, copr.assignableImage.filter((a, b) => copr.assignableImage.indexOf(a) === b));
+                        if (resp.success) {
+                            succeded.push(resp._id);
+                            resolve();
+                        } else {
+                            failed.push(resp);
+                            resolve();
+                        }
+                    })
                 });
-            await Visite.findOneAndUpdate({coproId}, {$set: {faiteLe: new Date(), done: true}}, {new: false}, function (err) {
-                if (err) {
-                    failed.push({err})
-                    console.log('update err: ', err)
+                await Promise.all(promises);
+                if (failed.length > 0) {
+                    await Batiment.deleteMany({_id: {$in: succeded}}, function (err) {
+                        if (err)
+                            console.log('err delete: ', err)
+                    });
+                    res.status(400).send({success: false, message: "l'enregistrement a échoué, des erreurs requièrent votre attention!!!", failed});
+                } else {
+                    await Copro.findOneAndUpdate(
+                        {_id: coproId},
+                        {$set: {batiments: succeded, dateVisite: new Date()}},
+                        {new: true},
+                        function (err) {
+                            if (err)
+                                console.log(err)
+                        });
+                    await Visite.findOneAndUpdate({coproId}, {$set: {faiteLe: new Date(), done: true}}, {new: false}, function (err) {
+                        if (err) {
+                            failed.push({err})
+                            console.log('update err: ', err)
+                        }
+                    });
+                    res.status(200).send({success: true, message: "fiche(s) enregistrée(s)"});
                 }
-            });
-            res.status(200).send({success: true, message: "fiche(s) enregistrée(s)"});
-        }
+            }
+        })
+
     }
 }
 
@@ -798,6 +882,7 @@ module.exports = {
     registerPrestataire,
     uploadRCProfessionnelle,
     uploadRCDecennale,
+    uploadBatImage,
     registerGestionnaire,
     registerCopro,
     registerBatiment,
