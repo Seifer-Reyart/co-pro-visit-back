@@ -19,7 +19,7 @@ let updateCopro = (req, res) => {
     if (req.user.role !== 'gestionnaire' && req.user.role !== 'syndic') {
         res.status(401).send({success: false, message: 'accès interdit'});
     } else {
-        Copro.findOneAndUpdate({_id}, {update}, {new: true}, async (err, copro) => {
+        Copro.findOneAndUpdate({_id}, {$set: {update}}, {new: true}, async (err, copro) => {
             if (err)
                 res.status(400).send({success: false, message: err});
             else
