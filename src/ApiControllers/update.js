@@ -16,7 +16,7 @@ let updateCopro = (req, res) => {
     const {_id} = req.body;
     let update = req.body;
     delete update._id;
-    if (req.user.role !== 'gestionnaire' || req.user.role !== 'syndic' || req.user.role !== 'architecte') {
+    if (req.user.role !== 'gestionnaire' && req.user.role !== 'syndic') {
         res.status(401).send({success: false, message: 'accès interdit'});
     } else {
         Copro.findOneAndUpdate({_id}, {update}, {new: true}, async (err, copro) => {
