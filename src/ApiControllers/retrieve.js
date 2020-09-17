@@ -443,7 +443,7 @@ let getVisitesAll = (req, res) => {
                         res.status(403).send({success: false, message: 'aucune visite enregistrée'});
                     else
                         res.status(200).send({success: true, visites});
-                })
+                });
         })
     else if (req.user.role === 'architecte')
         Architecte.findOne({_id: req.user.id}, (err, architecte) => {
@@ -488,7 +488,10 @@ let getVisitesUnassigned = (req, res) => {
                         res.status(403).send({success: false, message: 'aucune visite enregistrée'});
                     else
                         res.status(200).send({success: true, visites});
-                })
+                }).populate({
+                    model: 'copros',
+                    path: 'coproId'
+                });
         })
     else
         res.status(401).send({success: false, message: 'accès refusé'});
@@ -524,16 +527,28 @@ let getOneVisite = (req,res) => {
                 res.status(404).send({success: false, message: 'aucune visite enregistrée'});
             else
                 res.status(200).send({success: true, visite});
-        })
+        }).populate({
+            model: 'copros',
+            path: 'coproId'
+        }).populate({
+            model: 'gestionnaires',
+            path: 'gestionnaireId'
+        });
     else if (req.user.role === 'architecte')
-        Visite.find({$and: [{_id: req.body._id}, {architecteId: req.user.id}]}, (err, visite) => {
+        Visite.find({$and: [{architecteId: req.user.id}, {_id: req.body._id}]}, (err, visite) => {
             if (err)
                 res.status(400).send({success: false, message: 'erreur system', err});
             else if (!visite)
                 res.status(404).send({success: false, message: 'aucune visite enregistrée'});
             else
                 res.status(200).send({success: true, visite});
-        })
+        }).populate({
+            model: 'copros',
+            path: 'coproId'
+        }).populate({
+            model: 'gestionnaires',
+            path: 'gestionnaireId'
+        });
     else
         res.status(401).send({success: false, message: 'accès refusé'});
 }
