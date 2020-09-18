@@ -544,7 +544,6 @@ let uploadBatImage = async (req, res) => {
         const userId = req.user.id;
         const { coproId } = req.body;
         Copro.findOne({_id: coproId}, (err, copr) => {
-            console.log('Copro.findOne', err , !copr)
             if (err)
                 res.status(400).send({success: false, message: 'Erreur système', err});
             else if (!copr)
