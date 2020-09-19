@@ -471,11 +471,11 @@ let registerGestionnaire = async (req, res) => {
 /* register new Copro without batiment */
 
 let registerCopro = (req, res) => {
-    const {name, codePostal, ville} = req.body;
+    const {nomCopro, codePostal, ville} = req.body;
     if (req.user.role !== 'gestionnaire' && req.user.role !== 'syndic' && req.user.role !== 'admin') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
-        Copro.findOne({$and: [{name}, {codePostal}, {ville}]}, async (err, copro) => {
+        Copro.findOne({$and: [{nomCopro}, {codePostal}, {ville}]}, async (err, copro) => {
             if (err)
                 res.status(400).send({success: false, message: err});
             else if (copro)
@@ -655,6 +655,7 @@ let uploadBatImage = async (req, res) => {
 let saveBatiment = async (batiment, index, id, images) => {
     return new Promise(async (resolve) => {
         batiment.reference = 'bat-'+index+'-'+id;
+        batiment.coproId = id;
         Batiment.findOne({$and: [{reference: batiment.reference}, {coproId: batiment.coproId}]}, async (err, Bat) => {
             if (err) {
                 console.log('save err: ', err)
@@ -666,21 +667,21 @@ let saveBatiment = async (batiment, index, id, images) => {
                 batiment.faitLe = new Date();
                 const imageFormatted = batiment.image;
                 const batImages = {
-                    ParcelleCadastrale : images.find(e => e === imageFormatted.ParcelleCadastrale),
-                    VueGenGoogle       : images.find(e => e === imageFormatted.VueGenGoogle),
-                    facadeRue          : images.filter(e => imageFormatted.facadeRue.find(img => img === e)),
-                    facadeArriere      : images.filter(e => imageFormatted.facadeArriere.find(img => img === e)),
-                    entrees            : images.filter(e => imageFormatted.entrees.find(img => img === e)),
-                    etages             : images.filter(e => imageFormatted.etages.find(img => img === e)),
-                    caves              : images.filter(e => imageFormatted.caves.find(img => img === e)),
-                    parking            : images.filter(e => imageFormatted.parking.find(img => img === e)),
-                    environnement      : images.filter(e => imageFormatted.environnement.find(img => img === e)),
-                    contiguite         : images.filter(e => imageFormatted.contiguite.find(img => img === e)),
+                    ParcelleCadastrale : images.find(e => e === imageFormatted.ParcelleCadastrale) ? images.find(e => e === imageFormatted.ParcelleCadastrale) : null,
+                    VueGenGoogle       : images.find(e => e === imageFormatted.VueGenGoogle) ? images.find(e => e === imageFormatted.VueGenGoogle) : null,
+                    facadeRue          : images?.filter(e => imageFormatted.facadeRue?.find(img => img === e)) ?? [],
+                    facadeArriere      : images?.filter(e => imageFormatted.facadeArriere?.find(img => img === e)) ?? [],
+                    entrees            : images?.filter(e => imageFormatted.entrees?.find(img => img === e)) ?? [],
+                    etages             : images?.filter(e => imageFormatted.etages?.find(img => img === e)) ?? [],
+                    caves              : images?.filter(e => imageFormatted.caves?.find(img => img === e)) ?? [],
+                    parking            : images?.filter(e => imageFormatted.parking?.find(img => img === e)) ?? [],
+                    environnement      : images?.filter(e => imageFormatted.environnement?.find(img => img === e)) ?? [],
+                    contiguite         : images?.filter(e => imageFormatted.contiguite?.find(img => img === e)) ?? [],
                 };
                 let toBeRemoved = [];
                 console.log(batImages)
                 for (prop in batImages) {
-                    if (batImages[prop].length >= 0)
+                    if (prop !== "ParcelleCadastrale" && prop !== "VueGenGoogle")
                         toBeRemoved = toBeRemoved.concat(batImages[prop]);
                     else
                         toBeRemoved.push(batImages[prop]);

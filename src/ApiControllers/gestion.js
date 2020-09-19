@@ -115,7 +115,16 @@ let assignerVisite = async (req, res) => {
                 {new: true},
                 function (err, visite) {
                     if (err || !visite)
-                        error.push(visite)
+                        error.push(visite);
+                    else
+                        Architecte.findOneAndUpdate(
+                            {_id: req.body.architecteId},
+                            {$push: {copros: visite.coproId}},
+                            {new: true},
+                            (err) => {
+                                if (err)
+                                    error.push(err)
+                            });
                 })
         });
         if (error.length > 0)
@@ -137,7 +146,16 @@ let desassignerVisite = async (req, res) => {
                 {new: true},
                 function (err, visite) {
                     if (err || !visite)
-                        error.push(visite)
+                        error.push(visite);
+                    else
+                        Architecte.findOneAndUpdate(
+                            {_id: req.body.architecteId},
+                            {$pull: {copros: visite.coproId}},
+                            {new: true},
+                            (err) => {
+                                if (err)
+                                    error.push(err)
+                            });
                 })
         });
         if (error.length > 0)
