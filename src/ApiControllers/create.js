@@ -418,7 +418,7 @@ let registerCopro = (req, res) => {
     if (req.user.role !== 'gestionnaire' && req.user.role !== 'syndic') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
-        Copro.findOne({$and: [{name}, {codePostal}, {ville}]}, async (err, copro) => {
+        Copro.findOne({$and: [{nomCopro}, {codePostal}, {ville}]}, async (err, copro) => {
             if (err)
                 res.status(400).send({success: false, message: err});
             else if (copro)
@@ -587,7 +587,7 @@ let uploadBatImage = async (req, res) => {
 let saveBatiment = async (batiment, index, id, images) => {
     return new Promise(async (resolve) => {
         batiment.reference = 'bat-'+index+'-'+id;
-	batiment.coproId = id;
+	    batiment.coproId = id;
         Batiment.findOne({$and: [{reference: batiment.reference}, {coproId: batiment.coproId}]}, async (err, Bat) => {
             if (err) {
                 console.log('save err: ', err)
@@ -598,8 +598,6 @@ let saveBatiment = async (batiment, index, id, images) => {
             } else {
                 batiment.faitLe = new Date();
                 const imageFormatted = batiment.image;
-console.log('imageFormatted: ', imageFormatted)
-console.log('image .find: ', images.find(e => e === imageFormatted.ParcelleCadastrale))
                 const batImages = {
                     ParcelleCadastrale : images.find(e => e === imageFormatted.ParcelleCadastrale) ? images.find(e => e === imageFormatted.ParcelleCadastrale) : null,
                     VueGenGoogle       : images.find(e => e === imageFormatted.VueGenGoogle) ? images.find(e => e === imageFormatted.VueGenGoogle) : null,
@@ -655,8 +653,6 @@ let registerBatiment = async (req, res) => {
                 let promises = null;
                 promises = await batiments.map((batiment, index) => {
                     return new Promise(async resolve => {
-console.log('copro images: ', copr.assignableImage);
-console.log('filter: ', copr.assignableImage.filter((a, b) => copr.assignableImage.indexOf(a) === b))
                         let resp = await saveBatiment(batiment, index, coproId, copr.assignableImage.filter((a, b) => copr.assignableImage.indexOf(a) === b));
                         if (resp.success) {
                             succeded.push(resp._id);
@@ -675,7 +671,6 @@ console.log('filter: ', copr.assignableImage.filter((a, b) => copr.assignableIma
                     });
                     res.status(400).send({success: false, message: "l'enregistrement a échoué, des erreurs requièrent votre attention!!!", failed});
                 } else {
-console.log('succeded: ', succeded);
                     await Copro.findOneAndUpdate(
                         {_id: coproId},
                         {$set: {batiments: succeded, dateVisite: new Date()}},
