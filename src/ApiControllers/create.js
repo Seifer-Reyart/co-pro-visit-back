@@ -414,7 +414,7 @@ let registerGestionnaire = async (req, res) => {
 /* register new Copro without batiment */
 
 let registerCopro = (req, res) => {
-    const {name, codePostal, ville} = req.body;
+    const {nomCopro, codePostal, ville} = req.body;
     if (req.user.role !== 'gestionnaire' && req.user.role !== 'syndic') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
