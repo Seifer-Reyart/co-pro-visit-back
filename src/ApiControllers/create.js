@@ -587,6 +587,7 @@ let uploadBatImage = async (req, res) => {
 let saveBatiment = async (batiment, index, id, images) => {
     return new Promise(async (resolve) => {
         batiment.reference = 'bat-'+index+'-'+id;
+	batiment.coproId = id;
         Batiment.findOne({$and: [{reference: batiment.reference}, {coproId: batiment.coproId}]}, async (err, Bat) => {
             if (err) {
                 console.log('save err: ', err)
@@ -596,24 +597,24 @@ let saveBatiment = async (batiment, index, id, images) => {
                 resolve({success: false, message: 'Le batiment existe déjà - reference: ' + Bat.reference});
             } else {
                 batiment.faitLe = new Date();
-
                 const imageFormatted = batiment.image;
+console.log('imageFormatted: ', imageFormatted)
+console.log('image .find: ', images.find(e => e === imageFormatted.ParcelleCadastrale))
                 const batImages = {
-                    ParcelleCadastrale : images.find(e => e === imageFormatted.ParcelleCadastrale),
-                    VueGenGoogle       : images.find(e => e === imageFormatted.VueGenGoogle),
-                    facadeRue          : images.filter(e => imageFormatted.facadeRue.find(img => img === e)),
-                    facadeArriere      : images.filter(e => imageFormatted.facadeArriere.find(img => img === e)),
-                    entrees            : images.filter(e => imageFormatted.entrees.find(img => img === e)),
-                    etages             : images.filter(e => imageFormatted.etages.find(img => img === e)),
-                    caves              : images.filter(e => imageFormatted.caves.find(img => img === e)),
-                    parking            : images.filter(e => imageFormatted.parking.find(img => img === e)),
-                    environnement      : images.filter(e => imageFormatted.environnement.find(img => img === e)),
-                    contiguite         : images.filter(e => imageFormatted.contiguite.find(img => img === e)),
+                    ParcelleCadastrale : images.find(e => e === imageFormatted.ParcelleCadastrale) ? images.find(e => e === imageFormatted.ParcelleCadastrale) : null,
+                    VueGenGoogle       : images.find(e => e === imageFormatted.VueGenGoogle) ? images.find(e => e === imageFormatted.VueGenGoogle) : null,
+                    facadeRue          : images?.filter(e => imageFormatted.facadeRue?.find(img => img === e)) ?? [],
+                    facadeArriere      : images?.filter(e => imageFormatted.facadeArriere?.find(img => img === e)) ?? [],
+                    entrees            : images?.filter(e => imageFormatted.entrees?.find(img => img === e)) ?? [],
+                    etages             : images?.filter(e => imageFormatted.etages?.find(img => img === e)) ?? [],
+                    caves              : images?.filter(e => imageFormatted.caves?.find(img => img === e)) ?? [],
+                    parking            : images?.filter(e => imageFormatted.parking?.find(img => img === e)) ?? [],
+                    environnement      : images?.filter(e => imageFormatted.environnement?.find(img => img === e)) ?? [],
+                    contiguite         : images?.filter(e => imageFormatted.contiguite?.find(img => img === e)) ?? [],
                 };
                 let toBeRemoved = [];
-                console.log(batImages)
                 for (prop in batImages) {
-                    if (batImages[prop].length >= 0)
+                    if (prop !== "ParcelleCadastrale" && prop !== "VueGenGoogle")
                         toBeRemoved = toBeRemoved.concat(batImages[prop]);
                     else
                         toBeRemoved.push(batImages[prop]);
@@ -640,7 +641,6 @@ let saveBatiment = async (batiment, index, id, images) => {
 
 let registerBatiment = async (req, res) => {
     const {batiments, coproId} = req.body;
-    console.log("body: ", req.body);
     if (req.user.role !== 'admin' && req.user.role !== 'architecte') {
         res.status(401).send({success: false, message: 'accès interdit'});
     } else {
@@ -655,6 +655,8 @@ let registerBatiment = async (req, res) => {
                 let promises = null;
                 promises = await batiments.map((batiment, index) => {
                     return new Promise(async resolve => {
+console.log('copro images: ', copr.assignableImage);
+console.log('filter: ', copr.assignableImage.filter((a, b) => copr.assignableImage.indexOf(a) === b))
                         let resp = await saveBatiment(batiment, index, coproId, copr.assignableImage.filter((a, b) => copr.assignableImage.indexOf(a) === b));
                         if (resp.success) {
                             succeded.push(resp._id);
@@ -673,6 +675,7 @@ let registerBatiment = async (req, res) => {
                     });
                     res.status(400).send({success: false, message: "l'enregistrement a échoué, des erreurs requièrent votre attention!!!", failed});
                 } else {
+console.log('succeded: ', succeded);
                     await Copro.findOneAndUpdate(
                         {_id: coproId},
                         {$set: {batiments: succeded, dateVisite: new Date()}},
