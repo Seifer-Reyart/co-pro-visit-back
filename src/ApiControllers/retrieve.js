@@ -46,7 +46,7 @@ let getSyndics = (req, res) => {
                     res.status(404).send({success: false, message: 'aucun syndic enregistré'});
                 else
                     res.status(200).send({success: true, syndics});
-            });
+            }).sort({createdAt: -1});
     else if (req.user.role === 'courtier')
         Courtier.findOne({_id: req.user.id}, (err, courtier) => {
             if (err)

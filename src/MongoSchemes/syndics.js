@@ -18,6 +18,10 @@ let syndicsSchema = new Schema({
     enCoursSelect   : [Schema.Types.ObjectId],
     courtiers       : [Schema.Types.ObjectId],
     prestataires    : [Schema.Types.ObjectId],
+    createdAt       : {
+      type: Date,
+      default: new Date()
+    },
     role        	: {
         type: String,
         default: 'syndic'
