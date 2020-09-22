@@ -8,7 +8,10 @@ const express = require('express');
 /* import local modules */
 /************************/
 
-let {updateCopro} = require('../ApiControllers/update');
+let {
+    updateCopro,
+    updateGestionnaire
+} = require('../ApiControllers/update');
 
 /***************/
 /* init router */
@@ -77,5 +80,14 @@ let router = express.Router();
  * @security JWT
  */
 router.put('/copro', updateCopro);
+
+/**
+ * Cette route permet de changer les droits d'un gestionnaire, JWT necessaire.
+ * @route PUT /update/gestionnaire
+ * @group syndic et gestionnaire
+ * @param {string} _id.body.required - _id du Gestionnaire ciblé
+ * @param {Array.<integer>} permissions.body.required - tableau d'entiers correspondant aux permissions accordées aux Gestionnaire
+ */
+router.put('/gestionnaire', updateGestionnaire);
 
 module.exports = router;

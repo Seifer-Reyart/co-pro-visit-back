@@ -2,9 +2,10 @@
 /*** import Mongo Schemes ***/
 /****************************/
 
-const   Copro       = require('../MongoSchemes/copros'),
-        Batiment    = require('../MongoSchemes/batiments'),
-        Devis   = require('../MongoSchemes/devis');
+const   Copro           = require('../MongoSchemes/copros'),
+        Batiment        = require('../MongoSchemes/batiments'),
+        Devis           = require('../MongoSchemes/devis')
+        Gestionnaire    = require('../MongoSchemes/gestionnaires');
 
 /************/
 /* Function */
@@ -28,8 +29,27 @@ let updateCopro = (req, res) => {
     }
 }
 
+let updateGestionnaire = (req, res) => {
+    if (req.user.role !== 'gestionnaire')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else {
+        const {permissions, _id} = req.body;
+        Gestionnaire.findOneAndUpdate(
+            {_id},
+            {$set: {permissions}},
+            {new: true},
+            function (err, gestionnaire) {
+                if (err)
+                    res.status(400).send({success: false, message: 'erreur système', err});
+                else
+                    res.status(200).send({success: true, message: 'changement de droits effectué', gestionnaire});
+            });
+    }
+}
+
 /* Export Functions */
 
 module.exports = {
-    updateCopro
+    updateCopro,
+    updateGestionnaire
 }
