@@ -128,7 +128,7 @@ let getGestionnaires = (req, res) => {
 
 let postGestionnaire = (req, res) => {
     if (req.user.role === 'syndic' || req.user.role === 'admin')
-        Gestionnaire.find({syndic: req.body._id}, (err, gestionnaire) => {
+        Gestionnaire.findOne({_id: req.body._id}, (err, gestionnaire) => {
             if (err)
                 res.status(400).send({success: false, message: 'erreur system', err});
             else if (!gestionnaire)
