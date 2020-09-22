@@ -54,6 +54,7 @@ let incidentsSchema = new Schema({
         type: Schema.Types.ObjectId,
         required: false
     },
+    commentaire: String
 });
 
 let incidents = mongoose.model('incidents', incidentsSchema);
