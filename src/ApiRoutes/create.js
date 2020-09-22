@@ -599,6 +599,7 @@ router.post('/devis', registerDevis);
  * @property {string} gestionnaireId - _id du Gestionnaire
  * @property {string} architecteId - _id de l'Architecte
  * @property {string} courtierId - _id du Courtier
+ * @property {string} commentaire - commentaire de l'architecte
  * @property {Array.<string>} images - Fichiers à uploader , format acceptés: jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF
  */
 /**
@@ -611,6 +612,7 @@ router.post('/devis', registerDevis);
  * @param {string}  situation.body.reqired - ??
  * @param {string}  description.body.required - Description de l'incident
  * @param {string}  corpsEtat.body.required - corps de métier associé au désordre
+ * @param {string}  commentaire.body - commentaire de l'architecte
  * @param {Array.<string>} images.body.required - Tableau contenant des photographies de l'incident
  * @returns {object} 200 - {success: true, message : "L'incident a bien été créé !", imagesUploadErrors: [{ imageTitle: "incident1", err: "Mauvais format, reçu text/plain, attends: /jpeg|jpg|pdf|JPEG|JPG|PNG|PDF/" }, { imageTitle: "incident2.png", err: "Erreur renvoyée par le système lors de la sauvegarde de l'image sur le serveur(il n'y aura pas marqué ca mais l'erreur en question a la place)" }}]
  * @returns {Error}  400 - {success: false, message: 'Erreur système', err}

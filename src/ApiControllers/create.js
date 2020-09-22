@@ -783,7 +783,7 @@ let registerIncident = async (req, res) => {
     if (req.user.role !== 'architecte' && req.user.role !== 'admin') {
         res.status(401).send({success: false, message: 'accès interdit'});
     } else {
-        const { courtierId, architecteId, gestionnaireId, visiteId, syndicId, coproId, metrages, desordre, situation, description, corpsEtat} = req.body;
+        const { courtierId, architecteId, gestionnaireId, visiteId, syndicId, coproId, metrages, desordre, situation, description, commentaire, corpsEtat} = req.body;
         Copro.findOne({_id: coproId}, async (err, copr) => {
             if (err) {
                 res.status(400).send({ success: false, message: "Erreur lors de l'identification de la copropriété", err});
@@ -834,6 +834,7 @@ let registerIncident = async (req, res) => {
                     visiteId                ,
                     syndicId                ,
                     coproId                 ,
+                    commentaire
                 });
                 incident.save(function(err, incid) {
                     if (err) {
