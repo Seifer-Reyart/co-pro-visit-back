@@ -29,8 +29,9 @@ const   Syndic          = require('../MongoSchemes/syndics'),
 const   Copro       = require('../MongoSchemes/copros'),
         Batiment    = require('../MongoSchemes/batiments');
 
-const   Devis   = require('../MongoSchemes/devis'),
-        Visite  = require('../MongoSchemes/visites');
+const   Devis       = require('../MongoSchemes/devis'),
+        Visite      = require('../MongoSchemes/visites'),
+        Incident    = require('../MongoSchemes/incidents');
 
 /************/
 /* Function */
@@ -92,8 +93,15 @@ let demandeVisite = (req, res) => {
                             if (err || !v)
                                 res.status(400).send({success: false, message: 'erreur system', err});
                             else {
-                                await Copro.updateOne({_id: copro._id}, {$set: {dateDemandeVisite: new Date()}});
-                                res.send(200).send({success: true, message: 'requête visite envoyée'})
+                                await Copro.updateOne(
+                                    {_id: copro._id},
+                                    {$set: {dateDemandeVisite: new Date()}},
+                                    function (err) {
+                                        if (err)
+                                            res.status(400).send({success: false, message: 'erreur system', err});
+                                        else
+                                            res.send(200).send({success: true, message: 'requête visite envoyée'});
+                                    });
                             }
                         });
                     }
@@ -517,9 +525,72 @@ let changeStatusCopro = (req, res) => {
     }
 }
 
+let deleteCopro = (req, res) => {
+    if (req.user.role !== 'syndic' || req.user.role !== 'gestionnaire')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else {
+        const {_id, key} = req.body;
+
+        Copro.deleteOne({_id}, function (err) {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur système', err});
+            else {
+                Architecte.findOneAndUpdate(
+                    {copros: {$elemMatch: {$eq: _id}}},
+                    {$pull: {copros: _id}},
+                    function (err) {
+                        if (err)
+                            res.status(400).send({success: false, message: 'erreur système', err});
+                    });
+                Courtier.findOneAndUpdate({parc: {$elemMatch: {$eq: _id}}},
+                    {$pull: {parc: _id}},
+                    function (err) {
+                        if (err)
+                            res.status(400).send({success: false, message: 'erreur système', err});
+                    });
+                Visite.deleteMany({coproId: _id}, function (err) {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur système', err});
+                });
+                Batiment.deleteMany({coproId: _id}, function (err) {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur système', err});
+                });
+                Incident.deleteMany({coproId: _id}, function (err) {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur système', err});
+                });
+                if (req.user.role !== 'syndic')
+                    Syndic.findOneAndUpdate(
+                        {_id: req.user.id},
+                        {$pull: {parc: _id, enCoursSelect: _id}},
+                        {new: true},
+                        function (err, synd) {
+                            if (err)
+                                res.status(400).send({success: false, message: 'erreur système', err});
+                            else
+                                res.status(200).send({success: true, message: 'copro supprimée'});
+                        });
+                else
+                    Gestionnaire.findOneAndUpdate(
+                        {_id: req.user.id},
+                        {$pull: {parc: _id, enCoursSelect: _id}},
+                        {new: true},
+                        function (err) {
+                            if (err)
+                                res.status(400).send({success: false, message: 'erreur système', err});
+                            else
+                                res.status(200).send({success: true, message: 'copro supprimée'});
+                        });
+            }
+        })
+    }
+}
+
 /* Export Functions */
 
 module.exports = {
+    deleteCopro,
     deleteSyndic,
     demandeVisite,
     assignerVisite,
