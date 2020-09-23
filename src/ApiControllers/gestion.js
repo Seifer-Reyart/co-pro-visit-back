@@ -526,10 +526,10 @@ let changeStatusCopro = (req, res) => {
 }
 
 let deleteCopro = (req, res) => {
-    if (req.user.role !== 'syndic' || req.user.role !== 'gestionnaire')
+    if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
         res.status(401).send({success: false, message: 'accès interdit'});
     else {
-        const {_id, key} = req.body;
+        const {_id} = req.body;
 
         Copro.deleteOne({_id}, function (err) {
             if (err)
