@@ -9,6 +9,7 @@ const express = require('express');
 /************************/
 
 let {
+    deleteCopro,
     deleteSyndic,
     demandeVisite,
     assignerVisite,
@@ -231,6 +232,19 @@ router.post('/demande-prestataire', demandePrestataire);
  * @security JWT
  */
 router.post('/nomination', changeStatusCopro);
+
+/**
+ * Cette route permet de supprimer une Copro, JWT necessaire.
+ * @route POST /gestion/delete-copro
+ * @group gestion
+ * @param {string} _id.body.required - _id d'une Copro
+ * @returns {object} 200 - {success: true, message: "copro supprimée"}
+ * @returns {Error}  400 - {success: false, message: 'erreur système', err}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.post('/delete-copro', deleteCopro);
 
 module.exports = router;
 
