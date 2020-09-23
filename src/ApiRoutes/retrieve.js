@@ -343,6 +343,6 @@ router.post('/prestataire', postPrestataire);
  * @produces application/json
  * @security JWT
  */
-router.post('/prestataire-list', getPrestataire);
+router.get('/prestataire-list', getPrestataire);
 
 module.exports = router;
