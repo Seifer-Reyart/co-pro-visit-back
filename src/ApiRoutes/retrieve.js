@@ -27,6 +27,8 @@ let {
     postGestionnaire,
     getEncoursSelect,
     postEncoursSelect,
+    getPrestataire,
+    postPrestataire,
 } = require('../ApiControllers/retrieve');
 
 /***************/
@@ -315,5 +317,32 @@ router.post('/incident', postOneIncident);
  * @security JWT
  */
 router.post('/incident-list', postIncidentslist);
+
+/**
+ * Cette route permet de récupérer un Prestataire via son _id, JWT necessaire.
+ * @route POST /retrieve/prestataire
+ * @group Get_Data
+ * @param {INCIDENT.model} _id.body.required - _id du Prestataire
+ * @returns {object} 200 - {success: true, prestataire: Objet}
+ * @returns {Error}  400 - {succes: false, message: 'erreur système', err}
+ * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès refusé'}
+ * @returns {Error}  404 - si aucun prestataire trouvé  {succes: false, message: "ce prestataire n'existe pas"}
+ * @produces application/json
+ * @security JWT
+ */
+router.post('/prestataire', postPrestataire);
+
+/**
+ * Cette route permet de récupérer la liste des Prestataires, JWT necessaire.
+ * @route GET /retrieve/prestataire-list
+ * @group Get_Data
+ * @returns {object} 200 - {success: true, prestataires: [Objet]}
+ * @returns {Error}  400 - {succes: false, message: 'erreur système', err}
+ * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
+ * @returns {Error}  404 - si aucun presta trouvé  {succes: false, message: 'pas de prestataires enregistrés'}
+ * @produces application/json
+ * @security JWT
+ */
+router.post('/prestataire-list', getPrestataire);
 
 module.exports = router;

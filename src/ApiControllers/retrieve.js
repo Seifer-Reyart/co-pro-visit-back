@@ -621,6 +621,34 @@ let postOneIncident = (req,res) => {
         res.status(401).send({success: false, message: 'accès refusé'});
 }
 
+let getPrestataire = (req, res) => {
+    if (req.user.role === 'admin')
+        Prestataire.find({}, function (err, prestataires) {
+            if (err)
+                res.status(400).send({succes: false, message: 'erreur système', err});
+            else if (!prestataires || prestataires.length === 0)
+                res.status(404).send({succes: false, message: 'pas de prestataires enregistrés'});
+            else
+                res.status(200).send({success: true, prestataires});
+        })
+    else
+        res.status(401).send({success: false, message: 'accès refusé'});
+}
+
+let postPrestataire = (req, res) => {
+    if (req.user.role === 'admin')
+        Prestataire.find({_id: req.body._id}, function (err, prestataire) {
+            if (err)
+                res.status(400).send({succes: false, message: 'erreur système', err});
+            else if (!prestataires || prestataires.length === 0)
+                res.status(404).send({succes: false, message: "ce prestataire n'existe pas"});
+            else
+                res.status(200).send({success: true, prestataire});
+        })
+    else
+        res.status(401).send({success: false, message: 'accès refusé'});
+}
+
 module.exports = {
     getCopro,
     postCopro,
@@ -640,4 +668,6 @@ module.exports = {
     postGestionnaire,
     getEncoursSelect,
     postEncoursSelect,
+    getPrestataire,
+    postPrestataire
 }
