@@ -45,7 +45,7 @@ let batimentsSchema = new Schema({
             escalier                : {
                 natureMarches       : {
                     type: String,
-                    enum: ['bois', 'En dur']
+                    enum: ['bois', 'en dur']
                 },
                 naturePaliers       : {
                     type: String,
