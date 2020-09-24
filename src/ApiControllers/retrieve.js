@@ -236,7 +236,10 @@ let getCopro = (req, res) => {
                         res.status(404).send({success: false, message: 'aucun parc enregistré'});
                     else
                         res.status(200).send({success: true, parc: copros});
-                })
+                }).populate({
+                    path: 'batiments',
+                    model: 'batiments'
+                });
         });
     else if (req.user.role === 'gestionnaire')
         Gestionnaire.findOne({_id: req.user.id}, (err, gestionnaire) => {
@@ -252,7 +255,10 @@ let getCopro = (req, res) => {
                         res.status(404).send({success: false, message: 'aucun parc enregistré'});
                     else
                         res.status(200).send({success: true, parc: copros});
-                })
+                }).populate({
+                    path: 'batiments',
+                    model: 'batiments'
+                });
         });
     else if (req.user.role === 'courtier')
         Courtier.findOne({_id: req.user.id}, (err, courtier) => {
