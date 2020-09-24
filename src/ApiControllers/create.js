@@ -652,7 +652,7 @@ let uploadBatImage = async (req, res) => {
 }
 /* register new Batiment */
 
-let saveBatiment = async (batiment, index, id, images) => {
+let saveBatiment = async (batiment, index, id, images, imageFacadeRue) => {
     return new Promise(async (resolve) => {
         batiment.reference = 'bat-'+index+'-'+id;
         batiment.coproId = id;
@@ -666,10 +666,11 @@ let saveBatiment = async (batiment, index, id, images) => {
             } else {
                 batiment.faitLe = new Date();
                 const imageFormatted = batiment.image;
+                const facadeRueImageArray = images?.filter(e => imageFormatted.facadeRue?.find(img => img === e)) ?? [];
                 const batImages = {
                     ParcelleCadastrale : images.find(e => e === imageFormatted.ParcelleCadastrale) ? images.find(e => e === imageFormatted.ParcelleCadastrale) : null,
                     VueGenGoogle       : images.find(e => e === imageFormatted.VueGenGoogle) ? images.find(e => e === imageFormatted.VueGenGoogle) : null,
-                    facadeRue          : images?.filter(e => imageFormatted.facadeRue?.find(img => img === e)) ?? [],
+                    facadeRue          : facadeRueImageArray,
                     facadeArriere      : images?.filter(e => imageFormatted.facadeArriere?.find(img => img === e)) ?? [],
                     entrees            : images?.filter(e => imageFormatted.entrees?.find(img => img === e)) ?? [],
                     etages             : images?.filter(e => imageFormatted.etages?.find(img => img === e)) ?? [],
@@ -687,7 +688,8 @@ let saveBatiment = async (batiment, index, id, images) => {
                         toBeRemoved.push(batImages[prop]);
                 }
                 Copro.findOneAndUpdate({_id: id}, {
-                    assignableImage: images.filter(img => !toBeRemoved.find(im => im === img ))
+                    imageFacadeRue: index === 0 && facadeRueImageArray.length ?  facadeRueImageArray[0] : imageFacadeRue,
+                    assignableImage: images.filter(img => !toBeRemoved.find(im => im === img )),
                 });
                 batiment.image = batImages
                 let bat = new Batiment(batiment);
@@ -722,7 +724,7 @@ let registerBatiment = async (req, res) => {
                 let promises = null;
                 promises = await batiments.map((batiment, index) => {
                     return new Promise(async resolve => {
-                        let resp = await saveBatiment(batiment, index, coproId, copr.assignableImage.filter((a, b) => copr.assignableImage.indexOf(a) === b));
+                        let resp = await saveBatiment(batiment, index, coproId, copr.assignableImage.filter((a, b) => copr.assignableImage.indexOf(a) === b), copr.imageFacadeRue);
                         if (resp.success) {
                             succeded.push(resp._id);
                             resolve();

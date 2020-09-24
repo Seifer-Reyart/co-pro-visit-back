@@ -11,7 +11,7 @@ let coprosSchema = new Schema({
         type    : Number,
         default : 1
     },
-    image           : String,
+    imageFacadeRue  : String,
     nbrLot          : Number,
     batiments       : [Schema.Types.ObjectId],
     surface         : Number,
