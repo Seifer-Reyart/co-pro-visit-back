@@ -313,6 +313,9 @@ let getEncoursSelect = (req, res) => {
                         res.status(404).send({success: false, message: 'aucune copro en cours de selection'});
                     else
                         res.status(200).send({success: true, enCours: copros});
+                }).populate({
+                    path: 'batiments',
+                    model: 'batiments'
                 })
         });
     else if (req.user.role === 'gestionnaire')
@@ -329,6 +332,9 @@ let getEncoursSelect = (req, res) => {
                         res.status(404).send({success: false, message: 'aucune copro en cours de selection'});
                     else
                         res.status(200).send({success: true, enCours: copros});
+                }).populate({
+                    path: 'batiments',
+                    model: 'batiments'
                 })
         });
     else
