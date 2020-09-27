@@ -659,7 +659,7 @@ let annulerVisite = (req, res) => {
                                                let parc = [];
                                                let enCours = [];
                                                let i;
-                                               for (i in corpos) {
+                                               for (i in copros) {
                                                    if (copros[i].syndicNominated)
                                                        parc.push(copros[i]);
                                                    else
