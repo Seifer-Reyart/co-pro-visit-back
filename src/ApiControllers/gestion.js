@@ -628,7 +628,6 @@ let annulerVisite = (req, res) => {
         const {coproId} = req.body;
         Architecte.findOne({copros: {$elemMatch: {$eq: coproId}}}, function (err, archi) {
             if (err) {
-                console.log(err);
                 res.status(400).send({success: false, message: 'erreur système', err});
             } else if (archi)
                 res.status(403).send({success: false, message: 'Un architecte effectue la visite, opération suspendue'});
@@ -639,14 +638,12 @@ let annulerVisite = (req, res) => {
                     {new: true},
                     function (err, cpr) {
                         if (err) {
-                            console.log(err);
                             res.status(400).send({success: false, message: 'erreur système', err});
                         } else if (!cpr)
                             res.status(404).send({success: false, message: "cette copropriété n'existe pas"});
                         else
                             Visite.findOneAndDelete({coproId}, function (err, visite) {
                                if (err) {
-                                   console.log(err);
                                    res.status(400).send({success: false, message: 'erreur système', err});
                                } else if (!visite)
                                    res.status(404).send({success: false, message: "cette visite n'existe pas"});
@@ -658,8 +655,23 @@ let annulerVisite = (req, res) => {
                                                res.status(400).send({success: false, message: 'erreur système', err});
                                            else if (!copros)
                                                res.status(404).send({success: false, message: "pas de copros associées"});
-                                           else
-                                               res.status(200).send({success: true, message: 'la visite a été annulée', copros});
+                                           else {
+                                               let parc = [];
+                                               let enCours = [];
+                                               let i;
+                                               for (i in corpos) {
+                                                   if (copros[i].syndicNominated)
+                                                       parc.push(copros[i]);
+                                                   else
+                                                       enCours.push(copros[i]);
+                                               }
+                                               res.status(200).send({
+                                                   success: true,
+                                                   message: 'la visite a été annulée',
+                                                   parc,
+                                                   enCours
+                                               });
+                                           }
                                        });
                             });
 
