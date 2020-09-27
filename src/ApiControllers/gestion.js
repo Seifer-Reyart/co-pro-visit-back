@@ -673,6 +673,9 @@ let annulerVisite = (req, res) => {
                                                    enCours
                                                });
                                            }
+                                       }).populate({
+                                           path: 'batiments',
+                                           model: 'batiments'
                                        });
                             });
 
