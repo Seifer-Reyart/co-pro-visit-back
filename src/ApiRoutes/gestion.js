@@ -22,6 +22,7 @@ let {
     assignerPrestataireToSyndic,
     assignerGestionnaireToCopro,
     desassignerGestionnaireToCopro,
+    annulerVisite
 } = require('../ApiControllers/gestion');
 
 /***************/
@@ -245,6 +246,22 @@ router.post('/nomination', changeStatusCopro);
  * @security JWT
  */
 router.post('/delete-copro', deleteCopro);
+
+/**
+ * Cette route permet de supprimer une Copro, JWT necessaire.
+ * @route POST /gestion/delete-copro
+ * @group gestion
+ * @param {string} coproId.body.required - _id d'une Copro
+ * @returns {object} 200 - {success: true, message: "la visite a été annulée"}
+ * @returns {Error}  400 - {success: false, message: 'erreur système', err}
+ * @returns {Error}  401 - {success: false, message: 'accès interdit'}
+ * @returns {Error}  403 - {success: false, message: 'Un architecte effectue la visite, opération suspendue'}
+ * @returns {Error}  404 - {success: false, message: "cette visite n'existe pas"}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.post('/annuler-visite', annulerVisite);
 
 module.exports = router;
 

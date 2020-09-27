@@ -621,6 +621,41 @@ let deleteCopro = (req, res) => {
     }
 }
 
+let annulerVisite = (req, res) => {
+    if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else {
+        const {coproId} = req.body;
+        Architecte.findOne({copros: {$elemMatch: {$eq: coproId}}}, function (err, archi) {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur système', err});
+            else if (archi)
+                res.status(403).send({success: false, message: 'Un architecte effectue la visite, opération suspendue'});
+            else
+                Copro.findOneAndUpdate(
+                    {_id: coproId},
+                    {dateDemandeVisite: null, dateVisite: null},
+                    {new: true},
+                    function (err, cpr) {
+                        if (err)
+                            res.status(400).send({success: false, message: 'erreur système', err});
+                        else if (!cpr)
+                            res.status(404).send({success: false, message: "cette copropriété n'existe pas"});
+                        else
+                            Visite.findOneAndDelete({coproId}, function (err, visite) {
+                               if (err)
+                                   res.status(400).send({success: false, message: 'erreur système', err});
+                               else if (!visite)
+                                   res.status(404).send({success: false, message: "cette visite n'existe pas"});
+                               else
+                                   res.status(200).send({success: true, message: 'la visite a été annulée'})
+                            });
+
+                });
+        });
+    }
+}
+
 /* Export Functions */
 
 module.exports = {
@@ -637,4 +672,5 @@ module.exports = {
     assignerPrestataireToSyndic,
     assignerGestionnaireToCopro,
     desassignerGestionnaireToCopro,
+    annulerVisite
 }
