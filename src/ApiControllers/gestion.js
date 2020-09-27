@@ -650,7 +650,7 @@ let annulerVisite = (req, res) => {
                                else
                                    Copro.find(
                                        {$or: [{syndicNominated: req.user.id}, {syndicEnCours: {$elemMatch: {$eq: req.user.id}}}]},
-                                       function (err, copros) {
+                                       async function (err, copros) {
                                            if (err)
                                                res.status(400).send({success: false, message: 'erreur système', err});
                                            else if (!copros)
@@ -660,10 +660,11 @@ let annulerVisite = (req, res) => {
                                                let enCours = [];
                                                let i;
                                                for (i in copros) {
+                                                   console.log(copros[i])
                                                    if (copros[i].syndicNominated)
-                                                       parc.push(copros[i]);
+                                                       await parc.push(copros[i]);
                                                    else
-                                                       enCours.push(copros[i]);
+                                                       await enCours.push(copros[i]);
                                                }
                                                res.status(200).send({
                                                    success: true,
