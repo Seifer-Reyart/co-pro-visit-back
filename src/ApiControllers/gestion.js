@@ -118,7 +118,7 @@ let demandeVisite = (req, res) => {
                                                 if (err)
                                                     console.log(err);
                                                 else {
-                                                    sendCredentials(req.body.email.toLowerCase(), password);
+                                                    sendCredentials(req.body.emailPCS.toLowerCase(), password);
                                                     await Copro.findOneAndUpdate(
                                                         {_id: copro._id},
                                                         {$set: {pcs: p._id}},
