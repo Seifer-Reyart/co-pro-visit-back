@@ -651,7 +651,16 @@ let annulerVisite = (req, res) => {
                                } else if (!visite)
                                    res.status(404).send({success: false, message: "cette visite n'existe pas"});
                                else
-                                   res.status(200).send({success: true, message: 'la visite a été annulée'})
+                                   Copro.find(
+                                       {$or: [{syndicNominated: req.user.id}, {syndicEnCours: {$elemMatch: {$eq: req.user.id}}}]},
+                                       function (err, copros) {
+                                           if (err)
+                                               res.status(400).send({success: false, message: 'erreur système', err});
+                                           else if (!copros)
+                                               res.status(404).send({success: false, message: "pas de copros associées"});
+                                           else
+                                               res.status(200).send({success: true, message: 'la visite a été annulée', copros});
+                                       });
                             });
 
                 });

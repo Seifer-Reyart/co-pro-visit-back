@@ -18,8 +18,14 @@ let coprosSchema = new Schema({
     multiDevis      : Number,
     maxTravaux      : Number,
     moisAG          : Date,
-    dateVisite          : String,
-    dateDemandeVisite   : String,
+    dateVisite          : {
+        type: Date,
+        default: null
+    },
+    dateDemandeVisite   : {
+        type: Date,
+        default: null
+    },
     syndicNominated : Schema.Types.ObjectId,
     syndicDateNom   : Date,
     syndicEnCours   : [Schema.Types.ObjectId],
