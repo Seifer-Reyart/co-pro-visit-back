@@ -11,9 +11,18 @@ let path    = require("path");
 /***************/
 
 let {
+    sendCredentials,
     sendDemandeCourtier,
     sendDemandePrestataire,
 } = require('../Config/mailer');
+
+let {
+    generateP,
+    salt
+} = require('./create');
+
+/**** slat to crypt password ****/
+let salt = bcrypt.genSaltSync(10);
 
 /****************************/
 /*** import Mongo Schemes ***/
@@ -96,11 +105,35 @@ let demandeVisite = (req, res) => {
                                 await Copro.updateOne(
                                     {_id: copro._id},
                                     {$set: {dateDemandeVisite: new Date()}},
-                                    function (err) {
+                                    async function (err) {
                                         if (err)
                                             res.status(400).send({success: false, message: 'erreur system', err});
-                                        else
-                                            res.send(200).send({success: true, message: 'requête visite envoyée'});
+                                        else {
+                                            let password = await generateP();
+                                            let pcs = new PresidentCS({
+                                                email   : req.body.emailPCS,
+                                                lastName: req.body.nomPCS,
+                                                password: bcrypt.hashSync(password, salt),
+                                                phone   : req.body.phonePCS,
+                                                coproId : copro._id,
+                                            });
+                                            pcs.save(async function (err, p) {
+                                                if (err)
+                                                    console.log(err);
+                                                else {
+                                                    sendCredentials(req.body.email.toLowerCase(), password);
+                                                    await Copro.findOneAndUpdate(
+                                                        {_id: copro._id},
+                                                        {$set: {pcs: p._id}},
+                                                        {new: true},
+                                                        function (err) {
+                                                            if (err)
+                                                                console.log(err)
+                                                        });
+                                                    res.send(200).send({success: true, message: 'requête visite envoyée'});
+                                                }
+                                            });
+                                        }
                                     });
                             }
                         });
@@ -477,7 +510,11 @@ let changeStatusCopro = (req, res) => {
                                         else if (cpr.gestionnaire !== null)
                                             Gestionnaire.findOneAndUpdate(
                                                 {_id: cpr.gestionnaire},
-                                                {$push: {parc: cpr._id}, $pull: {enCoursSelect: cpr._id}},
+                                                {
+                                                    $push: {parc: cpr._id},
+                                                    $pull: {enCoursSelect: cpr._id},
+                                                    $set: {syndicDateNom: new Date()}
+                                                    },
                                                 {new: true},
                                                 function (err) {
                                                     if (err)
