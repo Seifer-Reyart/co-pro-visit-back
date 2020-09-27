@@ -21,9 +21,6 @@ let {
     salt
 } = require('./create');
 
-/**** slat to crypt password ****/
-let salt = bcrypt.genSaltSync(10);
-
 /****************************/
 /*** import Mongo Schemes ***/
 /****************************/
