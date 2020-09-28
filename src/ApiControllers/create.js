@@ -418,12 +418,13 @@ let registerCopro = (req, res) => {
     if (req.user.role !== 'gestionnaire' && req.user.role !== 'syndic') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
-        Copro.findOne({$and: [{nomCopro}, {codePostal}, {ville}, {reference}]}, async (err, copro) => {
+        Copro.findOne({$and: [{nomCopro}, {codePostal}, {ville}]}, async (err, copro) => {
             if (err)
                 res.status(400).send({success: false, message: err});
-            else if (copro)
+            else if (copro) {
+                console.log(copro)
                 res.status(403).send({success: false, message: 'La Copro existe déjà'});
-            else {
+            } else {
                 let copro = new Copro({
                     nomCopro       	: req.body.nomCopro,
                     reference       : req.body.reference,

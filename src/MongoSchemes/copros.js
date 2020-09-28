@@ -39,8 +39,14 @@ let coprosSchema = new Schema({
     },
     courtier        : Schema.Types.ObjectId,
     compagnie       : {
-        assurance : String,
-        echeance  : Date
+        assurance : {
+            type: String,
+            default: null
+        },
+        echeance  : {
+            type: Date,
+            default: null
+        }
     },
     incidentId      : [Schema.Types.ObjectId],
     assignableImage : [String],
