@@ -410,8 +410,10 @@ let postCopro = (req, res) => {
                     res.status(400).send({success: false, message: 'erreur system', err});
                 else if (!copro)
                     res.status(404).send({success: false, message: 'aucune copro enregistrée'});
-                else
+                else {
+                    copro.moisAG ? copro.moisAG = copro.moisAG.getMonth() : null;
                     res.status(200).send({success: true, copro: copro});
+                }
             })
 }
 
