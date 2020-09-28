@@ -22,6 +22,8 @@ let updateCopro = (req, res) => {
         Copro.findOneAndUpdate({_id}, {$set: {update}}, {new: true}, async (err, copro) => {
             if (err)
                 res.status(400).send({success: false, message: err});
+            if (!copro)
+                res.status(400).send({success: false, message: 'pas de retour copro'});
             else
                 res.status(200).send({success: true, message: 'La Copro a été mise à jour', copro});
         });
