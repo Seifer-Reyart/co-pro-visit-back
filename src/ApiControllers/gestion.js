@@ -55,7 +55,8 @@ let demandeVisite = (req, res) => {
             else if (visite)
                 res.status(403).send({success: false, message: 'une visite a déjà été demandé'});
             else {
-                Copro.findOne({_id: req.body.coproId}, function (err, copro) {
+                const {coproId} = req.body;
+                Copro.findOne({_id: coproId}, function (err, copro) {
                     if (err)
                         res.status(400).send({success: false, message: 'erreur system', err});
                     else if (!copro)
@@ -74,7 +75,7 @@ let demandeVisite = (req, res) => {
                                 nomPCS          : req.body.nomPCS,
                                 emailPCS        : req.body.emailPCS,
                                 phonePCS        : req.body.phonePCS,
-                                syndicId        : copro.syndicNominated ? copro.syndicNominated : copro.syndicEnCours,
+                                syndicId        : copro.syndicNominated ? copro.syndicNominated : req.user.id,
                                 demandeLe       : new Date(),
                                 done            : false
                             });
@@ -90,7 +91,7 @@ let demandeVisite = (req, res) => {
                                 nomPCS          : req.body.nomPCS,
                                 emailPCS        : req.body.emailPCS,
                                 phonePCS        : req.body.phonePCS,
-                                syndicId        : copro.syndicNominated ? copro.syndicNominated : copro.syndicEnCours,
+                                syndicId        : copro.syndicNominated ? copro.syndicNominated : req.user.id,
                                 gestionnaireId  : copro.gestionnaire,
                                 demandeLe       : new Date(),
                                 done            : false
