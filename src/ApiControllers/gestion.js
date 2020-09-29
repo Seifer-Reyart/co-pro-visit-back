@@ -128,7 +128,7 @@ let demandeVisite = (req, res) => {
                                                             if (err)
                                                                 console.log(err)
                                                         });
-                                                    res.send(200).send({success: true, message: 'requête visite envoyée'});
+                                                    res.status(200).send({success: true, message: 'requête visite envoyée'});
                                                 }
                                             });
                                         }
@@ -481,31 +481,35 @@ let deleteSyndic = (req, res) => {
 }
 
 let changeStatusCopro = (req, res) => {
+console.log(req.body);
     if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
         res.status(401).send({success: false, message: 'accès interdit'});
     else {
         const {coproId, isParc} = req.body;
         if (isParc)
             Copro.findOne({_id: coproId}, function (err, copro) {
-                if (err)
+                if (err) {
+		    console.log("find copro: ", err);
                     res.status(400).send({success: false, message: 'erreur système', err});
-                else
+                } else
                     Copro.findOneAndUpdate(
                         {_id: copro._id},
-                        {$set: {syndicNominated: copro.syndicEnCours}, $pull: {syndicEnCours: copro.syndicEnCours}},
+                        {$set: {syndicNominated: req.user.id}, $pull: {syndicEnCours: req.user.id}},
                         {new: true},
                         function (err, cpr) {
-                            if (err)
+                            if (err) {
+				console.log("find and update copro: ", err);
                                 res.status(400).send({success: false, message: 'erreur système', err});
-                            else
+                            } else
                                 Syndic.findOneAndUpdate(
                                     {_id: cpr.syndicNominated},
                                     {$push: {parc: cpr._id}, $pull: {enCoursSelect: cpr._id}},
                                     {new: true},
                                     function (err) {
-                                        if (err)
+                                        if (err) {
+					console.log("find and update syndic: ", err);
                                             res.status(400).send({success: false, message: 'erreur système', err});
-                                        else if (cpr.gestionnaire !== null)
+                                        } else if (cpr.gestionnaire !== null)
                                             Gestionnaire.findOneAndUpdate(
                                                 {_id: cpr.gestionnaire},
                                                 {
@@ -517,6 +521,8 @@ let changeStatusCopro = (req, res) => {
                                                 function (err) {
                                                     if (err)
                                                         res.status(400).send({success: false, message: 'erreur système', err});
+						    else
+							res.status(200).send({success: true, message: "la copropri  t   est maintenant dans le Parc"});
                                                 });
                                         else
                                             res.status(200).send({success: true, message: "la copropriété est maintenant dans le Parc"});
@@ -533,17 +539,19 @@ let changeStatusCopro = (req, res) => {
                         {$set: {syndicNominated: null}, $push: {syndicEnCours: copro.syndicNominated}},
                         {new: true},
                         (error, cpr) => {
-                            if (error)
+                            if (error) {
+				console.log("find and update copro: ", error);
                                 res.status(400).send({success: false, message: 'erreur système', err: error});
-                            else
+                            } else
                                 Syndic.findOneAndUpdate(
                                     {_id: cpr.syndicEnCours},
                                     {$pull: {parc: cpr._id}, $push: {enCoursSelect: cpr._id}},
                                     {new: true},
                                     function (err) {
-                                        if (err)
+                                        if (err) {
+					    console.log("find and update syndic: ", err);
                                             res.status(400).send({success: false, message: 'erreur système', err});
-                                        else if (cpr.gestionnaire !== null)
+                                        } else if (cpr.gestionnaire !== null)
                                             Gestionnaire.findOneAndUpdate(
                                                 {_id: cpr.gestionnaire},
                                                 {$pull: {parc: cpr._id}, $push: {enCoursSelect: cpr._id}},
@@ -551,6 +559,8 @@ let changeStatusCopro = (req, res) => {
                                                 function (err) {
                                                     if (err)
                                                         res.status(400).send({success: false, message: 'erreur système', err});
+						    else
+							res.status(200).send({success: true, message: "la copropri  t   est maintenant en cours de s  lection"});
                                                 });
                                         else
                                             res.status(200).send({success: true, message: "la copropriété est maintenant en cours de sélection"});
