@@ -411,7 +411,6 @@ let postCopro = (req, res) => {
                 else if (!copro)
                     res.status(404).send({success: false, message: 'aucune copro enregistrée'});
                 else {
-                    copro.moisAG ? copro.moisAG = copro.moisAG.format('MM') : null;
                     res.status(200).send({success: true, copro: copro});
                 }
             })

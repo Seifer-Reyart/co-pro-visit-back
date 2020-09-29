@@ -121,14 +121,27 @@ let registerCourtier = async (req, res) => {
                     password    	: bcrypt.hashSync(password, salt),
                     phone           : req.body.phone,
                     company         : req.body.company,
-                    role        	: 'courtier'
+                    role        	: 'courtier',
+                    syndics         : [],
+                    parc            : [],
                 })
-                courtier.save(function(err) {
+                courtier.save(function(err, court) {
                     if (err) {
                         res.send({ success: false, message: 'Erreur lors de la création du Courtier', err});
                     } else {
-                        sendCredentials(req.body.email.toLowerCase(), password);
-                        res.send({ success: true, message : 'Le Courtier a bien été créé'});
+                        Courtier.findOneAndUpdate(
+                            {_id: court._id},
+                            {$push: {syndics: req.body.syndic}},
+                            {new: true},
+                            function (err, crt) {
+                                if (err)
+                                    console.log("update courtier: ", err)
+                                else {
+                                    sendCredentials(req.body.email.toLowerCase(), password);
+                                    res.send({ success: true, message : 'Le Courtier a bien été créé'});
+                                }
+                            }
+                        )
                     }
                 });
             }
