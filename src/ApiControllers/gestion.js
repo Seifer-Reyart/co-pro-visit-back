@@ -204,12 +204,21 @@ let desassignerVisite = async (req, res) => {
     }
 }
 
-let demandeCourtier = async (req, res) => {
+let demandeCourtier = (req, res) => {
     if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
         res.status(401).send({success: false, message: 'accès interdit'});
     else {
-        await sendDemandeCourtier(req.body);
-        res.status(200).send({success: true, message: "demande envoyé, un administrateur va l'étudier"})
+        Syndic.findOne({_id: req.body.syndic}, async function (err, syndic) {
+            if (err)
+                res.status(400).send({success: false, message: "erreur système", err});
+            else if (!syndic)
+                res.status(404).send({success: false, message: "ce syndic n'existe pas"});
+            else {
+                let body = {...req.body, nomSyndic: syndic.nomSyndic}
+                await sendDemandeCourtier(body);
+                res.status(200).send({success: true, message: "demande envoyée, un administrateur va l'étudier"})
+            }
+        })
     }
 }
 

@@ -380,6 +380,18 @@ let sendDemandeCourtier = (body) => {
             "                          <td style=\"padding:0;Margin:0;text-align:center\"><br>entreprise<br><br></td> " +
             "                          <td style=\"padding:0;Margin:0;text-align:center\">"+body.company+"</td> " +
             "                         </tr> " +
+            "                         <tr style=\"border-collapse:collapse\"> " +
+            "                          <td style=\"padding:0;Margin:0;text-align:center\"><br>Adresse<br><br></td> " +
+            "                          <td style=\"padding:0;Margin:0;text-align:center\">"+body.address+"</td> " +
+            "                         </tr> " +
+            "                         <tr style=\"border-collapse:collapse\"> " +
+            "                          <td style=\"padding:0;Margin:0;text-align:center\"><br>Code Postal<br><br></td> " +
+            "                          <td style=\"padding:0;Margin:0;text-align:center\">"+body.codePostal+"</td> " +
+            "                         </tr> " +
+            "                         <tr style=\"border-collapse:collapse\"> " +
+            "                          <td style=\"padding:0;Margin:0;text-align:center\"><br>Ville<br><br></td> " +
+            "                          <td style=\"padding:0;Margin:0;text-align:center\">"+body.ville+"</td> " +
+            "                         </tr> " +
             "                       </table></td> " +
             "                     </tr> " +
             "                   </table></td> " +
