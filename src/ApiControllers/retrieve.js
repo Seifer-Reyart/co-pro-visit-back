@@ -408,6 +408,9 @@ let postCopro = (req, res) => {
             .populate({
                 path: 'incidentId',
                 model: 'incidents'
+            }).populate({
+                path: 'courtier',
+                model: 'courtiers'
             })
             .then((copro, err) => {
                 console.log(copro)
