@@ -2,42 +2,90 @@ let mongoose    = require('mongoose'),
     Schema      = mongoose.Schema;
 
 let coprosSchema = new Schema({
-    nomCopro    	: String,
-    reference       : String,
-    address    	    : String,
-    codePostal      : Number,
-    ville    	    : String,
+    nomCopro    	: {
+        type    : String,
+        required: true
+    },
+    reference       : {
+        type    : String,
+        default : null
+    },
+    address    	    : {
+        type    : String,
+        required: true
+    },
+    codePostal      : {
+        type    : String,
+        required: true
+    },
+    ville    	    : {
+        type    : String,
+        required: true
+    },
     nbBatiments     : {
         type    : Number,
         default : 1
     },
-    imgCopro        : String,
-    nbrLot          : Number,
-    batiments       : [Schema.Types.ObjectId],
-    surface         : Number,
-    multiDevis      : Number,
-    maxTravaux      : Number,
-    moisAG          : Date,
+    imgCopro        : {
+        type    : String,
+        default : null
+    },
+    nbrLot          : {
+        type    : String,
+        default : 1
+    },
+    batiments       : {
+        type    : [Schema.Types.ObjectId],
+        default : []
+    },
+    surface         : {
+        type    : Number,
+        required: true
+    },
+    multiDevis      : {
+        type    : Number,
+        default : 0
+    },
+    maxTravaux      : {
+        type    : Number,
+        default : 0
+    },
+    moisAG          : {
+        type    : Date,
+        default : null
+    },
     dateVisite          : {
-        type: Date,
-        default: null
+        type    : Date,
+        default : null
     },
     dateDemandeVisite   : {
-        type: Date,
-        default: null
+        type    : Date,
+        default : null
     },
-    syndicNominated : Schema.Types.ObjectId,
-    syndicDateNom   : Date,
-    syndicEnCours   : [Schema.Types.ObjectId],
+    syndicNominated : {
+        type    : Schema.Types.ObjectId,
+        default : null
+    },
+    syndicDateNom   : {
+        type    : Date,
+        default : null
+    },
+    syndicEnCours   : {
+        type    : [Schema.Types.ObjectId],
+        default : []
+    },
     gestionnaire    : {
-        type: Schema.Types.ObjectId,
-        default: null,
+        type    : Schema.Types.ObjectId,
+        default : null,
     },
     pcs             : {
         type: Schema.Types.ObjectId,
         default: null,
     },
-    courtier        : Schema.Types.ObjectId,
+    courtier        : {
+        type    : Schema.Types.ObjectId,
+        default : null
+    },
     compagnie       : {
         assurance : {
             type: String,
@@ -48,8 +96,14 @@ let coprosSchema = new Schema({
             default: null
         }
     },
-    incidentId      : [Schema.Types.ObjectId],
-    assignableImage : [String],
+    incidentId      : {
+        type    : [Schema.Types.ObjectId],
+        default : []
+    },
+    assignableImage : {
+        type    : [String],
+        default : []
+    },
 });
 
 let copros = mongoose.model('copros', coprosSchema);

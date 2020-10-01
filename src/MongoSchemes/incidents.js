@@ -3,23 +3,23 @@ let mongoose    = require('mongoose'),
 
 let incidentsSchema = new Schema({
     date                    : {
-        type: Date,
-        required: false
+        type    : Date,
+        default : new Date()
     },
     metrages                : {
-        type: Number,
+        type    : Number,
         required: true
     },
     desordre                : {
-        type: String,
+        type    : String,
         required: true
     },
     situation               : {
-        type: String,
+        type    : String,
         required: true
     },
     description             : {
-        type: String,
+        type    : String,
         required: true
     },
     corpsEtat               : {
@@ -31,28 +31,28 @@ let incidentsSchema = new Schema({
         required: true
     },
     visiteId    	            : {
-        type: Schema.Types.ObjectId,
-        required: false
+        type    : Schema.Types.ObjectId,
+        default : null
     },
     coproId    	            : {
-        type: Schema.Types.ObjectId,
-        required: false
+        type    : Schema.Types.ObjectId,
+        default : null
     },
     syndicId    	        : {
-        type: Schema.Types.ObjectId,
-        required: false
+        type    : Schema.Types.ObjectId,
+        default : null
     },
     gestionnaireId    	    : {
-        type: Schema.Types.ObjectId,
-        required: false
+        type    : Schema.Types.ObjectId,
+        default : null
     },
     architecteId: {
-        type: Schema.Types.ObjectId,
-        required: false
+        type    : Schema.Types.ObjectId,
+        default : null
     },
     courtierId    	        : {
-        type: Schema.Types.ObjectId,
-        required: false
+        type    : Schema.Types.ObjectId,
+        default : null
     },
     commentaire: String
 });

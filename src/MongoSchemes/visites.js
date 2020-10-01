@@ -2,22 +2,70 @@ let mongoose    = require('mongoose'),
     Schema      = mongoose.Schema;
 
 let visitesSchema = new Schema({
-    architecteId    : Schema.Types.ObjectId,
-    coproId    	    : Schema.Types.ObjectId,
-    nomCopro        : String,
-    reference       : String,
-    gardien         : Boolean,
-    accessCode      : String,
-    cleCabinet      : Boolean,
-    commentaire     : String,
-    nomPCS          : String,
-    emailPCS        : String,
-    phonePCS        : String,
-    syndicId        : Schema.Types.ObjectId,
-    gestionnaireId  : Schema.Types.ObjectId,
-    demandeLe       : Date,
-    faiteLe         : Date,
-    done            : Boolean
+    architecteId    : {
+        type    : Schema.Types.ObjectId,
+        default : null
+    },
+    coproId    	    : {
+        type    : Schema.Types.ObjectId,
+        required: true
+    },
+    nomCopro        : {
+        type    : String,
+        default : null
+    },
+    reference       : {
+        type    : String,
+        default : null
+    },
+    gardien         : {
+        type    : Boolean,
+        default : false
+    },
+    accessCode      : {
+        type    : String,
+        default : null
+    },
+    cleCabinet      : {
+        type    : Boolean,
+        default : false
+    },
+    commentaire     : {
+        type    : String,
+        default : null
+    },
+    nomPCS          : {
+        type    : String,
+        default : null
+    },
+    emailPCS        : {
+        type    : String,
+        default : null
+    },
+    phonePCS        : {
+        type    : String,
+        default : null
+    },
+    syndicId        : {
+        type    : Schema.Types.ObjectId,
+        required: true
+    },
+    gestionnaireId  : {
+        type    : Schema.Types.ObjectId,
+        default : null
+    },
+    demandeLe       : {
+        type    : Date,
+        default : null
+    },
+    faiteLe         : {
+        type    : Date,
+        default : null
+    },
+    done            : {
+        type    : Boolean,
+        default : false
+    }
 });
 
 let visites = mongoose.model('visites', visitesSchema);

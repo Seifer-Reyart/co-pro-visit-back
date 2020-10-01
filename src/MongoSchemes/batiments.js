@@ -2,9 +2,18 @@ let mongoose    = require('mongoose'),
     Schema      = mongoose.Schema;
 
 let batimentsSchema = new Schema({
-    reference               : String,
-    nbEtages                : Number,
-    localisation            : String,
+    reference               : {
+        type    : String,
+        default : null
+    },
+    nbEtages                : {
+        type    : Number,
+        default : 1
+    },
+    localisation            : {
+        type    : String,
+        default : null
+    },
     bacAsable               : Boolean,
     facadeRue               : {
         etatGen     : {
@@ -15,7 +24,10 @@ let batimentsSchema = new Schema({
             type: Boolean,
             default: false
         },
-        natCommerce : String
+        natCommerce : {
+            type    : String,
+            default : null
+        }
     },
     facadeArriere           : {
         access      : Boolean,

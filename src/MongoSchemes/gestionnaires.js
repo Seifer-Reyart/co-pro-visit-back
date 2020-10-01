@@ -2,16 +2,43 @@ let mongoose    = require('mongoose'),
     Schema      = mongoose.Schema;
 
 let gestionnairesSchema = new Schema({
-    email       	: String,
-    firstName   	: String,
-    lastName    	: String,
+    email       	: {
+        type    : String,
+        required: true
+    },
+    firstName   	: {
+        type    : String,
+        required: true
+    },
+    lastName    	: {
+        type    : String,
+        required: true
+    },
     password    	: String,
-    syndic          : Schema.Types.ObjectId,
-    phone           : String,
-    image           : String,
-    parc            : [Schema.Types.ObjectId],
-    enCoursSelect   : [Schema.Types.ObjectId],
-    permissions     : [Number],
+    syndic          : {
+        type    : Schema.Types.ObjectId,
+        required: true
+    },
+    phone           : {
+        type    : String,
+        required: true
+    },
+    image           : {
+        type    : String,
+        default : null
+    },
+    parc            : {
+        type    : [Schema.Types.ObjectId],
+        default : []
+    },
+    enCoursSelect   : {
+        type    : [Schema.Types.ObjectId],
+        default : []
+    },
+    permissions     : {
+        type    : [Number],
+        default : []
+    },
     role        	: {
         type: String,
         default: 'gestionnaire'

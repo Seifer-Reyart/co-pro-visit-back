@@ -11,18 +11,36 @@ let prestatairesSchema = new Schema({
     phone               : String,
     nbSalaries          : Number,
     siret               : String,
-    image               : String,
-    syndics             : [Schema.Types.ObjectId],
-    incidentId          : [Schema.Types.ObjectId],
+    image               : {
+        type    : String,
+        default : null
+    },
+    syndics             : {
+        type    : [Schema.Types.ObjectId],
+        default : []
+    },
+    incidentId          : {
+        type    : [Schema.Types.ObjectId],
+        default : []
+    },
     representant        : {
         firstName   	: String,
         lastName    	: String,
         phone           : String,
         email           : String,
     },
-    corpsEtat           : [String],
-    RCProfessionnelle   : String,
-    RCDecennale         : String,
+    corpsEtat           : {
+        type    : [String],
+        default : []
+    },
+    RCProfessionnelle   : {
+        type    : String,
+        default : null
+    },
+    RCDecennale         : {
+        type    : String,
+        default : null
+    },
     role        	: {
         type: String,
         default: 'prestataire'
