@@ -253,22 +253,24 @@ let assignerCourtierToCopro = (req, res) => {
                 res.status(404).send({success: false, message: "cette Copro n'existe pas!"});
             else if (cop.courtier && cop.courtier === courtier)
                 res.status(200).send({success: true, message: "le courtier est déjà assigné"});
-            else if (cop.courtier && cop.courtier !== courtier) {
-                Courtier.findOneAndUpdate(
-                    {_id: cop.courtier},
-                    {$pull: {parc: cop._id}},
-                    {new: true},
-                    function (err, court) {
-                        if (err || !court)
-                            console.log(err);
-                    });
+            else {
+                if (cop.courtier && cop.courtier !== courtier) {
+                    Courtier.findOneAndUpdate(
+                        {_id: cop.courtier},
+                        {$pull: {parc: cop._id}},
+                        {new: true},
+                        function (err, court) {
+                            if (err || !court)
+                                console.log(err);
+                        });
+                }
                 Copro.findOneAndUpdate(
                     {_id: copro},
                     {$set: {courtier: courtier}},
                     {new: false},
                     function (err, cop) {
                         if (err || !cop) {
-                            res.status(403).send({success: false, message: 'erreur assigniation dans copro', err});
+                            res.status(400).send({success: false, message: 'erreur assigniation dans copro', err});
                         } else {
                             Courtier.findOneAndUpdate(
                                 {_id: courtier},
@@ -285,7 +287,7 @@ let assignerCourtierToCopro = (req, res) => {
                                         res.status(200).send({success: true, message: "le courtier a bien été assigné"})
                                 })
                         }
-                })
+                    })
             }
         })
     }
