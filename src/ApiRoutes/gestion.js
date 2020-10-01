@@ -22,7 +22,8 @@ let {
     assignerPrestataireToSyndic,
     assignerGestionnaireToCopro,
     desassignerGestionnaireToCopro,
-    annulerVisite
+    annulerVisite,
+    sendToEtude
 } = require('../ApiControllers/gestion');
 
 /***************/
@@ -262,6 +263,21 @@ router.post('/delete-copro', deleteCopro);
  * @security JWT
  */
 router.post('/annuler-visite', annulerVisite);
+
+/**
+ * Cette route permet d'envoyer une Copro en étude à plusieurs Courtiers', JWT necessaire.
+ * @route POST /gestion/etude
+ * @group gestion
+ * @param {string} coproId.body.required - _id d'une Copro
+ * @param {string} courtiers.body.required - _ids des Courtiers sélectionnés
+ * @returns {object} 200 - {success: true, message: 'Copro envoyé en étude'}
+ * @returns {Error}  400 - {success: false, message: 'erreur système', err}
+ * @returns {Error}  401 - quand role != syndic ou gestionnaire {success: false, message: 'accès interdit'}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.post('/etude', sendToEtude);
 
 module.exports = router;
 

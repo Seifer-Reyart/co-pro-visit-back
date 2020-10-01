@@ -778,6 +778,24 @@ let annulerVisite = (req, res) => {
     }
 }
 
+let sendToEtude = (req, res) => {
+    if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else {
+        const {coproId, courtiers} = req.body;
+        Courtier.updateMany(
+            {_id: {$in: courtiers}},
+            {$addToSet: {etudes: coproId}},
+            function (err) {
+                if (err)
+                    res.status(400).send({success: false, message: 'erreur système', err});
+                else
+                    res.status(200).send({success: true, message: 'Copro envoyé en étude'})
+            });
+    }
+
+}
+
 /* Export Functions */
 
 module.exports = {
@@ -794,5 +812,6 @@ module.exports = {
     assignerPrestataireToSyndic,
     assignerGestionnaireToCopro,
     desassignerGestionnaireToCopro,
-    annulerVisite
+    annulerVisite,
+    sendToEtude
 }
