@@ -167,7 +167,10 @@ let getCourtiers = (req, res) => {
                     else
                         res.status(200).send({success: true, courtiers});
                 });
-        })
+        }).populate({
+            path: 'parc',
+            model: 'copros'
+        });
     else if (req.user.role === 'gestionnaire')
         Gestionnaire.findOne({_id: req.user.id}, (err, gestionnaire) => {
             if (err)
