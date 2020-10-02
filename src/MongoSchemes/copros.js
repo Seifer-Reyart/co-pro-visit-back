@@ -40,6 +40,7 @@ let coprosSchema = new Schema({
     },
     surface         : {
         type    : Number,
+        default : 0,
         required: true
     },
     multiDevis      : {
