@@ -465,7 +465,7 @@ let getVisitesAll = (req, res) => {
                 }).populate({
                     model: 'gestionnaires',
                     path: 'gestionnaireId'
-                }).sort({demandeLe: -1, done: 1});
+                }).sort({done: 1, demandeLe: -1});
         })
     else
         res.status(401).send({success: false, message: 'accès refusé'});
@@ -491,7 +491,7 @@ let getVisitesUnassigned = (req, res) => {
                 }).populate({
                     model: 'copros',
                     path: 'coproId'
-                }).sort({demandeLe: -1});
+                }).sort({done: 1, demandeLe: -1});
         })
     else
         res.status(401).send({success: false, message: 'accès refusé'});
@@ -513,7 +513,7 @@ let getVisitesArchi = (req,res) => {
         }).populate({
             model: 'copros',
             path: 'coproId'
-        }).sort({demandeLe: -1, done: 1});
+        }).sort({done: 1, demandeLe: -1});
 }
 
 /*** get One visite by its _id ***/
