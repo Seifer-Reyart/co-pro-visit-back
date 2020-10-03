@@ -443,7 +443,7 @@ let getVisitesAll = (req, res) => {
                         res.status(403).send({success: false, message: 'aucune visite enregistrée'});
                     else
                         res.status(200).send({success: true, visites});
-                });
+                }).sort({demandeLe: -1, done: 1});
         })
     else if (req.user.role === 'architecte')
         Architecte.findOne({_id: req.user.id}, (err, architecte) => {
@@ -465,7 +465,7 @@ let getVisitesAll = (req, res) => {
                 }).populate({
                     model: 'gestionnaires',
                     path: 'gestionnaireId'
-                });
+                }).sort({demandeLe: -1, done: 1});
         })
     else
         res.status(401).send({success: false, message: 'accès refusé'});
@@ -491,7 +491,7 @@ let getVisitesUnassigned = (req, res) => {
                 }).populate({
                     model: 'copros',
                     path: 'coproId'
-                });
+                }).sort({demandeLe: -1});
         })
     else
         res.status(401).send({success: false, message: 'accès refusé'});
@@ -513,7 +513,7 @@ let getVisitesArchi = (req,res) => {
         }).populate({
             model: 'copros',
             path: 'coproId'
-        });
+        }).sort({demandeLe: -1, done: 1});
 }
 
 /*** get One visite by its _id ***/
