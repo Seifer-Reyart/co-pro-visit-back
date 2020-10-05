@@ -614,8 +614,8 @@ let saveBatiment = async (batiment, index, id, images) => {
                 const imageFormatted = batiment.image;
                 console.log('imageFormatted: ', imageFormatted);
                 const batImages = {
-                    //ParcelleCadastrale : images?.filter(e => imageFormatted.ParcelleCadastrale?.find(img => img === e)) ?? [],
-                    //VueGenGoogle       : images?.filter(e => imageFormatted.VueGenGoogle?.find(img => img === e)) ?? [],
+                    ParcelleCadastrale : images?.filter(e => imageFormatted.ParcelleCadastrale?.find(img => img === e)) ?? [],
+                    VueGenGoogle       : images?.filter(e => imageFormatted.VueGenGoogle?.find(img => img === e)) ?? [],
                     facadeRue          : images?.filter(e => imageFormatted.facadeRue?.find(img => img === e)) ?? [],
                     facadeArriere      : images?.filter(e => imageFormatted.facadeArriere?.find(img => img === e)) ?? [],
                     entrees            : images?.filter(e => imageFormatted.entrees?.find(img => img === e)) ?? [],
@@ -686,15 +686,9 @@ let registerBatiment = async (req, res) => {
                     });
                     res.status(400).send({success: false, message: "l'enregistrement a échoué, des erreurs requièrent votre attention!!!", failed});
                 } else {
-                    let update = {
-                        batiments: succeded,
-                        dateVisite: new Date()
-                    };
-                    batiments[0].image?.ParcelleCadastrale && batiments[0].image?.ParcelleCadastrale[0] ? update.ParcelleCadastrale = batiments[0].image.ParcelleCadastrale[0] : null;
-                    batiments[0].image?.VueGenGoogle && batiments[0].image?.VueGenGoogle[0] ? update.VueGenGoogle = batiments[0].image.VueGenGoogle[0] : null;
                     await Copro.findOneAndUpdate(
                         {_id: coproId},
-                        {$set: update},
+                        {$set: {batiments: succeded, dateVisite: new Date()}},
                         {new: true},
                         function (err) {
                             if (err)
