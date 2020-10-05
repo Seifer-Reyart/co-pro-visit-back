@@ -690,8 +690,8 @@ let registerBatiment = async (req, res) => {
                         batiments: succeded,
                         dateVisite: new Date()
                     };
-                    batiments[0].image?.ParcelleCadastrale[0] ? update.ParcelleCadastrale = batiments[0].image.ParcelleCadastrale[0] : null;
-                    batiments[0].image?.VueGenGoogle[0] ? update.VueGenGoogle = batiments[0].image.VueGenGoogle[0] : null;
+                    batiments[0].image?.ParcelleCadastrale?[0] ? update.ParcelleCadastrale = batiments[0].image.ParcelleCadastrale[0] : null;
+                    batiments[0].image?.VueGenGoogle?[0] ? update.VueGenGoogle = batiments[0].image.VueGenGoogle[0] : null;
                     await Copro.findOneAndUpdate(
                         {_id: coproId},
                         {$set: update},
