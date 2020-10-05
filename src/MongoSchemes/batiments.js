@@ -123,8 +123,8 @@ let batimentsSchema = new Schema({
         },                                              // Électrique ou gaz si Individuelle
     },
     image                  : {
-        ParcelleCadastrale : String,
-        VueGenGoogle       : String,
+        ParcelleCadastrale : [String],
+        VueGenGoogle       : [String],
         facadeRue          : [String],
         facadeArriere      : [String],
         entrees            : [String],

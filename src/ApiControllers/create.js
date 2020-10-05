@@ -612,9 +612,10 @@ let saveBatiment = async (batiment, index, id, images) => {
             } else {
                 batiment.faitLe = new Date();
                 const imageFormatted = batiment.image;
+                console.log('imageFormatted: ', imageFormatted);
                 const batImages = {
-                    ParcelleCadastrale : images.find(e => e === imageFormatted.ParcelleCadastrale) ? images.find(e => e === imageFormatted.ParcelleCadastrale) : null,
-                    VueGenGoogle       : images.find(e => e === imageFormatted.VueGenGoogle) ? images.find(e => e === imageFormatted.VueGenGoogle) : null,
+                    ParcelleCadastrale : images?.filter(e => imageFormatted.ParcelleCadastrale?.find(img => img === e)) ?? [],
+                    VueGenGoogle       : images?.filter(e => imageFormatted.VueGenGoogle?.find(img => img === e)) ?? [],
                     facadeRue          : images?.filter(e => imageFormatted.facadeRue?.find(img => img === e)) ?? [],
                     facadeArriere      : images?.filter(e => imageFormatted.facadeArriere?.find(img => img === e)) ?? [],
                     entrees            : images?.filter(e => imageFormatted.entrees?.find(img => img === e)) ?? [],
@@ -626,9 +627,9 @@ let saveBatiment = async (batiment, index, id, images) => {
                 };
                 let toBeRemoved = [];
                 for (prop in batImages) {
-                    if (prop !== "ParcelleCadastrale" && prop !== "VueGenGoogle")
-                        toBeRemoved = toBeRemoved.concat(batImages[prop]);
-                    else
+                    //if (prop !== "ParcelleCadastrale" && prop !== "VueGenGoogle")
+                    //    toBeRemoved = toBeRemoved.concat(batImages[prop]);
+                    //else
                         toBeRemoved.push(batImages[prop]);
                 }
                 Copro.findOneAndUpdate({_id: id}, {
