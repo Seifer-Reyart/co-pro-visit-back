@@ -105,6 +105,14 @@ let coprosSchema = new Schema({
         type    : [String],
         default : []
     },
+    ParcelleCadastrale : {
+        type    : String,
+        default : null
+    },
+    VueGenGoogle       : {
+        type    : String,
+        default : null
+    },
 });
 
 let copros = mongoose.model('copros', coprosSchema);
