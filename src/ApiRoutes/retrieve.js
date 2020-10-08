@@ -29,6 +29,7 @@ let {
     postEncoursSelect,
     getPrestataire,
     postPrestataire,
+    getCoproCourtierBySyndic
 } = require('../ApiControllers/retrieve');
 
 /***************/
@@ -344,5 +345,21 @@ router.post('/prestataire', postPrestataire);
  * @security JWT
  */
 router.get('/prestataire-list', getPrestataire);
+
+/**
+ * Cette route permet de récupérer des copro lié au courtier, par syndic si dans parc ou toutes celles en étude, JWT necessaire.
+ * @route POST /retrieve/prestataire
+ * @group Get_Data
+ * @param {INCIDENT.model} syndicId.body.required - _id du syndic
+ * @param {INCIDENT.model} isParc.body.required - boolean, true == parc | false == etudes
+ * @returns {object} 200 - {success: true, parc: [{}]} || {success: true, etudes: [{}]}
+ * @returns {Error}  400 - {succes: false, message: 'erreur système', err}
+ * @returns {Error}  401 - si dans token, role !== courtier  {success: false, message: 'accès refusé'}
+ * @returns {Error}  404 - si aucun courtier trouvé  {succes: false, message: "ce prestataire n'existe pas"}
+ * @produces application/json
+ * @security JWT
+ */
+router.post('/courtier-copro', getCoproCourtierBySyndic);
+
 
 module.exports = router;

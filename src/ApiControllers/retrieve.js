@@ -372,6 +372,56 @@ let getEncoursSelect = (req, res) => {
         res.status(401).send({success: false, message: 'accès refusé'});
 }
 
+let getCoproCourtierBySyndic = (req, res) => {
+    if (req.user.role !== 'courtier')
+        res.status(401).send({success: false, message: 'accès refusé'});
+    else {
+        const {syndicId, isParc} = req.body;
+
+        Courtier.findOne({_id: req.user.id}, (err, courtier) => {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur system', err});
+            else if (!courtier)
+                res.status(404).send({success: false, message: 'aucun courtier enregistré'});
+            else
+                if (isParc)
+                    Copro.find({
+                            $and: [{_id: {$in: courtier.parc}}, {$or: [{syndicNominated: syndicId}, {syndicEnCours: {$elemMatch: {$eq: syndicId}}}]}]
+                        }, (err, parc) => {
+                        if (err)
+                            res.status(400).send({success: false, message: 'erreur system', err});
+                        else
+                            res.status(200).send({success: true, parc})
+                    }).populate({
+                        path: 'pcs',
+                        model: 'presidentCS'
+                    }).populate({
+                        path: 'gestionnaire',
+                        model: 'gestionnaires'
+                    }).populate({
+                        path: 'batiments',
+                        model: 'batiments'
+                    });
+                else
+                    Copro.find({_id: {$in: courtier.etudes}}, (err, etudes) => {
+                        if (err)
+                            res.status(400).send({success: false, message: 'erreur system', err});
+                        else
+                            res.status(200).send({success: true, etudes})
+                    }).populate({
+                        path: 'pcs',
+                        model: 'presidentCS'
+                    }).populate({
+                        path: 'gestionnaire',
+                        model: 'gestionnaires'
+                    }).populate({
+                        path: 'batiments',
+                        model: 'batiments'
+                    });
+        })
+    }
+}
+
 /*** get one copro encours de selection ***/
 
 let postEncoursSelect = (req, res) => {
@@ -716,5 +766,6 @@ module.exports = {
     getEncoursSelect,
     postEncoursSelect,
     getPrestataire,
-    postPrestataire
+    postPrestataire,
+    getCoproCourtierBySyndic
 }
