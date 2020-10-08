@@ -283,6 +283,9 @@ let getCopro = (req, res) => {
                         res.status(404).send({success: false, message: 'aucun parc enregistré'});
                     else
                         res.status(200).send({success: true, parc: copros});
+                }).populate({
+                    path: 'batiments',
+                    model: 'batiments'
                 })
         });
     else if (req.user.role === 'pcs')
@@ -292,13 +295,13 @@ let getCopro = (req, res) => {
             else if (!pcs)
                 res.status(404).send({success: false, message: 'aucun pcs enregistré'});
             else
-                Copro.find({_id: pcs.coproId}, (err, copros) => {
+                Copro.findOne({_id: pcs.coproId}, (err, copro) => {
                     if (err)
                         res.status(400).send({success: false, message: 'erreur system', err});
                     else if (!copros)
                         res.status(404).send({success: false, message: 'aucun parc enregistré'});
                     else
-                        res.status(200).send({success: true, parc: copros});
+                        res.status(200).send({success: true, copro});
                 })
         });
     else
@@ -341,6 +344,25 @@ let getEncoursSelect = (req, res) => {
                         res.status(404).send({success: false, message: 'aucune copro en cours de selection'});
                     else
                         res.status(200).send({success: true, enCours: copros});
+                }).populate({
+                    path: 'batiments',
+                    model: 'batiments'
+                })
+        });
+    else if (req.user.role === 'courtier')
+        Courtier.findOne({_id: req.user._id}, (err, courtier) => {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur system', err});
+            else if (!courtier)
+                res.status(403).send({success: false, message: 'aucun courtier enregistré'});
+            else
+                Copro.find({_id: {$in: courtier.etudes}}, (err, copros) => {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur system', err});
+                    else if (!copros)
+                        res.status(404).send({success: false, message: 'aucune copro en cours de selection'});
+                    else
+                        res.status(200).send({success: true, etudes: copros});
                 }).populate({
                     path: 'batiments',
                     model: 'batiments'
