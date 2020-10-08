@@ -394,7 +394,7 @@ let getCoproCourtierBySyndic = (req, res) => {
                             res.status(200).send({success: true, parc})
                     }).populate({
                         path: 'pcs',
-                        model: 'presidentCS'
+                        model: 'pcs'
                     }).populate({
                         path: 'gestionnaire',
                         model: 'gestionnaires'
@@ -410,7 +410,7 @@ let getCoproCourtierBySyndic = (req, res) => {
                             res.status(200).send({success: true, etudes})
                     }).populate({
                         path: 'pcs',
-                        model: 'presidentCS'
+                        model: 'pcs'
                     }).populate({
                         path: 'gestionnaire',
                         model: 'gestionnaires'
