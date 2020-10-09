@@ -328,7 +328,13 @@ let getEncoursSelect = (req, res) => {
                 }).populate({
                     path: 'batiments',
                     model: 'batiments'
-                })
+                }).populate({
+                    path: 'courtier',
+                    model: 'courtiers'
+                }).populate({
+                    path: 'gestionnaire',
+                    model: 'gestionnaires'
+                });
         });
     else if (req.user.role === 'gestionnaire')
         Gestionnaire.findOne({_id: req.user.id}, (err, gestionnaire) => {
