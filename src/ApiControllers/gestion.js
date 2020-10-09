@@ -404,9 +404,10 @@ let assignerGestionnaireToCopro = (req, res) => {
         res.status(401).send({success: false, message: 'accès interdit'});
     else
         Copro.findOneAndUpdate(
-            {$and: [{_id: coproId},{$or: [{syndicNominated: req.user.id}, {syndicEnCours: req.user.id}]}]},
+            {$and: [{_id: coproId},{$or: [{syndicNominated: req.user.id}, {syndicEnCours: {$elemMatch: {$eq: req.user.id}}}]}]},
             {$set: {gestionnaire: gestionnaireId}},
-            {new: true}, function (err, copro) {
+            {new: true},
+            function (err, copro) {
                 if (err)
                     res.status(400).send({success: false, message: 'erreur système', err});
                 else if (!copro)
