@@ -119,7 +119,7 @@ let batimentsSchema = new Schema({
         individuelle    : Boolean,
         genre           : {
             type: String,
-            enum: ['Fuel', 'Gaz', 'Cpu', 'Electrique']  // Fuel ou gaz ou cpu si Collective
+            enum: ['Fuel', 'Gaz', 'Cpu', 'Electrique', 'Inconnu']  // Fuel ou gaz ou cpu si Collective
         },                                              // Électrique ou gaz si Individuelle
     },
     image                  : {
