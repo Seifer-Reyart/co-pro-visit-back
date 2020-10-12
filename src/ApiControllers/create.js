@@ -428,6 +428,7 @@ let registerGestionnaire = async (req, res) => {
 
 let registerCopro = (req, res) => {
     const {nomCopro, codePostal, ville, reference} = req.body;
+    console.log(req.body)
     if (req.user.role !== 'gestionnaire' && req.user.role !== 'syndic') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
@@ -451,7 +452,7 @@ let registerCopro = (req, res) => {
                     maxTravaux      : req.body.maxTravaux,
                     syndicNominated : req.body.syndicNominated ? req.body.syndicNominated : null,
                     syndicEnCours   : req.body.syndicEnCours ? req.body.syndicEnCours : [],
-                    courtier        : req.body.courtier ?? null
+                    courtier        : req.body.courtier ? req.body.courtier : null,
                 });
                 copro.save(async function(err, cpr) {
                     if (err) {
