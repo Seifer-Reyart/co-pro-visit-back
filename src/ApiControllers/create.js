@@ -450,8 +450,9 @@ let registerCopro = (req, res) => {
                     multiDevis      : req.body.multiDevis,
                     maxTravaux      : req.body.maxTravaux,
                     syndicNominated : req.body.syndicNominated ? req.body.syndicNominated : null,
-                    syndicEnCours   : req.body.syndicEnCours ? req.body.syndicEnCours : []
-                })
+                    syndicEnCours   : req.body.syndicEnCours ? req.body.syndicEnCours : [],
+                    courtier        : req.body.courtier ?? null
+                });
                 copro.save(async function(err, cpr) {
                     if (err) {
                         res.send({ success: false, message: "Erreur lors de la création de la Copro", err});
