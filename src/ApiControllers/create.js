@@ -535,11 +535,23 @@ let parseXlsThenStore = (req, res) => {
                                 },
                                 syndicNominated: req.user.id
                             })
-                            copro.save(function (err) {
+                            copro.save(function (err, cpr) {
                                 if (err) {
                                     error.isError = true;
                                     error.message = err;
                                     error.errors.push(item)
+                                } else {
+                                    Syndic.findOneAndUpdate(
+                                        {_id: cpr.syndicNominated},
+                                        {$push: {parc: cpr._id}},
+                                    {new: true},
+                                        function (err) {
+                                            if (err) {
+                                                error.isError = true;
+                                                error.message = err;
+                                                error.errors.push(item)
+                                            }
+                                        })
                                 }
                             });
                         }
