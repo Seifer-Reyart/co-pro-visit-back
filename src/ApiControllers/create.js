@@ -519,7 +519,8 @@ let parseXlsThenStore = (req, res) => {
                     message: "",
                     errors: []
                 };
-                obj[0].data.map((item, index) => {
+                console.log(obj);
+                await obj[0].data.map((item, index) => {
                     if (index >= 1) {
                         if (item[0] && item[2] && item[3] && item[4] && item[5]) {
                             let copro = new Copro({
