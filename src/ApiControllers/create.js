@@ -519,12 +519,11 @@ let parseXlsThenStore = (req, res) => {
                     message: "",
                     errors: []
                 };
-                console.log(obj);
                 await obj[0].data.map((item, index) => {
                     if (index >= 1) {
                         if (item[0] && item[2] && item[3] && item[4] && item[5]) {
                             let copro = new Copro({
-                                name: item[1],
+                                nomCopro: item[1],
                                 reference: item[0],
                                 address: item[2],
                                 codePostal: item[3],
@@ -534,7 +533,7 @@ let parseXlsThenStore = (req, res) => {
                                     assurance: item[6],
                                     echeance: null
                                 },
-                                syndicEnCours: req.user.id
+                                syndicNominated: req.user.id
                             })
                             copro.save(function (err) {
                                 if (err) {
