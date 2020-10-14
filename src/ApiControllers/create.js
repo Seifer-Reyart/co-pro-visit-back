@@ -262,15 +262,14 @@ let registerPrestataire = async (req, res) => {
                     siret               : req.body.siret,
                     caisse              : 0,
                     representant        : {
-                        civility        : req.body.civility,
-                        firstName   	: req.body.firstName,
+                        firstName   	: req.body.firstName ?? null,
                         lastName    	: req.body.lastName,
                         phone           : req.body.phone,
                         email           : req.body.email.toLowerCase(),
                     },
                     corpsEtat           : req.body.corpsEtat,
-                    RCProfessionnelle   : req.body.RCProfessionnelle,
-                    RCDecennale         : req.body.RCDecennale,
+                    RCProfessionnelle   : req.body.RCProfessionnelle ?? null,
+                    RCDecennale         : req.body.RCDecennale ?? null,
                     role        	    : 'prestataire'
                 })
                 prestataire.save(function(err) {
