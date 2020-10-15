@@ -330,7 +330,7 @@ let assignerCourtierToSyndic = async (req, res) => {
             if (errorSyndic.length > 0 || errorCourtier.length > 0)
                 res.status(400).send({success: false, message: 'erreur assigniation', errorSyndic, errorCourtier, successId});
             else
-                res.status(200).send({success: true, message: "le courtier a bien été assigné", successId})
+                res.status(200).send({success: true, message: "le courtier a bien été assigné", successId});
         } else {
             let errorSyndic = [];
             let errorCourtier = [];
@@ -369,55 +369,78 @@ let assignerCourtierToSyndic = async (req, res) => {
     }
 }
 
-let assignerPrestataireToSyndic = (req, res) => {
-    const {prestataireId, syndicId, option} = req.body;
+let assignerPrestataireToSyndic = async (req, res) => {
+    const {prestataireId, syndics, option} = req.body;
     if (req.user.role !== 'admin')
         res.status(401).send({success: false, message: 'accès interdit'});
     else if (!prestataireId || !syndicId)
         res.status(403).send({success: false, message: 'syndicId et prestataireId requis'});
     else {
+        let errorSyndic = [];
+        let errorPresta = [];
+        let successId = [];
         if (option) {
-            Syndic.findOneAndUpdate(
-                {_id: syndic},
-                {$push: {prestataires: prestataireId}},
-                {new: true},
-                function (err, synd) {
-                    if (err || !synd)
-                        res.status(403).send({success: false, message: 'erreur assigniation dans syndic', err});
-                    else {
-                        Prestataire.findOneAndUpdate(
-                            {_id: prestataireId},
-                            {$push: {syndics: syndicId}},
-                            {new: true},
-                            function (err, prest) {
-                                if (err || !prest)
-                                    res.status(400).send({success: false, message: 'erreur assigniation dans prestataire', err});
-                                else
-                                    res.status(200).send({success: true, message: "le prestataire a bien été assigné"})
-                            })
-                    }
-                })
+            let promises = await syndics.map(syndic => {
+                Syndic.findOneAndUpdate(
+                    {_id: syndic},
+                    {$push: {prestataires: prestataireId}},
+                    {new: true},
+                    function (err, synd) {
+                        if (err || !synd)
+                            errorSyndic.push({success: false, message: 'erreur assigniation dans syndic', err});
+                            //res.status(403).send({success: false, message: 'erreur assigniation dans syndic', err});
+                        else {
+                            Prestataire.findOneAndUpdate(
+                                {_id: prestataireId},
+                                {$push: {syndics: syndicId}},
+                                {new: true},
+                                function (err, prest) {
+                                    if (err || !prest)
+                                        errorPresta.push({success: false, message: 'erreur assigniation dans prestataire', err});
+                                        //res.status(400).send({success: false, message: 'erreur assigniation dans prestataire', err});
+                                    else
+                                        successId.push(synd._id)
+                                        //res.status(200).send({success: true, message: "le prestataire a bien été assigné"})
+                                })
+                        }
+                    });
+            });
+            await Promise.all(promises);
+            if (errorSyndic.length > 0 || errorPresta.length > 0)
+                res.status(400).send({success: false, message: 'erreur assigniation', errorSyndic, errorCourtier, successId});
+            else
+                res.status(200).send({success: true, message: "le Prestataire a bien été assigné", successId})
         } else {
-            Syndic.findOneAndUpdate(
-                {_id: syndic},
-                {$pull: {prestataires: prestataireId}},
-                {new: true},
-                function (err, synd) {
-                    if (err || !synd)
-                        res.status(403).send({success: false, message: 'erreur désassigniation dans syndic', err});
-                    else {
-                        Prestataire.findOneAndUpdate(
-                            {_id: prestataireId},
-                            {$pull: {syndics: syndicId}},
-                            {new: true},
-                            function (err, prest) {
-                                if (err || !prest)
-                                    res.status(400).send({success: false, message: 'erreur désassigniation dans prestataire', err});
-                                else
-                                    res.status(200).send({success: true, message: "le prestataire a bien été désassigné"})
-                            })
-                    }
-                })
+            let promises = await syndics.map(syndic => {
+                Syndic.findOneAndUpdate(
+                    {_id: syndic},
+                    {$pull: {prestataires: prestataireId}},
+                    {new: true},
+                    function (err, synd) {
+                        if (err || !synd)
+                            errorSyndic.push({success: false, message: 'erreur désassigniation dans syndic', err})
+                            //res.status(403).send({success: false, message: 'erreur désassigniation dans syndic', err});
+                        else {
+                            Prestataire.findOneAndUpdate(
+                                {_id: prestataireId},
+                                {$pull: {syndics: syndicId}},
+                                {new: true},
+                                function (err, prest) {
+                                    if (err || !prest)
+                                        errorPresta.push({success: false, message: 'erreur désassigniation dans prestataire', err});
+                                        //res.status(400).send({success: false, message: 'erreur désassigniation dans prestataire', err});
+                                    else
+                                        successId.push(synd._id)
+                                        //res.status(200).send({success: true, message: "le prestataire a bien été désassigné"})
+                                });
+                        }
+                    });
+            });
+            await Promise.all(promises);
+            if (errorSyndic.length > 0 || errorCourtier.length > 0)
+                res.status(400).send({success: false, message: 'erreur désassigniation', errorSyndic, errorCourtier, successId});
+            else
+                res.status(200).send({success: true, message: "le Prestataire a bien été désassigné", successId})
         }
     }
 }
