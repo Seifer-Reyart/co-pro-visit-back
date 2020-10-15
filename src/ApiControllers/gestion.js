@@ -407,7 +407,7 @@ let assignerPrestataireToSyndic = async (req, res) => {
             });
             await Promise.all(promises);
             if (errorSyndic.length > 0 || errorPresta.length > 0)
-                res.status(400).send({success: false, message: 'erreur assigniation', errorSyndic, errorCourtier, successId});
+                res.status(400).send({success: false, message: 'erreur assigniation', errorSyndic, errorPresta, successId});
             else
                 res.status(200).send({success: true, message: "le Prestataire a bien été assigné", successId})
         } else {
@@ -437,8 +437,8 @@ let assignerPrestataireToSyndic = async (req, res) => {
                     });
             });
             await Promise.all(promises);
-            if (errorSyndic.length > 0 || errorCourtier.length > 0)
-                res.status(400).send({success: false, message: 'erreur désassigniation', errorSyndic, errorCourtier, successId});
+            if (errorSyndic.length > 0 || errorPresta.length > 0)
+                res.status(400).send({success: false, message: 'erreur désassigniation', errorSyndic, errorPresta, successId});
             else
                 res.status(200).send({success: true, message: "le Prestataire a bien été désassigné", successId})
         }
