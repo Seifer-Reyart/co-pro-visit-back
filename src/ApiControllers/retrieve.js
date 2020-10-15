@@ -740,10 +740,10 @@ let getPrestataire = (req, res) => {
 
 let postPrestataire = (req, res) => {
     if (req.user.role === 'admin')
-        Prestataire.find({_id: req.body._id}, function (err, prestataire) {
+        Prestataire.findOne({_id: req.body._id}, function (err, prestataire) {
             if (err)
                 res.status(400).send({succes: false, message: 'erreur système', err});
-            else if (!prestataires || prestataires.length === 0)
+            else if (!prestataire)
                 res.status(404).send({succes: false, message: "ce prestataire n'existe pas"});
             else
                 res.status(200).send({success: true, prestataire});
