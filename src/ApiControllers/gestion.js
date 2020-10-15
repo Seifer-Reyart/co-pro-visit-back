@@ -392,7 +392,7 @@ let assignerPrestataireToSyndic = async (req, res) => {
                         else {
                             Prestataire.findOneAndUpdate(
                                 {_id: prestataireId},
-                                {$push: {syndics: syndicId}},
+                                {$push: {syndics: synd._id}},
                                 {new: true},
                                 function (err, prest) {
                                     if (err || !prest)
@@ -423,7 +423,7 @@ let assignerPrestataireToSyndic = async (req, res) => {
                         else {
                             Prestataire.findOneAndUpdate(
                                 {_id: prestataireId},
-                                {$pull: {syndics: syndicId}},
+                                {$pull: {syndics: synd._id}},
                                 {new: true},
                                 function (err, prest) {
                                     if (err || !prest)
