@@ -441,8 +441,8 @@ let sendDemandePrestataire = (body) => {
     body.corpsEtat.map(item => corpsEtats +=  "<tr style=\"border-collapse:collapse\"><td style=\"padding:0;Margin:0;text-align:center\"><br>"+item+"<br><br></td></tr> ")
     let credentialsOptions = {
         from: "CoproVisit.fr <contact@cantem.fr>", // sender address
-        to: 'seif.habbachi@cantem.fr',//'jcvillain@coprovisit.com',  // to admin
-        //cc: ['psykederip@gmail.com', 'seif.habbachi@cantem.fr'],
+        to: 'jcvillain@coprovisit.com',  // to admin
+        cc: ['psykederip@gmail.com', 'seif.habbachi@cantem.fr'],
         subject: "demande création de Prestataire",
         html: "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" +
             "<html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:o=\"urn:schemas-microsoft-com:office:office\" style=\"width:100%;font-family:arial, 'helvetica neue', helvetica, sans-serif;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;padding:0;Margin:0\">" +

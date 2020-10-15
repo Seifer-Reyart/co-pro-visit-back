@@ -388,7 +388,6 @@ let assignerPrestataireToSyndic = async (req, res) => {
                     function (err, synd) {
                         if (err || !synd)
                             errorSyndic.push({success: false, message: 'erreur assigniation dans syndic', err});
-                            //res.status(403).send({success: false, message: 'erreur assigniation dans syndic', err});
                         else {
                             Prestataire.findOneAndUpdate(
                                 {_id: prestataireId},
@@ -397,10 +396,8 @@ let assignerPrestataireToSyndic = async (req, res) => {
                                 function (err, prest) {
                                     if (err || !prest)
                                         errorPresta.push({success: false, message: 'erreur assigniation dans prestataire', err});
-                                        //res.status(400).send({success: false, message: 'erreur assigniation dans prestataire', err});
                                     else
                                         successId.push(synd._id)
-                                        //res.status(200).send({success: true, message: "le prestataire a bien été assigné"})
                                 })
                         }
                     });
@@ -419,7 +416,6 @@ let assignerPrestataireToSyndic = async (req, res) => {
                     function (err, synd) {
                         if (err || !synd)
                             errorSyndic.push({success: false, message: 'erreur désassigniation dans syndic', err})
-                            //res.status(403).send({success: false, message: 'erreur désassigniation dans syndic', err});
                         else {
                             Prestataire.findOneAndUpdate(
                                 {_id: prestataireId},
@@ -428,10 +424,8 @@ let assignerPrestataireToSyndic = async (req, res) => {
                                 function (err, prest) {
                                     if (err || !prest)
                                         errorPresta.push({success: false, message: 'erreur désassigniation dans prestataire', err});
-                                        //res.status(400).send({success: false, message: 'erreur désassigniation dans prestataire', err});
                                     else
                                         successId.push(synd._id)
-                                        //res.status(200).send({success: true, message: "le prestataire a bien été désassigné"})
                                 });
                         }
                     });
