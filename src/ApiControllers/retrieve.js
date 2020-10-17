@@ -76,7 +76,7 @@ let getSyndics = (req, res) => {
                     else if (!syndics)
                         res.status(404).send({success: false, message: 'aucun syndic enregistré'});
                     else
-                        res.status(200).send({success: true, syndics});
+                        res.status(200).send({success: true, syndics, abonnements: prestataire.abonnements});
                 });
         });
     else

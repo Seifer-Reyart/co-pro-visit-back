@@ -103,7 +103,7 @@ router.get('/encours', postEncoursSelect);
  * Cette route permet de récupérer un ou plusieurs Syndics selon le type de compte, JWT necessaire.
  * @route GET /retrieve/syndic
  * @group Get_Data
- * @returns {object} 200 - {success: true, syndics: array of syndics}
+ * @returns {object} 200 - {success: true, syndics: array of syndics, abonnements: array of syndics subscribed to}
  * @returns {Error}  400 - {success: false, message: error system log from mongoose}
  * @returns {Error}  401 - si dans token, role !== admin ou courtier ou prestataire  {success: false, message: 'accès interdit'}
  * @returns {Error}  403 - si le compte n'est pas enregistré {success: false, message: "ce compte n'existe pas!"}
