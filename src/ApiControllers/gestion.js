@@ -838,6 +838,42 @@ let sendToEtude = (req, res) => {
 
 }
 
+let aboPrestaToSyndic = (req, res) => {
+    if (req.user.role !== 'admin')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else {
+        const {prestaId, syndicId, option} = req.body;
+
+        if (option) {
+            Prestataire.findOneAndUpdate(
+                {_id: prestaId},
+                {$push: {abonnements: syndicId}},
+                {new: true},
+                function (err, prest) {
+                   if (err)
+                       res.status(400).send({success: false, message: 'erreur système', err});
+                   else if (!prest)
+                       res.status(404).send({success: false, message: "ce prestataire n'existe pas"});
+                   else
+                       res.status(200).send({success: true, message: 'prestataire abonné'});
+                });
+        } else {
+            Prestataire.findOneAndUpdate(
+                {_id: prestaId},
+                {$pull: {abonnements: syndicId}},
+                {new: true},
+                function (err, prest) {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur système', err});
+                    else if (!prest)
+                        res.status(404).send({success: false, message: "ce prestataire n'existe pas"});
+                    else
+                        res.status(200).send({success: true, message: 'prestataire désabonné'});
+                });
+        }
+    }
+}
+
 /* Export Functions */
 
 module.exports = {
@@ -855,5 +891,6 @@ module.exports = {
     assignerGestionnaireToCopro,
     desassignerGestionnaireToCopro,
     annulerVisite,
-    sendToEtude
+    sendToEtude,
+    aboPrestaToSyndic
 }

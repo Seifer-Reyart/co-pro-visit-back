@@ -19,6 +19,10 @@ let prestatairesSchema = new Schema({
         type    : [Schema.Types.ObjectId],
         default : []
     },
+    abonnements         : {
+        type    : [Schema.Types.ObjectId],
+        default : []
+    },
     incidentId          : {
         type    : [Schema.Types.ObjectId],
         default : []

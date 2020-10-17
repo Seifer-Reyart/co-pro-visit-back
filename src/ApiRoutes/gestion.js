@@ -23,7 +23,8 @@ let {
     assignerGestionnaireToCopro,
     desassignerGestionnaireToCopro,
     annulerVisite,
-    sendToEtude
+    sendToEtude,
+    aboPrestaToSyndic
 } = require('../ApiControllers/gestion');
 
 /***************/
@@ -265,7 +266,7 @@ router.post('/delete-copro', deleteCopro);
 router.post('/annuler-visite', annulerVisite);
 
 /**
- * Cette route permet d'envoyer une Copro en étude à plusieurs Courtiers', JWT necessaire.
+ * Cette route permet d'envoyer une Copro en étude à plusieurs Courtiers, JWT necessaire.
  * @route POST /gestion/etude
  * @group gestion
  * @param {string} coproId.body.required - _id d'une Copro
@@ -278,6 +279,23 @@ router.post('/annuler-visite', annulerVisite);
  * @security JWT
  */
 router.post('/etude', sendToEtude);
+
+/**
+ * Cette route permet d'abonner/désabonner un Presta à/d'un Syndic, JWT necessaire.
+ * @route POST /gestion/abo-presta
+ * @group gestion
+ * @param {string} prestaId.body.required - _id d'un Prestataire
+ * @param {string} syndicId.body.required - _id d'un Syndic
+ * @param {boolean} option - true === abonner / false === désabonner
+ * @returns {object} 200 - {success: true, message: 'Copro envoyé en étude'}
+ * @returns {Error}  400 - {success: false, message: 'erreur système', err}
+ * @returns {Error}  401 - quand role != admin {success: false, message: 'accès interdit'}
+ * @returns {Error}  404 - {success: false, message: "ce prestataire n'existe pas"}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.post('/abo-presta', aboPrestaToSyndic);
 
 module.exports = router;
 
