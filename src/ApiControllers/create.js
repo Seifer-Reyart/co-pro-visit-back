@@ -865,8 +865,8 @@ let registerIncident = async (req, res) => {
                     coproId                 ,
                     commentaire
                 });
-                !courtierId ? delete incident.courtierId : null;
-                !gestionnaireId ? delete incident.gestionnaireId : null;
+                courtierId === 'null' ? delete incident.courtierId : null;
+                gestionnaireId === 'null' ? delete incident.gestionnaireId : null;
                 incident.save(function(err, incid) {
                     if (err) {
                         res.status(400).send({ success: false, message: "Erreur lors de la création de l'Incident", err});
