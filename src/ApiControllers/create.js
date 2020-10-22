@@ -811,7 +811,6 @@ let registerIncident = async (req, res) => {
     if (req.user.role !== 'architecte' && req.user.role !== 'admin') {
         res.status(401).send({success: false, message: 'accès interdit'});
     } else {
-        console.log(req.body);
         const { courtierId, architecteId, gestionnaireId, visiteId, syndicId, coproId, metrages, desordre, situation, description, commentaire, corpsEtat} = req.body;
         Copro.findOne({_id: coproId}, async (err, copr) => {
             if (err) {
@@ -857,16 +856,15 @@ let registerIncident = async (req, res) => {
                     situation               ,
                     description             ,
                     corpsEtat               ,
-                    courtierId              ,
-                    gestionnaireId          ,
+                    courtierId      : courtierId === 'null' ? null : courtierId,
+                    gestionnaireId  : gestionnaireId === 'null' ? null : gestionnaireId,
                     architecteId            ,
                     visiteId                ,
                     syndicId                ,
                     coproId                 ,
                     commentaire
                 });
-                courtierId === 'null' ? delete incident.courtierId : null;
-                gestionnaireId === 'null' ? delete incident.gestionnaireId : null;
+
                 incident.save(function(err, incid) {
                     if (err) {
                         res.status(400).send({ success: false, message: "Erreur lors de la création de l'Incident", err});
