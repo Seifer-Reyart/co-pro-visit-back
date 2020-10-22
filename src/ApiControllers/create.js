@@ -811,6 +811,7 @@ let registerIncident = async (req, res) => {
     if (req.user.role !== 'architecte' && req.user.role !== 'admin') {
         res.status(401).send({success: false, message: 'accès interdit'});
     } else {
+        console.log(req.body);
         const { courtierId, architecteId, gestionnaireId, visiteId, syndicId, coproId, metrages, desordre, situation, description, commentaire, corpsEtat} = req.body;
         Copro.findOne({_id: coproId}, async (err, copr) => {
             if (err) {
@@ -856,8 +857,8 @@ let registerIncident = async (req, res) => {
                     situation               ,
                     description             ,
                     corpsEtat               ,
-                    courtierId              ,
-                    gestionnaireId          ,
+                    courtierId      : courtierId ?? null,
+                    gestionnaireId  : gestionnaireId ?? null,
                     architecteId            ,
                     visiteId                ,
                     syndicId                ,
