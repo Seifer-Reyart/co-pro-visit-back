@@ -710,7 +710,7 @@ let postIncidentslist = (req,res) => {
                 let corpsEtat = presta.corpsEtat;
                 console.log("corpsEtat: ",corpsEtat)
                 Incident.find(
-                    {$and: [{syndicId}, {corpsEtat: {$elemMatch: {$in: corpsEtat}}}]},
+                    {$and: [{syndicId}, {corpsEtat: {$all: corpsEtat}}]},
                     this.resolveIncidents
                 ).populate({
                     model: 'copros',
