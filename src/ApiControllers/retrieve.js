@@ -697,14 +697,18 @@ let postIncidentslist = (req,res) => {
         Incident.find({courtierId}, this.resolveIncidents);
     else if (req.user.role === 'pcs' && coproId)
         Incident.find({coproId}, this.resolveIncidents);
-    else if (req.user.role === 'prestataire') {
+    else if (req.user.role === 'prestataire' && syndicId) {
+        console.log("case Presta")
         Prestataire.findOne({_id: req.user.id}, function (err, presta) {
-            if (err)
+            if (err) {
+                console.log("err: ", err)
                 res.status(400).send({success: false, message: 'erreur system', err});
-            else if (!presta)
+            } else if (!presta) {
+                console.log("not found presta")
                 res.status(404).send({success: false, message: "Ce prestataire n'existe pas"});
-            else {
+            } else {
                 let corpsEtat = presta.corpsEtat;
+                console.log("corpsEtat: ",corpsEtat)
                 Incident.find(
                     {$and: [{syndicId}, {corpsEtat: {$elemMatch: {$in: {corpsEtat}}}}]},
                     this.resolveIncidents
