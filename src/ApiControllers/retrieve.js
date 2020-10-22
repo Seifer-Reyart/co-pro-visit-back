@@ -693,14 +693,20 @@ let postIncidentslist = (req,res) => {
         Incident.find({coproId}, this.resolveIncidents);
     else if (req.user.role === 'prestataire') {
         Prestataire.findOne({_id: req.user.id}, function (err, presta) {
-            let corpsEtat = presta.corpsEtat;
-            Incident.find(
-                {$and: [{syndicId}, {corpsEtat: {$elemMatch: {$in: {corpsEtat}}}}]},
-                this.resolveIncidents
-            ).populate({
-                model: 'copros',
-                path: 'coproId'
-            });
+            if (err)
+                res.status(400).send({success: false, message: 'erreur system', err});
+            else if (!presta)
+                res.status(404).send({success: false, message: "Ce prestataire n'existe pas"});
+            else {
+                let corpsEtat = presta.corpsEtat;
+                Incident.find(
+                    {$and: [{syndicId}, {corpsEtat: {$elemMatch: {$in: {corpsEtat}}}}]},
+                    this.resolveIncidents
+                ).populate({
+                    model: 'copros',
+                    path: 'coproId'
+                });
+            }
         });
     } else
         res.status(401).send({success: false, message: 'accès refusé'});
