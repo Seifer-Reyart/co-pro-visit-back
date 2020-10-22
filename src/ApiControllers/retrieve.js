@@ -691,7 +691,7 @@ let postIncidentslist = (req,res) => {
         Incident.find({courtierId}, this.resolveIncidents);
     else if (req.user.role === 'pcs' && coproId)
         Incident.find({coproId}, this.resolveIncidents);
-    else if (req.user.id === 'prestataire') {
+    else if (req.user.role === 'prestataire') {
         Prestataire.findOne({_id: req.user.id}, function (err, presta) {
             let corpsEtat = presta.corpsEtat;
             Incident.find(
