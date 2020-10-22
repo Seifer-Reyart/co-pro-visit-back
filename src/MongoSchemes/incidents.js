@@ -23,7 +23,7 @@ let incidentsSchema = new Schema({
         required: true
     },
     corpsEtat               : {
-        type: String,
+        type: [String],
         required: true
     },
     images                  : {

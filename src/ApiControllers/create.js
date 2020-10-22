@@ -875,10 +875,10 @@ let registerIncident = async (req, res) => {
                             else {
                                 Prestataire.updateMany({
                                     $and: [
-                                        {corpsEtat: {$elemMatch: {$eq: corpsEtat}}},
+                                        {corpsEtat: {$elemMatch: {$in: corpsEtat}}},
                                         {syndics: {$elemMatch: {$eq: copr.syndicNominated}}}
                                         ]
-                                }, {$push: {incidentId: incid._id}}, {new: true}, function (err, prest) {
+                                }, {$addToSet: {incidentId: incid._id}}, {new: true}, function (err, prest) {
                                     if (err)
                                         res.status(400).send({success: false, message: "Erreur lors de la mise à jour de la liste des prestataires", err});
                                     else

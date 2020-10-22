@@ -691,7 +691,12 @@ let postIncidentslist = (req,res) => {
         Incident.find({courtierId}, this.resolveIncidents);
     else if (req.user.role === 'pcs' && coproId)
         Incident.find({coproId}, this.resolveIncidents);
-    else
+    else if (req.user.id === 'prestataire') {
+        Prestataire.findOne({_id: req.user.id}, function (err, presta) {
+            let corpsEtat = presta.corpsEtat;
+            Incident.find({$and: [{syndicId}, {corpsEtat: {$elemMatch: {$in: {corpsEtat}}}}]}, this.resolveIncidents);
+        });
+    } else
         res.status(401).send({success: false, message: 'accès refusé'});
 }
 
