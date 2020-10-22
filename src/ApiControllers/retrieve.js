@@ -694,7 +694,13 @@ let postIncidentslist = (req,res) => {
     else if (req.user.id === 'prestataire') {
         Prestataire.findOne({_id: req.user.id}, function (err, presta) {
             let corpsEtat = presta.corpsEtat;
-            Incident.find({$and: [{syndicId}, {corpsEtat: {$elemMatch: {$in: {corpsEtat}}}}]}, this.resolveIncidents);
+            Incident.find(
+                {$and: [{syndicId}, {corpsEtat: {$elemMatch: {$in: {corpsEtat}}}}]},
+                this.resolveIncidents
+            ).populate({
+                model: 'copros',
+                path: 'coproId'
+            });
         });
     } else
         res.status(401).send({success: false, message: 'accès refusé'});
