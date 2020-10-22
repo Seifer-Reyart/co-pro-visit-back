@@ -857,8 +857,8 @@ let registerIncident = async (req, res) => {
                     situation               ,
                     description             ,
                     corpsEtat               ,
-                    courtierId      : courtierId ?? null,
-                    gestionnaireId  : gestionnaireId ?? null,
+                    courtierId      : courtierId ? courtierId : null,
+                    gestionnaireId  : gestionnaireId ? gestionnaireId : null,
                     architecteId            ,
                     visiteId                ,
                     syndicId                ,
@@ -869,15 +869,15 @@ let registerIncident = async (req, res) => {
                     if (err) {
                         res.status(400).send({ success: false, message: "Erreur lors de la création de l'Incident", err});
                     } else {
-                        Copro.findOneAndUpdate({_id: coproId}, {$push: {incidentId: incid._id}}, {new: true}, function (err, court) {
+                        Copro.findOneAndUpdate({_id: coproId}, {$push: {incidentId: incid._id}}, {new: true}, function (err, cpr) {
                             console.log('Copro.findOneAndUpdate err', err);
-                            if (err || !court)
+                            if (err || !cpr)
                                 res.status(400).send({success: false, message: "Erreur lors de la mise à jour de la copropriété associée", err});
                             else {
                                 Prestataire.updateMany({
                                     $and: [
                                         {corpsEtat: {$elemMatch: {$in: corpsEtat}}},
-                                        {syndics: {$elemMatch: {$eq: copr.syndicNominated}}}
+                                        {syndics: {$elemMatch: {$eq: syndicId}}}
                                         ]
                                 }, {$addToSet: {incidentId: incid._id}}, {new: true}, function (err, prest) {
                                     if (err)
