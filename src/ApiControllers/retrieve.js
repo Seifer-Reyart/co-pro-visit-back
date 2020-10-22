@@ -669,14 +669,20 @@ let postArchitecte = (req,res) => {
 /*** fetch Incidents list ***/
 
 let postIncidentslist = (req,res) => {
+    console.log(req.body)
     const { coproId, architecteId, syndicId, gestionnaireId, courtierId } = req.body;
+    console.log("start check...")
     this.resolveIncidents = function (err, incidents) {
-        if (err)
+        if (err) {
+            console.log("err: ", err)
             res.status(400).send({success: false, message: 'erreur system', err});
-        else if (incidents && incidents.length > 0)
+        } else if (incidents && incidents.length > 0) {
+            console.log("incidents: ",incidents)
             res.status(200).send({success: true, incidents});
-        else
+        } else {
+            console.log("not found")
             res.status(404).send({success: false, message: 'aucun incident enregistrée'});
+        }
     };
 
     if (req.user.role === 'admin')
