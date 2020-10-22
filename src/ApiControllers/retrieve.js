@@ -601,7 +601,7 @@ let getVisitesArchi = (req,res) => {
 
 let getOneVisite = (req,res) => {
     if (req.user.role === 'admin')
-        Visite.find({_id: req.body._id}, (err, visite) => {
+        Visite.findOne({_id: req.body._id}, (err, visite) => {
             if (err)
                 res.status(400).send({success: false, message: 'erreur system', err});
             else if (!visite)
@@ -616,7 +616,7 @@ let getOneVisite = (req,res) => {
             path: 'gestionnaireId'
         });
     else if (req.user.role === 'architecte')
-        Visite.find({$and: [{_id: req.body._id}, {architecteId: req.user.id}]}, (err, visite) => {
+        Visite.findOne({$and: [{_id: req.body._id}, {architecteId: req.user.id}]}, (err, visite) => {
             if (err)
                 res.status(400).send({success: false, message: 'erreur system', err});
             else if (!visite)
