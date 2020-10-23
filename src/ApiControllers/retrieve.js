@@ -701,6 +701,7 @@ let postIncidentslist = (req,res) => {
         console.log("case Presta")
         Prestataire.findOne({_id: req.user.id}, function (err, presta) {
             console.log('Presta: ', presta)
+            let _this = this;
             if (err) {
                 console.log("err: ", err)
                 res.status(400).send({success: false, message: 'erreur system', err});
@@ -712,7 +713,7 @@ let postIncidentslist = (req,res) => {
                 console.log("corpsEtat: ",corpsEtat)
                 Incident.find(
                     {$and: [{syndicId}, {corpsEtat: {$elemMatch: {$in: corpsEtat}}}]},
-                    this.resolveIncidents
+                    _this.resolveIncidents
                 ).populate({
                     model: 'copros',
                     path: 'coproId'
