@@ -700,8 +700,6 @@ let postIncidentslist = (req,res) => {
     else if (req.user.role === 'prestataire' && syndicId) {
         console.log("case Presta")
         Prestataire.findOne({_id: req.user.id}, function (err, presta) {
-            console.log('Presta: ', presta)
-            let _this = this;
             if (err) {
                 console.log("err: ", err)
                 res.status(400).send({success: false, message: 'erreur system', err});
@@ -712,12 +710,23 @@ let postIncidentslist = (req,res) => {
                 let corpsEtat = presta.corpsEtat;
                 console.log("corpsEtat: ",corpsEtat)
                 Incident.find(
-                    {$and: [{syndicId}, {corpsEtat: {$elemMatch: {$in: corpsEtat}}}]},
-                    _this.resolveIncidents
-                ).populate({
-                    model: 'copros',
-                    path: 'coproId'
-                });
+                    {$and: [{syndicId: syndicId}, {corpsEtat: {$elemMatch: {$in: corpsEtat}}}]},
+                    (err, incidents) => {
+                        console.log('resolve...')
+                        if (err) {
+                            console.log("err: ", err)
+                            res.status(400).send({success: false, message: 'erreur system', err});
+                        } else if (incidents) {
+                            console.log("incidents: ", incidents)
+                            res.status(200).send({success: true, incidents});
+                        } else {
+                            console.log("not found")
+                            res.status(404).send({success: false, message: 'aucun incident enregistrée'});
+                        }
+                    }).populate({
+                        model: 'copros',
+                        path: 'coproId'
+                    });
             }
         });
     } else
