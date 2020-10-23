@@ -705,7 +705,6 @@ let postIncidentslist = (req,res) => {
     console.log(req.body)
     const { coproId, architecteId, syndicId, gestionnaireId, courtierId } = req.body;
     this.resolveIncidents = function (err, incidents) {
-        console.log('resolve...')
         if (err) {
             console.log("err: ", err)
             res.status(400).send({success: false, message: 'erreur system', err});
@@ -731,33 +730,30 @@ let postIncidentslist = (req,res) => {
     else if (req.user.role === 'pcs' && coproId)
         Incident.find({coproId}, this.resolveIncidents);
     else if (req.user.role === 'prestataire' && syndicId) {
-        console.log("case Presta")
         Prestataire.findOne({_id: req.user.id}, function (err, presta) {
             if (err) {
-                console.log("err: ", err)
                 res.status(400).send({success: false, message: 'erreur system', err});
             } else if (!presta) {
-                console.log("not found presta")
                 res.status(404).send({success: false, message: "Ce prestataire n'existe pas"});
             } else {
                 let corpsEtat = presta.corpsEtat;
-                console.log("corpsEtat: ",corpsEtat)
                 Incident.find(
-                    {$and: [{syndicId: syndicId}, {corpsEtat: {$elemMatch: {$in: corpsEtat}}}]},
+                    {$and: [{coproId: coproId}, {corpsEtat: {$elemMatch: {$in: corpsEtat}}}]},
                     (err, incidents) => {
                         if (err) {
-                            console.log("err: ", err)
                             res.status(400).send({success: false, message: 'erreur system', err});
                         } else if (incidents) {
-                            console.log("incidents: ", incidents)
-                            res.status(200).send({success: true, incidents});
+                            Copro.findOne({_id: coproId}, function (err, copro) {
+                                if (err)
+                                    res.status(400).send({success: false, message: 'erreur system', err});
+                                else if (!copro)
+                                    res.status(404).send({success: false, message: "Cette Copro n'existe pas"});
+                                else
+                                    res.status(200).send({success: true, copro, incidents});
+                            });
                         } else {
-                            console.log("not found")
                             res.status(404).send({success: false, message: 'aucun incident enregistrée'});
                         }
-                    }).populate({
-                        model: 'copros',
-                        path: 'coproId'
                     });
             }
         });
