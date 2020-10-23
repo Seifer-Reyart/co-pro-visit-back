@@ -671,12 +671,12 @@ let postArchitecte = (req,res) => {
 let postIncidentslist = (req,res) => {
     console.log(req.body)
     const { coproId, architecteId, syndicId, gestionnaireId, courtierId } = req.body;
-    console.log("start check...")
     this.resolveIncidents = function (err, incidents) {
+        console.log('resolve...')
         if (err) {
             console.log("err: ", err)
             res.status(400).send({success: false, message: 'erreur system', err});
-        } else if (incidents && incidents.length > 0) {
+        } else if (incidents) {
             console.log("incidents: ",incidents)
             res.status(200).send({success: true, incidents});
         } else {
@@ -700,6 +700,7 @@ let postIncidentslist = (req,res) => {
     else if (req.user.role === 'prestataire' && syndicId) {
         console.log("case Presta")
         Prestataire.findOne({_id: req.user.id}, function (err, presta) {
+            console.log('Presta: ', presta)
             if (err) {
                 console.log("err: ", err)
                 res.status(400).send({success: false, message: 'erreur system', err});
@@ -710,7 +711,7 @@ let postIncidentslist = (req,res) => {
                 let corpsEtat = presta.corpsEtat;
                 console.log("corpsEtat: ",corpsEtat)
                 Incident.find(
-                    {$and: [{syndicId}, {corpsEtat: {$elemMatch: {$eq: "Chauffagiste"}}}]},
+                    {$and: [{syndicId}, {corpsEtat: {$elemMatch: {$in: corpsEtat}}}]},
                     this.resolveIncidents
                 ).populate({
                     model: 'copros',
