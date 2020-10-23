@@ -286,7 +286,7 @@ let getCopro = (req, res) => {
                 }).populate({
                     path: 'batiments',
                     model: 'batiments'
-                })
+                });
         });
     else if (req.user.role === 'pcs')
         PresidentCS.findOne({_id: req.user.id}, (err, pcs) => {
@@ -302,7 +302,40 @@ let getCopro = (req, res) => {
                         res.status(404).send({success: false, message: 'aucun parc enregistré'});
                     else
                         res.status(200).send({success: true, copro});
-                })
+                });
+        });
+    else if (req.user.role === 'prestataire')
+        Prestataire.findOne({_id: req.user.id}, (err, presta) => {
+           if (err)
+               res.status(400).send({success: false, message: 'erreur system', err});
+           else if (!presta)
+               res.status(404).send({success: false, message: 'aucun prestataire enregistré'});
+           else
+               Copro.find(
+                   {
+                       $and: [
+                           {
+                               $or: [
+                                   {syndicNominated: {$in: presta.syndics}},
+                                   {syndicEnCours: {$elemMatch: {$in: presta.syndics}}}
+                               ]
+                           },
+                           {incidentId: {$elemMatch: {$in: presta.incidentId}}}
+                       ]
+                   },
+                   (err, copros) => {
+                       if (err)
+                           res.status(400).send({success: false, message: 'erreur system', err});
+                       else if (!copros)
+                           res.status(404).send({success: false, message: 'aucune copro enregistrée'});
+                       else {
+                           res.status(200).send({success: true, copros});
+                       }
+                   }).select({nomCopro: 1, address: 1, codePostal: 1, ville: 1, batiments: 1})
+                   .populate({
+                       path: 'batiments',
+                       model: 'batiments'
+                   })
         });
     else
         res.status(401).send({success: false, message: 'accès refusé'});
@@ -712,7 +745,6 @@ let postIncidentslist = (req,res) => {
                 Incident.find(
                     {$and: [{syndicId: syndicId}, {corpsEtat: {$elemMatch: {$in: corpsEtat}}}]},
                     (err, incidents) => {
-                        console.log('resolve...')
                         if (err) {
                             console.log("err: ", err)
                             res.status(400).send({success: false, message: 'erreur system', err});
