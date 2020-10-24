@@ -663,6 +663,15 @@ let getOneVisite = (req,res) => {
             model: 'gestionnaires',
             path: 'gestionnaireId'
         });
+    else if (req.user.role === 'prestataire')
+        Visite.findOne({_id: req.body._id}, (err, visite) => {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur system', err});
+            else if (!visite)
+                res.status(404).send({success: false, message: 'aucune visite enregistrée'});
+            else
+                res.status(200).send({success: true, visite});
+        }).select({accessCode: 1, cleCabinet: 1, commentaire: 1, gardien: 1, _id: 0});
     else
         res.status(401).send({success: false, message: 'accès refusé'});
 }
