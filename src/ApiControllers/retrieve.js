@@ -738,7 +738,7 @@ let postIncidentslist = (req,res) => {
         Incident.find({courtierId}, this.resolveIncidents);
     else if (req.user.role === 'pcs' && coproId)
         Incident.find({coproId}, this.resolveIncidents);
-    else if (req.user.role === 'prestataire' && syndicId) {
+    else if (req.user.role === 'prestataire') {
         Prestataire.findOne({_id: req.user.id}, function (err, presta) {
             if (err) {
                 res.status(400).send({success: false, message: 'erreur system', err});
