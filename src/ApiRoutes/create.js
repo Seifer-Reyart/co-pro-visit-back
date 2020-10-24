@@ -24,13 +24,15 @@ let {
 let {
     uploadRCDecennale,
     uploadRCProfessionnelle,
-    uploadBatImage
+    uploadBatImage,
+    uploadDevisFile,
+    uploadFactureFile
 } = require('../ApiControllers/create');
 
 let registerCopro       = require('../ApiControllers/create').registerCopro,
     registerBatiment    = require('../ApiControllers/create').registerBatiment;
 
-let registerDevis   = require('../ApiControllers/create').registerDevis;
+let registerEvaluation   = require('../ApiControllers/create').registerEvaluation;
 
 /***************/
 /* init router */
@@ -582,7 +584,7 @@ router.post('/batiment', registerBatiment);
  * @consumes application/json
  * @security JWT
  */
-router.post('/devis', registerDevis);
+router.post('/evaluation', registerEvaluation);
 
 /**
  * @typedef INCIDENT
@@ -647,5 +649,41 @@ router.post('/incident', multer().any(), registerIncident);
  */
 
 router.post('/batImage', multer().fields([{name: 'image'}]), uploadBatImage);
+
+/**
+ * @typedef Devis
+ * @property {file} data.required - fichier Devis au format jpg|jpeg|png|pdf
+ */
+/**
+ * Cette route permet de uploader un Devis
+ * @route POST /create/rcdecennale
+ * @group prestataire
+ * @param {Devis.model} data.body - fichier RCDecennale au format jpg|jpeg|png|pdf
+ * @returns {object} 200 - {success: true, message : "devis uploadé!", RCDecennale: "filename"}
+ * @returns {Error}  400 - {success: false, message: error system log}
+ * @returns {Error}  401 - si dans token, role !== prestataire  {success: false, message: 'accès interdit'}
+ * @produces application/json
+ * @consumes multipart/form-data
+ * @security JWT
+ */
+router.post('/devis-pdf', uploadDevisFile);
+
+/**
+ * @typedef Devis
+ * @property {file} data.required - fichier Facture au format jpg|jpeg|png|pdf
+ */
+/**
+ * Cette route permet de uploader une Facture
+ * @route POST /create/rcdecennale
+ * @group prestataire
+ * @param {Devis.model} data.body - fichier RCDecennale au format jpg|jpeg|png|pdf
+ * @returns {object} 200 - {success: true, message : "devis uploadé!", RCDecennale: "filename"}
+ * @returns {Error}  400 - {success: false, message: error system log}
+ * @returns {Error}  401 - si dans token, role !== prestataire  {success: false, message: 'accès interdit'}
+ * @produces application/json
+ * @consumes multipart/form-data
+ * @security JWT
+ */
+router.post('/facture-pdf', uploadFactureFile);
 
 module.exports = router;

@@ -721,8 +721,7 @@ let registerBatiment = async (req, res) => {
     }
 }
 
-/* upload an xls/xlsx file of copros, parse it and store elements in DB */
-/* upload RCProfessionnelle & RCDecennale */
+/* upload Devis & Facture */
 let storageDevis = multer.diskStorage({
     destination: function (req, file, cb) {
         // Uploads is the Upload_folder_name
@@ -755,53 +754,94 @@ let uploadDevis = multer({
 
 /* register new Devis */
 
-let registerDevis = async (req, res) => {
-    const {name, codePostal, ville, copro} = req.body;
+let registerEvaluation = async (req, res) => {
+    const {coproId, prestataireId, syndicId} = req.body;
     if (req.user.role !== 'admin' && req.user.role !== 'prestataire') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
-        Devis.findOne({$and: [{copro}, {prestataire}, {syndic}]}, async (err, Devis) => {
+        Devis.findOne({$and: [{coproId}, {prestataireId}, {syndicId}]}, async (err, Devis) => {
             if (err)
                 res.status(400).send({success: false, message: err});
             else if (Devis)
                 res.status(403).send({success: false, message: 'Un devis a déjà été crée'});
             else {
-                uploadDevis(req, res, function(err) {
-                    if(err) {
-                        // ERROR occured (here it can be occured due
-                        // to uploading file of size greater than
-                        // 5MB or uploading different file type)
-                        res.status(400).send({success: false, message: err})
-                    } else {
-                        // SUCCESS, file successfully uploaded
-                        let devis = new Devis({
-                            reference       : req.body.reference,
-                            descriptif      : req.body.descriptif,
-                            naturetravaux   : req.body.naturetravaux,
-                            support         : req.body.support,
-                            hauteur         : req.body.hauteur,
-                            couleur         : req.body.couleur,
-                            photos          : req.body.photos,
-                            evaluationTTC   : req.body.evaluationTTC,
-                            copro    	    : req.body.copro,
-                            Batiment        : req.body.Batiment,
-                            prestataire     : req.body.prestataire,
-                            syndic          : req.body.syndic,
-                            gestionnaire    : req.body.gestionnaire,
-                            pcs             : req.body.pcs,
-                        })
-                        devis.save(function(err) {
-                            if (err) {
-                                res.send({ success: false, message: "Erreur lors de la création du Devis", err});
-                            } else {
-                                res.send({ success: true, message : "Le Devis a bien été créé"});
-                            }
-                        });
-                        res.status(200).send({success: true, message:"devis uploadé!", RCDecennale: req.file.filename})
-                    }
+                let devis = new Devis({
+                    evaluationTTC   : req.body.evaluationTTC,
+                    coproId    	    : coproId,
+                    prestataireId   : prestataireId,
+                    syndicId        : syndicId,
+                    commentaire     : req.body.commentaire,
+                    gestionnaireId  : req.body.gestionnaireId,
+                    pcsId           : req.body.pcsId,
+                    corpsEtat       : req.body.corpsEtat
                 })
+                devis.save(function(err) {
+                    if (err) {
+                        res.send({ success: false, message: "Erreur lors de la création de l'évaluation", err});
+                    } else {
+                        res.status(200).send({success: true, message:"Evaluation envoyée!"})
+                    }
+                });
             }
         })
+    }
+}
+
+let uploadDevisFile = (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'prestataire') {
+        res.status(403).send({success: false, message: 'accès interdit'});
+    } else {
+        const {option} = req.body;
+        uploadDevis(req, res, function(err) {
+            if (err) {
+                // ERROR occured (here it can be occured due
+                // to uploading file of size greater than
+                // 5MB or uploading different file type)
+                res.status(400).send({success: false, message: err})
+            } else {
+                Devis.findOneAndUpdate(
+                    {$and: [{coproId}, {prestataireId}, {syndicId}]},
+                    {$set: {devisPDF: '/uploads/devis/'+req.file.filename}},
+                    {new: true},
+                    (err, devis) => {
+                        if (err)
+                            res.status(400).send({success: false, message: "erreur système", err});
+                        else if (!devis)
+                            res.status(404).send({success: false, message: "devis introuvable"});
+                        else
+                            res.status(200).send({success: true, message: "devis uploadé"});
+                    });
+            }
+        });
+    }
+}
+
+let uploadFactureFile = (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'prestataire') {
+        res.status(403).send({success: false, message: 'accès interdit'});
+    } else {
+        const {option} = req.body;
+        uploadDevis(req, res, function(err) {
+            if (err) {
+                // ERROR occured (here it can be occured due
+                // to uploading file of size greater than
+                // 5MB or uploading different file type)
+                res.status(400).send({success: false, message: err})
+            } else {
+                Devis.findOneAndUpdate(
+                    {$and: [{coproId}, {prestataireId}, {syndicId}]},
+                    {$set: {facturePDF: '/uploads/devis/'+req.file.filename}},
+                    {new: true},
+                    (err, devis) => {
+                        if (err)
+                            res.status(400).send({success: false, message: "erreur système", err});
+                        else if (!devis)
+                            res.status(404).send({success: false, message: "devis introuvable"});
+                        else
+                            res.status(200).send({success: true, message: "facture uploadée"});
+                    });
+            }
+        });
     }
 }
 
@@ -913,9 +953,11 @@ module.exports = {
     registerGestionnaire,
     registerCopro,
     registerBatiment,
-    registerDevis,
+    registerEvaluation,
     registerIncident,
     parseXlsThenStore,
     generateP,
+    uploadDevisFile,
+    uploadFactureFile,
     salt
 };

@@ -2,31 +2,11 @@ let mongoose    = require('mongoose'),
     Schema      = mongoose.Schema;
 
 let devisSchema = new Schema({
-    reference       : {
-        type    : String,
-        default : null
+    date                    : {
+        type    : Date,
+        default : new Date()
     },
-    descriptif      : {
-        type    : String,
-        default : null
-    },
-    naturetravaux   : {
-        type    : [String],
-        default : []
-    },
-    support         : {
-        type    : String,
-        default : null
-    },
-    hauteur         : {
-        type    : Number,
-        default : null
-    },
-    couleur         : {
-        type    : String,
-        default : null
-    },
-    photos          : {
+    corpsEtat       : {
         type    : [String],
         default : []
     },
@@ -34,13 +14,21 @@ let devisSchema = new Schema({
         type    : Number,
         default : 0
     },
+    commentaire     : {
+        type    : String,
+        default : ''
+    },
+    devisPDF        : {
+        type    : String,
+        default : null
+    },
+    facturePDF      : {
+        type    : String,
+        default : null
+    },
     coproId    	    : {
         type    : Schema.Types.ObjectId,
         required: true
-    },
-    batimentId      : {
-        type    : Schema.Types.ObjectId,
-        default : null
     },
     prestataireId   : {
         type    : Schema.Types.ObjectId,
@@ -58,6 +46,10 @@ let devisSchema = new Schema({
         type    : Schema.Types.ObjectId,
         default : null
     },
+    demandeDevis    : {
+        type    : Boolean,
+        default : false
+    }
 });
 
 let devis = mongoose.model('devis', devisSchema);
