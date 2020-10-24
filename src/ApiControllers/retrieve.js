@@ -758,7 +758,7 @@ let postIncidentslist = (req,res) => {
                                 else if (!copro)
                                     res.status(404).send({success: false, message: "Cette Copro n'existe pas"});
                                 else
-                                    res.status(200).send({success: true, copro, incidents});
+                                    res.status(200).send({success: true, copro, incidents, abonnements: presta.abonnements});
                             }).populate({
                                 path: 'pcs',
                                 model: 'pcs'
