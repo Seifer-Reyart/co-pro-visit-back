@@ -2,6 +2,7 @@ let mongoose    = require('mongoose'),
     Schema      = mongoose.Schema;
 
 let devisSchema = new Schema({
+    incidentId      : {type: Schema.Types.ObjectId, default: null},
     evaluationTTC   : {type: Number, default: 0},
     metrages        : {type: Number, default: 0},
     coproId    	    : {type: Schema.Types.ObjectId, default: null},

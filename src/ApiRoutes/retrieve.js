@@ -367,7 +367,6 @@ router.post('/courtier-copro', getCoproCourtierBySyndic);
  * @route POST /retrieve/devis-list
  * @group Get_Data
  * @param {string} prestataireId.body.required - _id du syndic
- * @param {string} option.body.required - 'devis' || 'evaluation'
  * @returns {object} 200 - {success: true, list: [object]}
  * @returns {Error}  400 - {succes: false, message: 'erreur système', err}
  * @returns {Error}  401 - si dans token, role !== prestataire ou admin  {success: false, message: 'accès refusé'}
