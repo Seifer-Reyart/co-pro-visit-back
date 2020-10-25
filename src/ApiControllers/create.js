@@ -759,12 +759,13 @@ let registerEvaluation = async (req, res) => {
     if (req.user.role !== 'admin' && req.user.role !== 'prestataire') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
-        Devis.findOne({$and: [{coproId}, {prestataireId}, {syndicId}]}, async (err, Devis) => {
-            if (err)
+        Devis.findOne({$and: [{coproId}, {prestataireId}, {syndicId}, {incidentId}]}, async (err, Devis) => {
+            if (err) {
+                console.log(err)
                 res.status(400).send({success: false, message: err});
-            else if (Devis)
+            } else if (Devis) {
                 res.status(403).send({success: false, message: 'Un devis a déjà été crée'});
-            else {
+            } else {
                 let devis = new Devis({
                     incidentId      : req.body.incidentId,
                     evaluationTTC   : req.body.evaluationTTC,
@@ -787,6 +788,7 @@ let registerEvaluation = async (req, res) => {
                 })
                 devis.save(function(err) {
                     if (err) {
+                        console.log(err)
                         res.send({ success: false, message: "Erreur lors de la création de l'évaluation", err});
                     } else {
                         res.status(200).send({success: true, message:"Evaluation envoyée!"})
