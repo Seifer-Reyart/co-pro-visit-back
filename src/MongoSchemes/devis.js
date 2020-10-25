@@ -18,7 +18,7 @@ let devisSchema = new Schema({
     situation       : {type: String, default: null},
     corpsEtat       : {type: [String], default: []},
     images          : {type: [String], default: []},
-    date            : new Date(),
+    date            : {type: Date, default: new Date()},
     demandeDevis    : {type: Boolean, default: false}
 });
 
