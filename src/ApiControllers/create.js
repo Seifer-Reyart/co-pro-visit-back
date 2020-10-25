@@ -756,9 +756,30 @@ let uploadDevis = multer({
 
 let registerEvaluation = async (req, res) => {
     const {coproId, prestataireId, syndicId, incidentId} = req.body;
+
     if (req.user.role !== 'admin' && req.user.role !== 'prestataire') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
+        let devis = new Devis({
+            incidentId      : incidentId,
+            evaluationTTC   : req.body.evaluationTTC,
+            coproId    	    : coproId,
+            prestataireId   : prestataireId,
+            pcsId           : req.body.pcsId,
+            syndicId        : syndicId,
+            commentaire     : req.body.commentaire,
+            gestionnaireId  : req.body.gestionnaireId,
+            corpsEtat       : req.body.corpsEtat,
+            metrages        : req.body.metrages,
+            desordre        : req.body.desordre,
+            situation       : req.body.situation,
+            description     : req.body.description,
+            courtierId      : req.body.courtierId,
+            architecteId    : req.body.architecteId,
+            visiteId        : req.body.visiteId,
+            images          : req.body.images,
+            date            : new Date()
+        });
         Devis.findOne({$and: [{coproId}, {prestataireId}, {syndicId}, {incidentId}]}, async (err, Devis) => {
             if (err) {
                 console.log(err)
@@ -766,26 +787,6 @@ let registerEvaluation = async (req, res) => {
             } else if (Devis) {
                 res.status(403).send({success: false, message: 'Un devis a déjà été crée'});
             } else {
-                let devis = new Devis({
-                    incidentId      : incidentId,
-                    evaluationTTC   : req.body.evaluationTTC,
-                    coproId    	    : coproId,
-                    prestataireId   : prestataireId,
-                    pcsId           : req.body.pcsId,
-                    syndicId        : syndicId,
-                    commentaire     : req.body.commentaire,
-                    gestionnaireId  : req.body.gestionnaireId,
-                    corpsEtat       : req.body.corpsEtat,
-                    metrages        : req.body.metrages,
-                    desordre        : req.body.desordre,
-                    situation       : req.body.situation,
-                    description     : req.body.description,
-                    courtierId      : req.body.courtierId,
-                    architecteId    : req.body.architecteId,
-                    visiteId        : req.body.visiteId,
-                    images          : req.body.images,
-                    date            : new Date()
-                })
                 devis.save(function(err) {
                     if (err) {
                         console.log(err)
