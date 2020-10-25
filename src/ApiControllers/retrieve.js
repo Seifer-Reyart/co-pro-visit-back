@@ -836,6 +836,27 @@ let postPrestataire = (req, res) => {
         res.status(401).send({success: false, message: 'accès refusé'});
 }
 
+let retrieveDevis = (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'prestataire')
+        res.status(401).send({success: false, message: 'accès refusé'});
+    else {
+        const {prestataireId, option} = req.body;
+        let filter = {};
+        if (option === 'evaluation')
+            filter = {demandeDevis: false}
+        else if (option === 'devis')
+            filter = {demandeDevis: true}
+        Devis.find({$and: [{prestataireId}, filter]}, function (err, devis) {
+            if (err)
+                res.status(400).send({succes: false, message: 'erreur système', err});
+            else if (!devis)
+                res.status(404).send({succes: false, message: "ce devis/evaluation n'existe pas"});
+            else
+                res.status(200).send({success: true, list: devis});
+        });
+    }
+}
+
 module.exports = {
     getCopro,
     postCopro,
@@ -857,5 +878,6 @@ module.exports = {
     postEncoursSelect,
     getPrestataire,
     postPrestataire,
-    getCoproCourtierBySyndic
+    getCoproCourtierBySyndic,
+    retrieveDevis
 }
