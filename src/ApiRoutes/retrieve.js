@@ -30,7 +30,8 @@ let {
     getPrestataire,
     postPrestataire,
     getCoproCourtierBySyndic,
-    retrieveDevis
+    retrieveDevis,
+    retrieveDevisByCopro
 } = require('../ApiControllers/retrieve');
 
 /***************/
@@ -366,7 +367,7 @@ router.post('/courtier-copro', getCoproCourtierBySyndic);
  * Cette route permet de récupérer les evaluations/devis, JWT necessaire.
  * @route POST /retrieve/devis-list
  * @group Get_Data
- * @param {string} prestataireId.body.required - _id du syndic
+ * @param {string} prestataireId.body.required - _id du prestataire
  * @returns {object} 200 - {success: true, list: [object]}
  * @returns {Error}  400 - {succes: false, message: 'erreur système', err}
  * @returns {Error}  401 - si dans token, role !== prestataire ou admin  {success: false, message: 'accès refusé'}
@@ -376,5 +377,20 @@ router.post('/courtier-copro', getCoproCourtierBySyndic);
  */
 
 router.post('/devis-list', retrieveDevis);
+
+/**
+ * Cette route permet de récupérer les evaluations/devis d'une Copro, JWT necessaire.
+ * @route POST /retrieve/devis-copro
+ * @group Get_Data
+ * @param {string} coproId.body.required - _id d'une Copro
+ * @returns {object} 200 - {success: true, list: [object]}
+ * @returns {Error}  400 - {succes: false, message: 'erreur système', err}
+ * @returns {Error}  401 - si dans token, role !== prestataire ou admin  {success: false, message: 'accès refusé'}
+ * @returns {Error}  404 - si aucun devis/evaluation trouvé  {succes: false, message: "ce devis/evaluation n'existe pas"}
+ * @produces application/json
+ * @security JWT
+ */
+
+router.post('/devis-copro', retrieveDevisByCopro);
 
 module.exports = router;

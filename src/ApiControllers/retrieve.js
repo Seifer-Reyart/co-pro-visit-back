@@ -853,6 +853,21 @@ let retrieveDevis = (req, res) => {
     }
 }
 
+let retrieveDevisByCopro = (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
+        res.status(401).send({success: false, message: 'accès refusé'});
+    else {
+        Devis.find({$and: [{coproId: req.body.coproId}, {$or: [{syndicId: req.user.id},{gestionnaireId: req.user.id}]}]}, function (err, devis) {
+            if (err)
+                res.status(400).send({succes: false, message: 'erreur système', err});
+            else if (!devis)
+                res.status(404).send({succes: false, message: "ce devis/evaluation n'existe pas"});
+            else
+                res.status(200).send({success: true, list: devis});
+        });
+    }
+}
+
 module.exports = {
     getCopro,
     postCopro,
@@ -875,5 +890,6 @@ module.exports = {
     getPrestataire,
     postPrestataire,
     getCoproCourtierBySyndic,
-    retrieveDevis
+    retrieveDevis,
+    retrieveDevisByCopro
 }
