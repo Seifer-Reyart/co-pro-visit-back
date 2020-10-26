@@ -54,7 +54,14 @@ let incidentsSchema = new Schema({
         type    : Schema.Types.ObjectId,
         default : null
     },
-    commentaire: String
+    commentaire             : {
+        type    : String,
+        default : null
+    },
+    devis                   : {
+        type    : [Schema.Types.ObjectId],
+        default : []
+    }
 });
 
 let incidents = mongoose.model('incidents', incidentsSchema);

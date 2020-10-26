@@ -782,17 +782,29 @@ let registerEvaluation = async (req, res) => {
         });
         Devis.findOne({$and: [{coproId}, {prestataireId}, {syndicId}, {incidentId}]}, async (err, Devis) => {
             if (err) {
-                console.log(err)
                 res.status(400).send({success: false, message: err});
             } else if (Devis) {
                 res.status(403).send({success: false, message: 'Un devis a déjà été crée'});
             } else {
-                devis.save(function(err) {
+                devis.save(function(err, dev) {
                     if (err) {
                         console.log(err)
                         res.send({ success: false, message: "Erreur lors de la création de l'évaluation", err});
                     } else {
-                        res.status(200).send({success: true, message:"Evaluation envoyée!"})
+                        Incident.findOneAndUpdate(
+                            {_id: incidentId},
+                            {$push: {devis: dev._id}},
+                            {new: true},
+                            (err, result) => {
+                                if (err) {
+                                    res.status(400).send({success: false, message: "erreur update Incident", err});
+                                } else if (!result) {
+                                    res.status(404).send({success: false, message: 'Incident introuvable'});
+                                } else {
+                                    res.status(200).send({success: true, message:"Evaluation envoyée!"})
+                                }
+                            }
+                        )
                     }
                 });
             }

@@ -60,8 +60,11 @@ let getSyndics = (req, res) => {
                     else if (!syndics)
                         res.status(404).send({success: false, message: 'aucun syndic enregistré'});
                     else
-                        res.status(200).send({success: true, syndics});
+                        res.status(200).send({success: true, syndics, parc: courtier.parc});
                 });
+        }).populate({
+            path: 'parc',
+            model: 'copros'
         });
     else if (req.user.role === 'prestataire')
         Prestataire.findOne({_id: req.user.id}, (err, prestataire) => {
@@ -768,6 +771,9 @@ let postIncidentslist = (req,res) => {
                             }).populate({
                                 path: 'batiments',
                                 model: 'batiments'
+                            }).populate({
+                                path: 'devis',
+                                model: 'devis'
                             });
                         } else {
                             res.status(404).send({success: false, message: 'aucun incident enregistrée'});
