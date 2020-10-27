@@ -28,6 +28,19 @@ function generateP() {
     return pass;
 }
 
+function generateName() {
+    let name = 'Copro ';
+    let str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+    while (name.length <= 6) {
+        let char = Math.floor(Math.random() * str.length + 1);
+
+        name += str.charAt(char)
+    }
+
+    return name;
+}
+
 /**** slat to crypt password ****/
 let salt = bcrypt.genSaltSync(10);
 
@@ -520,10 +533,9 @@ let parseXlsThenStore = (req, res) => {
                 };
                 await obj[0].data.map((item, index) => {
                     if (index >= 1) {
-                        console.log("item: ", item)
                         if (item[0] && item[2] && item[3] && item[4] && item[5]) {
                             let copro = new Copro({
-                                nomCopro: item[1] ?? null,
+                                nomCopro: item[1] ?? generateName(),
                                 reference: item[0],
                                 address: item[2],
                                 codePostal: item[3],
@@ -537,7 +549,6 @@ let parseXlsThenStore = (req, res) => {
                             })
                             copro.save(function (err, cpr) {
                                 if (err) {
-                                    console.log("err: ", err)
                                     error.isError = true;
                                     error.message = err;
                                     error.errors.push(item)
