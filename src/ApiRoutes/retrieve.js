@@ -29,7 +29,7 @@ let {
     postEncoursSelect,
     getPrestataire,
     postPrestataire,
-    getCoproCourtierBySyndic,
+    getCoproBySyndic,
     retrieveDevis,
     retrieveDevisByCopro
 } = require('../ApiControllers/retrieve');
@@ -361,7 +361,7 @@ router.get('/prestataire-list', getPrestataire);
  * @produces application/json
  * @security JWT
  */
-router.post('/courtier-copro', getCoproCourtierBySyndic);
+router.post('/courtier-copro', getCoproBySyndic);
 
 /**
  * Cette route permet de récupérer les evaluations/devis, JWT necessaire.
