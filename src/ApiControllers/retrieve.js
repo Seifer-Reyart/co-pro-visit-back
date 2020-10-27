@@ -426,6 +426,8 @@ let getCoproBySyndic = (req, res) => {
                 });
         });
     } else if (req.user.role !== 'prestataire') {
+        const {syndicId} = req.body;
+
         Prestataire.findOne({_id: req.user.id}, (err, presta) => {
             if (err)
                 res.status(400).send({success: false, message: 'erreur system', err});
@@ -434,7 +436,6 @@ let getCoproBySyndic = (req, res) => {
             else
                 Copro.find({
                     $and: [
-                        {_id: {$in: presta.parc}},
                         {
                             $or: [
                                 {syndicNominated: syndicId}, {syndicEnCours: {$elemMatch: {$eq: syndicId}}}

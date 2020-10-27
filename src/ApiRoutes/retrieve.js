@@ -361,7 +361,7 @@ router.get('/prestataire-list', getPrestataire);
  * @produces application/json
  * @security JWT
  */
-router.post('/courtier-copro', getCoproBySyndic);
+router.post('/copro-by-syndic', getCoproBySyndic);
 
 /**
  * Cette route permet de récupérer les evaluations/devis, JWT necessaire.
