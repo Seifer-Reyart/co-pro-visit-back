@@ -522,7 +522,7 @@ let parseXlsThenStore = (req, res) => {
                     if (index >= 1) {
                         if (item[0] && item[2] && item[3] && item[4] && item[5]) {
                             let copro = new Copro({
-                                nomCopro: item[1],
+                                nomCopro: item[1] ?? null,
                                 reference: item[0],
                                 address: item[2],
                                 codePostal: item[3],
