@@ -874,6 +874,28 @@ let aboPrestaToSyndic = (req, res) => {
     }
 }
 
+let demandeDevis = (req, res) => {
+    if (req.user.role !== 'syndic')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else {
+        const {devisId, option} = req.body;
+
+        Devis.findOneAndUpdate(
+            {_id: devisId},
+            {$set: {demandeDevis: option}},
+            {new: true},
+            (err, devis) => {
+                if (err)
+                    res.status(400).send({success: false, message: "erreur système", err});
+                else if (!devis)
+                    res.status(404).send({success: false, message: "devis introuvable"});
+                else
+                    res.status(200).send({success: true, message: "demande de devis envoyée!"});
+            }
+        )
+    }
+}
+
 /* Export Functions */
 
 module.exports = {
@@ -892,5 +914,6 @@ module.exports = {
     desassignerGestionnaireToCopro,
     annulerVisite,
     sendToEtude,
-    aboPrestaToSyndic
+    aboPrestaToSyndic,
+    demandeDevis
 }

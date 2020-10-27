@@ -24,7 +24,8 @@ let {
     desassignerGestionnaireToCopro,
     annulerVisite,
     sendToEtude,
-    aboPrestaToSyndic
+    aboPrestaToSyndic,
+    demandeDevis
 } = require('../ApiControllers/gestion');
 
 /***************/
@@ -296,6 +297,23 @@ router.post('/etude', sendToEtude);
  * @security JWT
  */
 router.post('/abo-presta', aboPrestaToSyndic);
+
+/**
+ * Cette route permet au syndic de demander un devis à un prestataire, JWT necessaire.
+ * @route POST /gestion/demande-devis
+ * @group gestion
+ * @param {string} prestaId.body.required - _id d'un Prestataire
+ * @param {string} syndicId.body.required - _id d'un Syndic
+ * @param {boolean} option - true === abonner / false === désabonner
+ * @returns {object} 200 - {success: true, message: 'demande de devis envoyée'}
+ * @returns {Error}  400 - {success: false, message: 'erreur système', err}
+ * @returns {Error}  401 - quand role != prestataire {success: false, message: 'accès interdit'}
+ * @returns {Error}  404 - {success: false, message: "ce devis n'existe pas"}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.post('/demande-devis', demandeDevis);
 
 module.exports = router;
 
