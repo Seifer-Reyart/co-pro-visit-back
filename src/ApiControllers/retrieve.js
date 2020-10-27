@@ -382,7 +382,7 @@ let getEncoursSelect = (req, res) => {
 }
 
 let getCoproBySyndic = (req, res) => {
-    if (req.user.role !== 'courtier') {
+    if (req.user.role === 'courtier') {
         const {syndicId, isParc} = req.body;
 
         Courtier.findOne({_id: req.user.id}, (err, courtier) => {
@@ -425,7 +425,7 @@ let getCoproBySyndic = (req, res) => {
                     model: 'batiments'
                 });
         });
-    } else if (req.user.role !== 'prestataire') {
+    } else if (req.user.role === 'prestataire') {
         const {syndicId} = req.body;
 
         Prestataire.findOne({_id: req.user.id}, (err, presta) => {
