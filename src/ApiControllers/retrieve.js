@@ -209,19 +209,6 @@ let postCourtier = (req, res) => {
         })
 }
 
-/*** get devis ***/
-
-let getDevis = (req, res) => {
-    Devis.find({}, (err, devis) => {
-        if (err)
-            res.status(400).send({success: false, message: 'erreur system', err});
-        else if (!devis)
-            res.status(404).send({success: false, message: 'aucun devis enregistré'});
-        else
-            res.status(200).send({success: true, devis});
-    })
-}
-
 /*** get parc Copro ***/
 
 let getCopro = (req, res) => {
@@ -525,8 +512,6 @@ let postCopro = (req, res) => {
                 model: 'courtiers'
             })
             .then((copro, err) => {
-                console.log(copro)
-                console.log(err)
                 if (err)
                     res.status(400).send({success: false, message: 'erreur system', err});
                 else if (!copro)
@@ -837,6 +822,8 @@ let postPrestataire = (req, res) => {
         res.status(401).send({success: false, message: 'accès refusé'});
 }
 
+/*** get devis ***/
+
 let retrieveDevis = (req, res) => {
     if (req.user.role !== 'admin' && req.user.role !== 'prestataire')
         res.status(401).send({success: false, message: 'accès refusé'});
@@ -858,14 +845,30 @@ let retrieveDevisByCopro = (req, res) => {
     if (req.user.role !== 'admin' && req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
         res.status(401).send({success: false, message: 'accès refusé'});
     else {
-        Devis.find({$and: [{coproId: req.body.coproId}, {$or: [{syndicId: req.user.id},{gestionnaireId: req.user.id}]}]}, function (err, devis) {
-            if (err)
-                res.status(400).send({succes: false, message: 'erreur système', err});
-            else if (!devis)
-                res.status(404).send({succes: false, message: "ce devis/evaluation n'existe pas"});
-            else
-                res.status(200).send({success: true, list: devis});
-        });
+        if (req.body.option)
+            Devis.find({$and: [{coproId: req.body.coproId}, {$or: [{syndicId: req.user.id},{gestionnaireId: req.user.id}]}]}, function (err, devis) {
+                if (err)
+                    res.status(400).send({succes: false, message: 'erreur système', err});
+                else if (!devis)
+                    res.status(404).send({succes: false, message: "ce devis/evaluation n'existe pas"});
+                else
+                    res.status(200).send({success: true, list: devis});
+            }).populate({
+                path: "incidentId",
+                model: "incidents"
+            }).populate({
+                path: "prestataireId",
+                model: "prestataires"
+            });
+        else
+            Devis.find({$and: [{coproId: req.body.coproId}, {$or: [{syndicId: req.user.id},{gestionnaireId: req.user.id}]}]}, function (err, devis) {
+                if (err)
+                    res.status(400).send({succes: false, message: 'erreur système', err});
+                else if (!devis)
+                    res.status(404).send({succes: false, message: "ce devis/evaluation n'existe pas"});
+                else
+                    res.status(200).send({success: true, list: devis});
+            });
     }
 }
 
@@ -892,5 +895,6 @@ module.exports = {
     postPrestataire,
     getCoproBySyndic,
     retrieveDevis,
-    retrieveDevisByCopro
+    retrieveDevisByCopro,
+    getDevisByCopro
 }
