@@ -885,9 +885,10 @@ let demandeDevis = (req, res) => {
             {$set: {demandeDevis: option}},
             {new: true},
             (err, devis) => {
-                if (err)
+                if (err) {
+                    console.log(err)
                     res.status(400).send({success: false, message: "erreur système", err});
-                else if (!devis)
+                } else if (!devis)
                     res.status(404).send({success: false, message: "devis introuvable"});
                 else
                     res.status(200).send({success: true, message: "demande de devis envoyée!"});

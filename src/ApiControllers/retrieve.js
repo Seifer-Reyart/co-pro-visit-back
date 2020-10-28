@@ -845,7 +845,6 @@ let retrieveDevisByCopro = (req, res) => {
     if (req.user.role !== 'admin' && req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
         res.status(401).send({success: false, message: 'accès refusé'});
     else {
-        console.log(req.body)
         if (req.body.option)
             Devis.find({$and: [{coproId: req.body.coproId}, {$or: [{syndicId: req.user.id},{gestionnaireId: req.user.id}]}]}, function (err, devis) {
                 if (err) {
