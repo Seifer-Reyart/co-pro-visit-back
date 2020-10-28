@@ -896,5 +896,4 @@ module.exports = {
     getCoproBySyndic,
     retrieveDevis,
     retrieveDevisByCopro,
-    getDevisByCopro
 }
