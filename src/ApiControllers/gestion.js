@@ -875,9 +875,10 @@ let aboPrestaToSyndic = (req, res) => {
 }
 
 let demandeDevis = (req, res) => {
-    if (req.user.role !== 'syndic')
+    if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
         res.status(401).send({success: false, message: 'accès interdit'});
     else {
+        console.log(req.body)
         const {devisId, option} = req.body;
 
         Devis.findOneAndUpdate(
@@ -888,10 +889,13 @@ let demandeDevis = (req, res) => {
                 if (err) {
                     console.log(err)
                     res.status(400).send({success: false, message: "erreur système", err});
-                } else if (!devis)
+                } else if (!devis) {
+                    console.log("not found")
                     res.status(404).send({success: false, message: "devis introuvable"});
-                else
+                } else {
+                    console.log("all good!!!")
                     res.status(200).send({success: true, message: "demande de devis envoyée!"});
+                }
             }
         )
     }
