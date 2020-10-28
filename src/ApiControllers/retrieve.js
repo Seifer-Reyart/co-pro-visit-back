@@ -562,6 +562,9 @@ let getVisitesAll = (req, res) => {
                 }).populate({
                     model: 'gestionnaires',
                     path: 'gestionnaireId'
+                }).populate({
+                    model: 'syndics',
+                    path: 'syndicId'
                 }).sort({done: 1, demandeLe: -1});
         })
     else
