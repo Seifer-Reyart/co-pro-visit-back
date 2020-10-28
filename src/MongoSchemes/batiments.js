@@ -50,6 +50,8 @@ let batimentsSchema = new Schema({
             cmdDesenfumage  : Boolean,
             alarmeIncendie  : Boolean,
             Ascenceur       : Boolean,
+            photosEntree    : [String],
+            photosAscenseur : [String],
             etatAscenceur   : {
                 type: String,
                 enum: ['bon', 'moyen', 'mauvais']
