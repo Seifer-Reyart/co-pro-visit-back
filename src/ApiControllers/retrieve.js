@@ -806,7 +806,18 @@ let getPrestataire = (req, res) => {
                 res.status(404).send({succes: false, message: 'pas de prestataires enregistrés'});
             else
                 res.status(200).send({success: true, prestataires});
-        })
+        });
+    else if (req.user.role === 'syndic' || req.user.role === 'gestionnaire')
+        Syndic.findOne({$or: [{_id: req.user.id}, {gestionnaires: {$elemMatch: {$eq: req.user.id}}}]}, (err, user) => {
+            Prestataire.find({_id: {$in: user.prestataires}}, function (err, prestataires) {
+                if (err)
+                    res.status(400).send({succes: false, message: 'erreur système', err});
+                else if (!prestataires || prestataires.length === 0)
+                    res.status(404).send({succes: false, message: 'pas de prestataires enregistrés'});
+                else
+                    res.status(200).send({success: true, prestataires});
+            });
+        });
     else
         res.status(401).send({success: false, message: 'accès refusé'});
 }
