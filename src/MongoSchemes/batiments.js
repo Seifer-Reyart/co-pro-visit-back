@@ -129,7 +129,7 @@ let batimentsSchema = new Schema({
         VueGenGoogle       : [String],
         facadeRue          : [String],
         facadeArriere      : [String],
-        entrees            : [String],
+        entrees            : [String], // to be removed next database reset
         etages             : [String],
         caves              : [String],
         parking            : [String],

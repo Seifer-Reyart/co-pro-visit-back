@@ -644,7 +644,7 @@ let saveBatiment = async (batiment, index, id, images) => {
                     VueGenGoogle       : images?.filter(e => imageFormatted.VueGenGoogle?.find(img => img === e)) ?? [],
                     facadeRue          : images?.filter(e => imageFormatted.facadeRue?.find(img => img === e)) ?? [],
                     facadeArriere      : images?.filter(e => imageFormatted.facadeArriere?.find(img => img === e)) ?? [],
-                    entrees            : images?.filter(e => imageFormatted.entrees?.find(img => img === e)) ?? [],
+                    //entrees            : images?.filter(e => imageFormatted.entrees?.find(img => img === e)) ?? [],
                     etages             : images?.filter(e => imageFormatted.etages?.find(img => img === e)) ?? [],
                     caves              : images?.filter(e => imageFormatted.caves?.find(img => img === e)) ?? [],
                     parking            : images?.filter(e => imageFormatted.parking?.find(img => img === e)) ?? [],
