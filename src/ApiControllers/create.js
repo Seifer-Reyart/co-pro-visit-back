@@ -839,7 +839,7 @@ let uploadDevisFile = (req, res) => {
             } else {
                 Devis.findOneAndUpdate(
                     {$and: [{coproId}, {prestataireId}, {syndicId}]},
-                    {$set: {devisPDF: '/uploads/devis/'+req.file.filename}},
+                    {$set: {devisPDF: '/uploads/devis/'+req.file.filename, dateDepotDevis: new Date()}},
                     {new: true},
                     (err, devis) => {
                         if (err)
@@ -868,7 +868,7 @@ let uploadFactureFile = (req, res) => {
             } else {
                 Devis.findOneAndUpdate(
                     {$and: [{coproId}, {prestataireId}, {syndicId}]},
-                    {$set: {facturePDF: '/uploads/devis/'+req.file.filename}},
+                    {$set: {facturePDF: '/uploads/devis/'+req.file.filename, dateDepotFacture: new Date()}},
                     {new: true},
                     (err, devis) => {
                         if (err)

@@ -22,7 +22,9 @@ let devisSchema = new Schema({
     date            : {type: Date, default: new Date()},
     demandeDevis    : {type: Boolean, default: false},
     devisPDF        : {type: String, default: null},
-    facturePDF      : {type: String, default: null}
+    dateDepotDevis  : {type: Date, default: null},
+    facturePDF      : {type: String, default: null},
+    dateDepotFacture: {type: String, default: null}
 });
 
 let devis = mongoose.model('devis', devisSchema);
