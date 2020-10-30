@@ -734,36 +734,6 @@ let registerBatiment = async (req, res) => {
     }
 }
 
-/* upload Devis & Facture */
-let storageDevis = multer.diskStorage({
-    destination: function (req, file, cb) {
-        // Uploads is the Upload_folder_name
-        cb(null, "./src/uploads/devis")
-    },
-    filename: async function (req, file, cb) {
-        let name = await generateP();
-        cb(null, req.user + "-" + name);
-    }
-})
-
-let uploadDevis = multer({
-    storage: storageDevis,
-    fileFilter: function (req, file, cb){
-        // Set the filetypes, it is optional
-        let filetypes = /pdf|PDF|jpg|JPG|jpeg|JPEG|png|PNG/;
-        let exttypes = /pdf|PDF|jpg|JPG|jpeg|JPEG|png|PNG/
-        let mimetype = filetypes.test(file.mimetype);
-        let extname = exttypes.test(path.extname(file.originalname).toLowerCase());
-
-        if (mimetype && extname) {
-            return cb(null, true);
-        }
-
-        cb("Error: Assurez vous de transmettre un fichier au format - " + exttypes);
-    }
-
-// data is the name of file attribute sent in body
-}).single("data");
 
 /* register new Devis */
 
@@ -825,11 +795,41 @@ let registerEvaluation = async (req, res) => {
     }
 }
 
+/* upload Devis & Facture */
+let storageDevis = multer.diskStorage({
+    destination: function (req, file, cb) {
+        // Uploads is the Upload_folder_name
+        cb(null, "./src/uploads/devis")
+    },
+    filename: async function (req, file, cb) {
+        let name = await generateP();
+        cb(null, req.user + "-" + name);
+    }
+})
+
+let uploadDevis = multer({
+    storage: storageDevis,
+    fileFilter: function (req, file, cb){
+        // Set the filetypes, it is optional
+        let filetypes = /pdf|PDF|jpg|JPG|jpeg|JPEG|png|PNG/;
+        let exttypes = /pdf|PDF|jpg|JPG|jpeg|JPEG|png|PNG/
+        let mimetype = filetypes.test(file.mimetype);
+        let extname = exttypes.test(path.extname(file.originalname).toLowerCase());
+
+        if (mimetype && extname) {
+            return cb(null, true);
+        }
+
+        cb("Error: Assurez vous de transmettre un fichier au format - " + exttypes);
+    }
+
+// data is the name of file attribute sent in body
+}).single("data");
+
 let uploadDevisFile = (req, res) => {
     if (req.user.role !== 'admin' && req.user.role !== 'prestataire') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
-        const {option} = req.body;
         uploadDevis(req, res, function(err) {
             if (err) {
                 // ERROR occured (here it can be occured due
@@ -838,7 +838,7 @@ let uploadDevisFile = (req, res) => {
                 res.status(400).send({success: false, message: err})
             } else {
                 Devis.findOneAndUpdate(
-                    {$and: [{coproId}, {prestataireId}, {syndicId}]},
+                    {$and: [{_id: req.body.devisId}, {prestataireId: req.user.id}]},
                     {$set: {devisPDF: '/uploads/devis/'+req.file.filename, dateDepotDevis: new Date()}},
                     {new: true},
                     (err, devis) => {
