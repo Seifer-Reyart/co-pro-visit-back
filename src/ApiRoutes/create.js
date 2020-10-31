@@ -669,7 +669,7 @@ router.post('/batImage', multer().fields([{name: 'image'}]), uploadBatImage);
  * @consumes multipart/form-data
  * @security JWT
  */
-router.post('/devis-pdf', uploadDevisFacture, uploadDevisFile);
+router.post('/devis-pdf', uploadDevisFile);
 
 /**
  * @typedef Devis
@@ -687,6 +687,6 @@ router.post('/devis-pdf', uploadDevisFacture, uploadDevisFile);
  * @consumes multipart/form-data
  * @security JWT
  */
-router.post('/facture-pdf', uploadDevisFacture, uploadFactureFile);
+router.post('/facture-pdf', uploadFactureFile);
 
 module.exports = router;
