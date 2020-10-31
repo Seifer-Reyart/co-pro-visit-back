@@ -207,6 +207,16 @@ const checkPassword = (req, res, next) => {
     });
 }
 
+const storageDevisFacture = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, './src/uploads/devis');
+    },
+    filename: (req, file, cb) => {
+        cb(null, Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + '.' + file.mimetype.substr(6, file.mimetype.length))
+    }
+});
+let uploadDevisFacture = multer({ storageDevisFacture }).single('data');
+
 
 const identityCheck = (_id, userType, callBack, extraQuery, res) => {
     userType.findOne({ _id, ...extraQuery}, function (err, user) {
@@ -223,4 +233,5 @@ module.exports = {
     uploadFile,
     checkPassword,
     identityCheck,
+    uploadDevisFacture
 };

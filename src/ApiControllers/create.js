@@ -831,7 +831,8 @@ let uploadDevisFile = (req, res) => {
     console.log("file: ", req.file);
     if (req.user.role !== 'prestataire') {
         res.status(403).send({success: false, message: 'accès interdit'});
-    } else {
+    } else if (req.file) {
+        /*
         uploadDevis(req, req.file, function(err) {
             if (err) {
                 // ERROR occured (here it can be occured due
@@ -840,6 +841,8 @@ let uploadDevisFile = (req, res) => {
                 console.log("upload func err: ", err)
                 res.status(400).send({success: false, message: err})
             } else {
+
+         */
                 Devis.findOneAndUpdate(
                     {$and: [{_id: req.body.devisId}, {prestataireId: req.user.id}]},
                     {$set: {devisPDF: '/uploads/devis/'+req.file.filename, dateDepotDevis: new Date()}},
@@ -853,9 +856,13 @@ let uploadDevisFile = (req, res) => {
                         else
                             res.status(200).send({success: true, message: "devis uploadé", dateDepotDevis: devis.dateDepotDevis});
                     });
+          /*
             }
         });
-    }
+
+           */
+    } else
+        res.status("409").json({success: false, message: "No Files to Upload."});
 }
 
 let uploadFactureFile = (req, res) => {

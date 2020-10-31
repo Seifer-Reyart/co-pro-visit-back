@@ -8,7 +8,10 @@ const multer  = require('multer');
 /* import local modules */
 /************************/
 
-let {checkEmailExist} = require('../Middleware/ApiHelpers');
+let {
+    checkEmailExist,
+    uploadDevisFacture
+} = require('../Middleware/ApiHelpers');
 
 let {
     registerSyndic,
@@ -666,7 +669,7 @@ router.post('/batImage', multer().fields([{name: 'image'}]), uploadBatImage);
  * @consumes multipart/form-data
  * @security JWT
  */
-router.post('/devis-pdf', uploadDevisFile);
+router.post('/devis-pdf', uploadDevisFacture, uploadDevisFile);
 
 /**
  * @typedef Devis
@@ -684,6 +687,6 @@ router.post('/devis-pdf', uploadDevisFile);
  * @consumes multipart/form-data
  * @security JWT
  */
-router.post('/facture-pdf', uploadFactureFile);
+router.post('/facture-pdf', uploadDevisFacture, uploadFactureFile);
 
 module.exports = router;
