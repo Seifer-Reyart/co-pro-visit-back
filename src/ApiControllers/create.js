@@ -833,7 +833,7 @@ let uploadDevisFile = (req, res) => {
     if (req.user.role !== 'prestataire') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
-        uploadDevis(req, req.file, function(err) {
+        uploadDevis(req, req.file, function (err) {
             if (err) {
                 // ERROR occured (here it can be occured due
                 // to uploading file of size greater than
@@ -843,7 +843,7 @@ let uploadDevisFile = (req, res) => {
             } else {
                 Devis.findOneAndUpdate(
                     {$and: [{_id: req.body.devisId}, {prestataireId: req.user.id}]},
-                    {$set: {devisPDF: '/uploads/devis/'+req.file.filename, dateDepotDevis: new Date()}},
+                    {$set: {devisPDF: '/uploads/devis/' + req.file.filename, dateDepotDevis: new Date()}},
                     {new: true},
                     (err, devis) => {
                         if (err) {
@@ -852,10 +852,15 @@ let uploadDevisFile = (req, res) => {
                         } else if (!devis)
                             res.status(404).send({success: false, message: "devis introuvable"});
                         else
-                            res.status(200).send({success: true, message: "devis uploadé", dateDepotDevis: devis.dateDepotDevis});
+                            res.status(200).send({
+                                success: true,
+                                message: "devis uploadé",
+                                dateDepotDevis: devis.dateDepotDevis
+                            });
                     });
             }
         });
+    }
 }
 
 let uploadFactureFile = (req, res) => {
