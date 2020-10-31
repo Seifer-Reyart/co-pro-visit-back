@@ -847,7 +847,7 @@ let uploadDevisFile = (req, res) => {
                         else if (!devis)
                             res.status(404).send({success: false, message: "devis introuvable"});
                         else
-                            res.status(200).send({success: true, message: "devis uploadé"});
+                            res.status(200).send({success: true, message: "devis uploadé", dateDepotDevis: devis.dateDepotDevis});
                     });
             }
         });
@@ -876,7 +876,7 @@ let uploadFactureFile = (req, res) => {
                         else if (!devis)
                             res.status(404).send({success: false, message: "devis introuvable"});
                         else
-                            res.status(200).send({success: true, message: "facture uploadée"});
+                            res.status(200).send({success: true, message: "facture uploadée", dateDepotFacture: devis.dateDepotFacture});
                     });
             }
         });
