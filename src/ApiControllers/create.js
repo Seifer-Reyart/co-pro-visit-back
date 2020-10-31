@@ -827,13 +827,10 @@ let uploadDevis = multer({
 }).single("data");
 
 let uploadDevisFile = (req, res) => {
-    console.log("body: ", req.body);
-    console.log("files: ", req.files);
-    console.log("file: ", req.file);
     if (req.user.role !== 'prestataire') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
-        uploadDevis(req, req.file, function (err) {
+        uploadDevis(req, res, function (err) {
             if (err) {
                 // ERROR occured (here it can be occured due
                 // to uploading file of size greater than
