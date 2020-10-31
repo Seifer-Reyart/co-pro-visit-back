@@ -827,14 +827,17 @@ let uploadDevis = multer({
 }).single("data");
 
 let uploadDevisFile = (req, res) => {
-    if (req.user.role !== 'admin' && req.user.role !== 'prestataire') {
+    console.log("body: ", req.body);
+    console.log("file: ", req.file);
+    if (req.user.role !== 'prestataire') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
-        uploadDevis(req, res, function(err) {
+        uploadDevis(req, req.file, function(err) {
             if (err) {
                 // ERROR occured (here it can be occured due
                 // to uploading file of size greater than
                 // 5MB or uploading different file type)
+                console.log("upload func err: ", err)
                 res.status(400).send({success: false, message: err})
             } else {
                 Devis.findOneAndUpdate(
@@ -842,9 +845,10 @@ let uploadDevisFile = (req, res) => {
                     {$set: {devisPDF: '/uploads/devis/'+req.file.filename, dateDepotDevis: new Date()}},
                     {new: true},
                     (err, devis) => {
-                        if (err)
+                        if (err) {
+                            console.log("update err: ", err)
                             res.status(400).send({success: false, message: "erreur système", err});
-                        else if (!devis)
+                        } else if (!devis)
                             res.status(404).send({success: false, message: "devis introuvable"});
                         else
                             res.status(200).send({success: true, message: "devis uploadé", dateDepotDevis: devis.dateDepotDevis});
@@ -855,7 +859,7 @@ let uploadDevisFile = (req, res) => {
 }
 
 let uploadFactureFile = (req, res) => {
-    if (req.user.role !== 'admin' && req.user.role !== 'prestataire') {
+    if (req.user.role !== 'prestataire') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
         const {option} = req.body;
@@ -867,7 +871,7 @@ let uploadFactureFile = (req, res) => {
                 res.status(400).send({success: false, message: err})
             } else {
                 Devis.findOneAndUpdate(
-                    {$and: [{coproId}, {prestataireId}, {syndicId}]},
+                    {$and: [{_id: req.body.devisId}, {prestataireId: req.user.id}]},
                     {$set: {facturePDF: '/uploads/devis/'+req.file.filename, dateDepotFacture: new Date()}},
                     {new: true},
                     (err, devis) => {
