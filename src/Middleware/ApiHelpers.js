@@ -18,6 +18,7 @@ const   Admin           = require('../MongoSchemes/admins'),
 const crypto    = require('crypto');
 const fs        = require('fs');
 const bcrypt    = require('bcryptjs');
+const multer    = require('multer');
 
 /**************************************/
 
