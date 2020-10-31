@@ -209,6 +209,7 @@ const checkPassword = (req, res, next) => {
 }
 
 const storageDevisFacture = multer.diskStorage({
+    limits: { fieldSize: 25 * 1024 * 1024 },
     destination: (req, file, cb) => {
         cb(null, './src/uploads/devis');
     },
