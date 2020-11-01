@@ -846,7 +846,7 @@ let uploadDevisFile = (req, res) => {
                 console.log("req.files", req.files);
                 console.log("req.body.images: ", req.body.images)
                 if (req.files) {
-                    promisesFiles = req.files.map(file => {
+                    promisesFiles = req.body.images.map(file => {
                         return new Promise((resolve) => {
                             let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
                             let mimetype = filetypes.test(file.mimetype);
