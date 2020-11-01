@@ -865,7 +865,9 @@ let uploadDevisFile = (req, res) => {
                             }
                         })
                     });
-                    await Promise.all(promisesFiles)
+                    await Promise.all(promisesFiles);
+                    console.log("file: ", filesUploaded);
+                    console.log("error: ", filesErrors);
                     Devis.findOneAndUpdate(
                         {$and: [{_id: devisId}, {prestataireId: req.user.id}]},
                         {$set: {devisPDF: filesUploaded[0], dateDepotDevis: new Date()}},
