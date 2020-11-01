@@ -844,6 +844,7 @@ let uploadDevisFile = (req, res) => {
                 console.log("body: ", req.body)
                 console.log("req.file: ", req.file);
                 console.log("req.files", req.files);
+                console.log("req.body.images: ", req.body.images)
                 if (req.files) {
                     promisesFiles = req.files.map(file => {
                         return new Promise((resolve) => {
