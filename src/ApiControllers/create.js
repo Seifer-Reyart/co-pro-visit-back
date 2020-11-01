@@ -929,6 +929,7 @@ let uploadFactureFile = (req, res) => {
                         })
                     });
                     await Promise.all(promisesFiles)
+                    console.log("file: ", promisesFiles);
                     Devis.findOneAndUpdate(
                         {$and: [{_id: devisId}, {prestataireId: req.user.id}]},
                         {$set: {facturePDF: filesUploaded[0], dateDepotFacture: new Date()}},
