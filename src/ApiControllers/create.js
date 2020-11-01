@@ -796,6 +796,7 @@ let registerEvaluation = async (req, res) => {
 }
 
 /* upload Devis & Facture */
+/*
 let storageDevis = multer.diskStorage({
     destination: function (req, file, cb) {
         // Uploads is the Upload_folder_name
@@ -825,36 +826,65 @@ let uploadDevis = multer({
 
 // data is the name of file attribute sent in body
 }).single("data");
-
+*/
 let uploadDevisFile = (req, res) => {
     if (req.user.role !== 'prestataire') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
-        uploadDevis(req, res, function (err) {
-            if (err) {
-                // ERROR occured (here it can be occured due
-                // to uploading file of size greater than
-                // 5MB or uploading different file type)
-                console.log("upload func err: ", err)
-                res.status(400).send({success: false, message: err})
-            } else {
-                Devis.findOneAndUpdate(
-                    {$and: [{_id: req.body.devisId}, {prestataireId: req.user.id}]},
-                    {$set: {devisPDF: '/uploads/devis/' + req.file.filename, dateDepotDevis: new Date()}},
-                    {new: true},
-                    (err, devis) => {
-                        if (err) {
-                            console.log("update err: ", err)
-                            res.status(400).send({success: false, message: "erreur système", err});
-                        } else if (!devis)
-                            res.status(404).send({success: false, message: "devis introuvable"});
-                        else
-                            res.status(200).send({
-                                success: true,
-                                message: "devis uploadé",
-                                dateDepotDevis: devis.dateDepotDevis
-                            });
+        Prestataire.findOne({_id: req.user.id}, async (err, presta) => {
+            if (err)
+                res.status(400).send({success: false, message: "erreur système", err});
+            else if (!presta)
+                res.status(404).send({success: false, message: "prestataire introuvable"});
+            else {
+                const {devisId} = req.body;
+                let filesErrors = [];
+                let filesUploaded = []
+                let promisesFiles = null;
+                if (req.files) {
+                    promisesFiles = req.files.map(file => {
+                        return new Promise((resolve) => {
+                            let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
+                            let mimetype = filetypes.test(file.mimetype);
+                            if (mimetype) {
+                                fs.writeFile('./src/uploads/devis/' + file.originalname, file.buffer, (err) => {
+                                    if (err) {
+                                        filesErrors.push({fileTitle: file.originalname, err});
+                                        resolve()
+                                    } else {
+                                        filesUploaded.push(file.originalname);
+                                        resolve()
+                                    }
+                                })
+                            } else {
+                                filesErrors.push({
+                                    fileTitle: file.originalname,
+                                    err: "Mauvais format, reçu " + file.mimetype + ", attendu: " + filetypes
+                                });
+                                resolve()
+                            }
+                        })
                     });
+                    await Promise.all(promisesFiles)
+                    Devis.findOneAndUpdate(
+                        {$and: [{_id: devisId}, {prestataireId: req.user.id}]},
+                        {$set: {devisPDF: filesUploaded[0], dateDepotDevis: new Date()}},
+                        {new: true},
+                        (err, devis) => {
+                            if (err) {
+                                console.log("update err: ", err)
+                                res.status(400).send({success: false, message: "erreur système", err});
+                            } else if (!devis)
+                                res.status(404).send({success: false, message: "devis introuvable"});
+                            else
+                                res.status(200).send({
+                                    success: true,
+                                    message: "devis uploadé",
+                                    dateDepotDevis: devis.dateDepotDevis
+                                });
+                        });
+                }
+
             }
         });
     }
@@ -864,28 +894,56 @@ let uploadFactureFile = (req, res) => {
     if (req.user.role !== 'prestataire') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
-        const {option} = req.body;
-        uploadDevis(req, res, function(err) {
-            if (err) {
-                // ERROR occured (here it can be occured due
-                // to uploading file of size greater than
-                // 5MB or uploading different file type)
-                res.status(400).send({success: false, message: err})
-            } else {
-                Devis.findOneAndUpdate(
-                    {$and: [{_id: req.body.devisId}, {prestataireId: req.user.id}]},
-                    {$set: {facturePDF: '/uploads/devis/'+req.file.filename, dateDepotFacture: new Date()}},
-                    {new: true},
-                    (err, devis) => {
-                        if (err)
-                            res.status(400).send({success: false, message: "erreur système", err});
-                        else if (!devis)
-                            res.status(404).send({success: false, message: "devis introuvable"});
-                        else
-                            res.status(200).send({success: true, message: "facture uploadée", dateDepotFacture: devis.dateDepotFacture});
+        Prestataire.findOne({_id: req.user.id}, async (err, presta) => {
+            if (err)
+                res.status(400).send({success: false, message: "erreur système", err});
+            else if (!presta)
+                res.status(404).send({success: false, message: "prestataire introuvable"});
+            else {
+                const {devisId} = req.body;
+                let filesErrors = [];
+                let filesUploaded = []
+                let promisesFiles = null;
+                if (req.files) {
+                    promisesFiles = req.files.map(file => {
+                        return new Promise((resolve) => {
+                            let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
+                            let mimetype = filetypes.test(file.mimetype);
+                            if (mimetype) {
+                                fs.writeFile('./src/uploads/devis/' + file.originalname, file.buffer, (err) => {
+                                    if (err) {
+                                        filesErrors.push({fileTitle: file.originalname, err});
+                                        resolve()
+                                    } else {
+                                        filesUploaded.push(file.originalname);
+                                        resolve()
+                                    }
+                                })
+                            } else {
+                                filesErrors.push({
+                                    fileTitle: file.originalname,
+                                    err: "Mauvais format, reçu " + file.mimetype + ", attendu: " + filetypes
+                                });
+                                resolve()
+                            }
+                        })
                     });
+                    await Promise.all(promisesFiles)
+                    Devis.findOneAndUpdate(
+                        {$and: [{_id: devisId}, {prestataireId: req.user.id}]},
+                        {$set: {facturePDF: filesUploaded[0], dateDepotFacture: new Date()}},
+                        {new: true},
+                        (err, devis) => {
+                            if (err || filesErrors.length > 0)
+                                res.status(400).send({success: false, message: "erreur système", err, filesErrors});
+                            else if (!devis)
+                                res.status(404).send({success: false, message: "devis introuvable"});
+                            else
+                                res.status(200).send({success: true, message: "facture uploadée", dateDepotFacture: devis.dateDepotFacture});
+                        });
+                }
             }
-        });
+        })
     }
 }
 
