@@ -841,12 +841,11 @@ let uploadDevisFile = (req, res) => {
                 let filesErrors = [];
                 let filesUploaded = []
                 let promisesFiles = null;
-                console.log("body: ", req.body)
-                console.log("req.file: ", req.file);
-                console.log("req.files", req.files);
-                console.log("req.body.images: ", req.body.images)
-                if (req.files) {
-                    promisesFiles = req.files.map(file => {
+
+                console.log("req.body.files[0]", req.body.files[0]);
+
+                if (req.body.files) {
+                    promisesFiles = req.body.files.map(file => {
                         return new Promise((resolve) => {
                             let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
                             let mimetype = filetypes.test(file.mimetype);
