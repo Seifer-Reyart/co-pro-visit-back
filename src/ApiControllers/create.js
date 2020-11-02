@@ -843,6 +843,7 @@ let uploadDevisFile = (req, res) => {
                 let filesUploaded = []
                 let savedFileName = '';
                 let promisesFiles = null;
+                console.log('Body: ', req.body)
 
                 if (req.files) {
                     promisesFiles = req.files.map(file => {
