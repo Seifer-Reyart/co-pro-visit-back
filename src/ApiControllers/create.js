@@ -842,6 +842,7 @@ let uploadDevisFile = (req, res) => {
                 let filesErrors = [];
                 let filesUploaded = []
                 let promisesFiles = null;
+                let savedFileName = '';
                 if (req.files) {
                     promisesFiles = req.files.map(file => {
                         return new Promise((resolve) => {
@@ -852,7 +853,7 @@ let uploadDevisFile = (req, res) => {
                             hash.update(hashedBuffer);
                             let extension = file.mimetype.match(filetypes);
                             extension = extension?.length ? extension[0] : null;
-                            const savedFileName = `${hash.digest('hex')}.${extension}`
+                            savedFileName = `${hash.digest('hex')}.${extension}`
                             if (mimetype) {
                                 fs.writeFile('./src/uploads/devis/' + savedFileName, file.buffer, (err) => {
                                     if (err) {
