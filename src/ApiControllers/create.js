@@ -841,22 +841,24 @@ let uploadDevisFile = (req, res) => {
                 let filesErrors = [];
                 let filesUploaded = []
                 let promisesFiles = null;
-                console.log("body: ", req.body)
-                console.log("req.file: ", req.file);
-                console.log("req.files", req.files);
-                console.log("req.body.images: ", req.body.images)
                 if (req.files) {
                     promisesFiles = req.files.map(file => {
                         return new Promise((resolve) => {
                             let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
                             let mimetype = filetypes.test(file.mimetype);
+                            const hash = crypto.createHash('sha1')
+                            let hashedBuffer = file.buffer;
+                            hash.update(hashedBuffer);
+                            let extension = file.mimetype.match(filetypes);
+                            extension = extension?.length ? extension[0] : null;
+                            const savedFileName = `${hash.digest('hex')}.${extension}`
                             if (mimetype) {
-                                fs.writeFile('./src/uploads/devis/' + file.originalname, file.buffer, (err) => {
+                                fs.writeFile('./src/uploads/devis/' + savedFileName, file.buffer, (err) => {
                                     if (err) {
                                         filesErrors.push({fileTitle: file.originalname, err});
                                         resolve()
                                     } else {
-                                        filesUploaded.push(file.originalname);
+                                        filesUploaded.push(savedFileName);
                                         resolve()
                                     }
                                 })
@@ -874,7 +876,7 @@ let uploadDevisFile = (req, res) => {
                     console.log("error: ", filesErrors);
                     Devis.findOneAndUpdate(
                         {$and: [{_id: devisId}, {prestataireId: req.user.id}]},
-                        {$set: {devisPDF: filesUploaded[0], dateDepotDevis: new Date()}},
+                        {$set: {devisPDF: savedFileName, dateDepotDevis: new Date()}},
                         {new: true},
                         (err, devis) => {
                             if (err) {
