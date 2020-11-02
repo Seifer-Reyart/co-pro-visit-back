@@ -687,6 +687,6 @@ router.post('/devis-pdf', multer().any(), uploadDevisFile);
  * @consumes multipart/form-data
  * @security JWT
  */
-router.post('/facture-pdf', multer().any(), uploadFactureFile);
+router.post('/facture-pdf', multer().fields([{name: 'images'}]), uploadFactureFile);
 
 module.exports = router;
