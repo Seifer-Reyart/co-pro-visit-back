@@ -7,6 +7,7 @@ let multer  = require('multer');
 let path    = require("path");
 let xlsx    = require('node-xlsx').default;
 let fs      = require('fs');
+let crypto  = require('crypto');
 /***************/
 /*** helpers ***/
 /***************/
