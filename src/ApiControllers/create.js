@@ -841,8 +841,9 @@ let uploadDevisFile = (req, res) => {
                 const {devisId} = req.body;
                 let filesErrors = [];
                 let filesUploaded = []
-                let promisesFiles = null;
                 let savedFileName = '';
+                let promisesFiles = null;
+
                 if (req.files) {
                     promisesFiles = req.files.map(file => {
                         return new Promise((resolve) => {
@@ -854,6 +855,7 @@ let uploadDevisFile = (req, res) => {
                             let extension = file.mimetype.match(filetypes);
                             extension = extension?.length ? extension[0] : null;
                             savedFileName = `${hash.digest('hex')}.${extension}`
+
                             if (mimetype) {
                                 fs.writeFile('./src/uploads/devis/' + savedFileName, file.buffer, (err) => {
                                     if (err) {
@@ -874,25 +876,26 @@ let uploadDevisFile = (req, res) => {
                         })
                     });
                     await Promise.all(promisesFiles);
-                    console.log("file: ", filesUploaded);
-                    console.log("error: ", filesErrors);
-                    Devis.findOneAndUpdate(
-                        {$and: [{_id: devisId}, {prestataireId: req.user.id}]},
-                        {$set: {devisPDF: savedFileName, dateDepotDevis: new Date()}},
-                        {new: true},
-                        (err, devis) => {
-                            if (err) {
-                                console.log("update err: ", err)
-                                res.status(400).send({success: false, message: "erreur système", err});
-                            } else if (!devis)
-                                res.status(404).send({success: false, message: "devis introuvable"});
-                            else
-                                res.status(200).send({
-                                    success: true,
-                                    message: "devis uploadé",
-                                    dateDepotDevis: devis.dateDepotDevis
-                                });
-                        });
+
+                    if (filesErrors.length > 0)
+                        res.status(400).send({success: false, message: "erreur upload", filesErrors});
+                    else
+                        Devis.findOneAndUpdate(
+                            {$and: [{_id: devisId}, {prestataireId: req.user.id}]},
+                            {$set: {devisPDF: savedFileName, dateDepotDevis: new Date()}},
+                            {new: true},
+                            (err, devis) => {
+                                if (err) {
+                                    res.status(400).send({success: false, message: "erreur système", err});
+                                } else if (!devis)
+                                    res.status(404).send({success: false, message: "devis introuvable"});
+                                else
+                                    res.status(200).send({
+                                        success: true,
+                                        message: "devis uploadé",
+                                        dateDepotDevis: devis.dateDepotDevis
+                                    });
+                            });
                 }
 
             }
@@ -913,19 +916,28 @@ let uploadFactureFile = (req, res) => {
                 const {devisId} = req.body;
                 let filesErrors = [];
                 let filesUploaded = []
+                let savedFileName = '';
                 let promisesFiles = null;
+
                 if (req.files) {
                     promisesFiles = req.files.map(file => {
                         return new Promise((resolve) => {
                             let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
                             let mimetype = filetypes.test(file.mimetype);
+                            const hash = crypto.createHash('sha1')
+                            let hashedBuffer = file.buffer;
+                            hash.update(hashedBuffer);
+                            let extension = file.mimetype.match(filetypes);
+                            extension = extension?.length ? extension[0] : null;
+                            savedFileName = `${hash.digest('hex')}.${extension}`
+
                             if (mimetype) {
-                                fs.writeFile('./src/uploads/devis/' + file.originalname, file.buffer, (err) => {
+                                fs.writeFile('./src/uploads/devis/' + savedFileName, file.buffer, (err) => {
                                     if (err) {
                                         filesErrors.push({fileTitle: file.originalname, err});
                                         resolve()
                                     } else {
-                                        filesUploaded.push(file.originalname);
+                                        filesUploaded.push(savedFileName);
                                         resolve()
                                     }
                                 })
@@ -939,19 +951,21 @@ let uploadFactureFile = (req, res) => {
                         })
                     });
                     await Promise.all(promisesFiles)
-                    console.log("file: ", promisesFiles);
-                    Devis.findOneAndUpdate(
-                        {$and: [{_id: devisId}, {prestataireId: req.user.id}]},
-                        {$set: {facturePDF: filesUploaded[0], dateDepotFacture: new Date()}},
-                        {new: true},
-                        (err, devis) => {
-                            if (err || filesErrors.length > 0)
-                                res.status(400).send({success: false, message: "erreur système", err, filesErrors});
-                            else if (!devis)
-                                res.status(404).send({success: false, message: "devis introuvable"});
-                            else
-                                res.status(200).send({success: true, message: "facture uploadée", dateDepotFacture: devis.dateDepotFacture});
-                        });
+                    if (filesErrors.length > 0)
+                        res.status(400).send({success: false, message: "erreur upload", filesErrors});
+                    else
+                        Devis.findOneAndUpdate(
+                            {$and: [{_id: devisId}, {prestataireId: req.user.id}]},
+                            {$set: {facturePDF: savedFileName, dateDepotFacture: new Date()}},
+                            {new: true},
+                            (err, devis) => {
+                                if (err)
+                                    res.status(400).send({success: false, message: "erreur système", err});
+                                else if (!devis)
+                                    res.status(404).send({success: false, message: "devis introuvable"});
+                                else
+                                    res.status(200).send({success: true, message: "facture uploadée", dateDepotFacture: devis.dateDepotFacture});
+                            });
                 }
             }
         })
