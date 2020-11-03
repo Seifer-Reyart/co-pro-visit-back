@@ -970,6 +970,8 @@ let uploadFactureFile = (req, res) => {
                                         else if (!bat)
                                             res.status(404).send({success: false, message: "batiment introuvable"});
                                         else {
+                                            console.log("devis: ", devis);
+                                            console.log("batiment: ", bat);
                                             Visite.findOneAndUpdate(
                                                 {_id: devis.visiteId},
                                                 {$set: {img: bat.image.facadeRue[0]}},
