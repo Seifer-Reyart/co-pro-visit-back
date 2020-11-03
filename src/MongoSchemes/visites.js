@@ -2,6 +2,10 @@ let mongoose    = require('mongoose'),
     Schema      = mongoose.Schema;
 
 let visitesSchema = new Schema({
+    img             : {
+        type    : String,
+        default : null
+    },
     architecteId    : {
         type    : Schema.Types.ObjectId,
         default : null
@@ -63,6 +67,10 @@ let visitesSchema = new Schema({
         default : null
     },
     done            : {
+        type    : Boolean,
+        default : false
+    },
+    demandeReception: {
         type    : Boolean,
         default : false
     }

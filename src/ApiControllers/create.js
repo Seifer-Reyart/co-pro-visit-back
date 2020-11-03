@@ -843,7 +843,6 @@ let uploadDevisFile = (req, res) => {
                 let filesUploaded = []
                 let savedFileName = '';
                 let promisesFiles = null;
-                console.log('Body: ', req.body)
 
                 if (req.files) {
                     promisesFiles = req.files.map(file => {
@@ -964,8 +963,27 @@ let uploadFactureFile = (req, res) => {
                                     res.status(400).send({success: false, message: "erreur système", err});
                                 else if (!devis)
                                     res.status(404).send({success: false, message: "devis introuvable"});
-                                else
+                                else {
+                                    Batiment.findOne({coproId: devis.coproId}, function (err, bat) {
+                                        if (err)
+                                            res.status(400).send({success: false, message: "erreur upload", err});
+                                        else if (!bat)
+                                            res.status(404).send({success: false, message: "batiment introuvable"});
+                                        else {
+                                            Visite.findOneAndUpdate(
+                                                {_id: devis.visiteId},
+                                                {$set: {img: bat.image.facadeRue[0]}},
+                                                {new: true},
+                                                (err, vis) => {
+                                                    if (err)
+                                                        console.log(err)
+                                                    else if (!vis)
+                                                        console.log("visite introuvable");
+                                                });
+                                        }
+                                    });
                                     res.status(200).send({success: true, message: "facture uploadée", dateDepotFacture: devis.dateDepotFacture});
+                                }
                             });
                 }
             }
