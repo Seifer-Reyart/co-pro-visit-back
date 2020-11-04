@@ -370,7 +370,7 @@ router.post('/copro-by-syndic', getCoproBySyndic);
  * @param {string} prestataireId.body.required - _id du prestataire
  * @returns {object} 200 - {success: true, list: [object]}
  * @returns {Error}  400 - {succes: false, message: 'erreur système', err}
- * @returns {Error}  401 - si dans token, role !== prestataire ou admin  {success: false, message: 'accès refusé'}
+ * @returns {Error}  401 - si dans token, role !== prestataire ou admin ou architecte  {success: false, message: 'accès refusé'}
  * @returns {Error}  404 - si aucun devis/evaluation trouvé  {succes: false, message: "ce devis/evaluation n'existe pas"}
  * @produces application/json
  * @security JWT
