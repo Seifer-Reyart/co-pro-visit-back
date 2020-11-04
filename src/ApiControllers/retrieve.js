@@ -839,9 +839,27 @@ let postPrestataire = (req, res) => {
 /*** get devis ***/
 
 let retrieveDevis = (req, res) => {
-    if (req.user.role !== 'admin' && req.user.role !== 'prestataire')
+    if (req.user.role !== 'admin' && req.user.role !== 'prestataire' && req.user.role !== 'architecte')
         res.status(401).send({success: false, message: 'accès refusé'});
-    else {
+    if (req.user.role === 'architecte') {
+        const {visiteId} = req.body;
+
+        Devis.findOne({$and: [{visiteId},{architecteId: req.user.id}]}, function (err, devis) {
+            if (err)
+                res.status(400).send({succes: false, message: 'erreur système', err});
+            else if (!devis)
+                res.status(404).send({succes: false, message: "devis/evaluation introuvable"});
+            else {
+                res.status(200).send({success: true, devis});
+            }
+        }).populate({
+            path: 'visiteId',
+            model: 'visites'
+        }).populate({
+            path: 'gestionnaireId',
+            model: 'gestionnaires'
+        });
+    } else {
         const {prestataireId} = req.body;
 
         Devis.find({prestataireId}, function (err, devis) {
