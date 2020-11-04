@@ -73,6 +73,10 @@ let visitesSchema = new Schema({
     demandeReception: {
         type    : Boolean,
         default : false
+    },
+    receptionDone: {
+        type    : Schema.Types.ObjectId,
+        default : null
     }
 });
 
