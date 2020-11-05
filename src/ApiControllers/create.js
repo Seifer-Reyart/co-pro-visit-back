@@ -955,14 +955,14 @@ let uploadFactureFile = (req, res) => {
                         res.status(400).send({success: false, message: "erreur upload", filesErrors});
                     else
                         Devis.findOneAndUpdate(
-                            {$and: [{_id: devisId}, {prestataireId: req.user.id}]},
+                            {$and: [{_id: devisId}, {prestataireId: req.user.id}, {facturePDF: null}]},
                             {$set: {facturePDF: savedFileName, dateDepotFacture: new Date()}},
                             {new: true},
                             (err, devis) => {
                                 if (err)
                                     res.status(400).send({success: false, message: "erreur système", err});
                                 else if (!devis)
-                                    res.status(404).send({success: false, message: "devis introuvable"});
+                                    res.status(404).send({success: false, message: "devis introuvable ou une facture a déjà été déposée"});
                                 else {
                                     Batiment.findOne({coproId: devis.coproId}, function (err, bat) {
                                         if (err)

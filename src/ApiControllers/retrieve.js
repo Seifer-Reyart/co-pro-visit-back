@@ -591,6 +591,9 @@ let getVisitesUnassigned = (req, res) => {
                 }).populate({
                     model: 'copros',
                     path: 'coproId'
+                }).populate({
+                    model: 'gestionnaires',
+                    path: 'gestionnaireId'
                 }).sort({done: 1, demandeLe: -1});
         })
     else
