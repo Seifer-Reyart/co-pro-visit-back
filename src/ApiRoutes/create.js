@@ -35,7 +35,8 @@ let {
 let registerCopro       = require('../ApiControllers/create').registerCopro,
     registerBatiment    = require('../ApiControllers/create').registerBatiment;
 
-let registerEvaluation   = require('../ApiControllers/create').registerEvaluation;
+let registerEvaluation  = require('../ApiControllers/create').registerEvaluation;
+let registerAvisTravaux = require('../ApiControllers/create').registerAvisTravaux;
 
 /***************/
 /* init router */
@@ -688,5 +689,23 @@ router.post('/devis-pdf', multer().any(), uploadDevisFile);
  * @security JWT
  */
 router.post('/facture-pdf', multer().any(), uploadFactureFile);
+
+/**
+ * @typedef Devis
+ * @property {file} data.required - fichier Facture au format jpg|jpeg|png|pdf
+ */
+/**
+ * Cette route permet d'enregistrer un Avis sur Travaux par un Architecte + photos après
+ * @route POST /create/reception
+ * @group prestataire
+ * @param {Devis.model} data.body - toutes les infos sur la Pré-réception
+ * @returns {object} 200 - {success: true, message : "Avis travaux enregistré"}
+ * @returns {Error}  400 - {success: false, message: error system log, err}
+ * @returns {Error}  401 - si dans token, role !== architecte  {success: false, message: 'accès interdit'}
+ * @produces application/json
+ * @consumes multipart/form-data
+ * @security JWT
+ */
+router.post('/reception', multer().any(), registerAvisTravaux);
 
 module.exports = router;

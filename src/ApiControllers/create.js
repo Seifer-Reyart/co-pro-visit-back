@@ -60,9 +60,10 @@ const   Syndic          = require('../MongoSchemes/syndics'),
 const   Copro       = require('../MongoSchemes/copros'),
         Batiment    = require('../MongoSchemes/batiments');
 
-const   Devis    = require('../MongoSchemes/devis');
-const   Visite   = require('../MongoSchemes/visites');
-const   Incident = require('../MongoSchemes/incidents');
+const   Devis       = require('../MongoSchemes/devis');
+const   Visite      = require('../MongoSchemes/visites');
+const   Incident    = require('../MongoSchemes/incidents');
+const   Reception   = require('../MongoSchemes/reception');
 
 
 /************/
@@ -1085,6 +1086,93 @@ let registerIncident = async (req, res) => {
     }
 };
 
+let registerAvisTravaux = async (req, res) => {
+    if (req.user.role !== 'architecte') {
+        res.status(401).send({success: false, message: 'accès interdit'});
+    } else {
+        const { src_img, evaluationTTC, metrages, comArchi, comPrest, desordre, description, situation, corpsEtat, images_bf, images_af, date, conformite, rate, remarque, incidentId, coproId, pcsId, syndicId, visiteId, courtierId, architecteId, prestataireId, gestionnaireId, demandeDevis, devisPDF, dateDepotDevis, facturePDF, dateDepotFacture } = req.body;
+
+        let imagesUploadErrors = [];
+        let imagesUploaded = []
+        let promisesFiles = null;
+        if (req.files) {
+            promisesFiles = req.files.map( file => {
+                return new Promise((resolve) => {
+                    let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
+                    let mimetype = filetypes.test(file.mimetype);
+                    if (mimetype) {
+                        fs.writeFile('./src/uploads/incidents/' + file.originalname, file.buffer, (err) => {
+                            if (err) {
+                                imagesUploadErrors.push({imageTitle: file.originalname, err});
+                                resolve()
+                            }
+                            else {
+                                imagesUploaded.push(file.originalname);
+                                resolve()
+                            }
+                        })
+                    } else {
+                        imagesUploadErrors.push({
+                            imageTitle: file.originalname,
+                            err: "Mauvais format, reçu " + file.mimetype + ", attendu: " + filetypes
+                        });
+                        resolve()
+                    }
+                })
+            });
+            await Promise.all(promisesFiles)
+        }
+        let reception = new Reception({
+            src_img,
+            evaluationTTC,
+            metrages,
+            comArchi,
+            comPrest,
+            desordre,
+            description,
+            situation,
+            corpsEtat,
+            images_bf,
+            images_af       : imagesUploaded,
+            date,
+            conformite,
+            rate,
+            remarque,
+            incidentId,
+            coproId,
+            pcsId,
+            syndicId,
+            visiteId,
+            courtierId,
+            architecteId,
+            prestataireId,
+            gestionnaireId,
+            demandeDevis,
+            devisPDF,
+            dateDepotDevis,
+            facturePDF,
+            dateDepotFacture,
+        });
+
+        reception.save(function(err, recept) {
+            if (err) {
+                res.status(400).send({ success: false, message: "Erreur lors de l'enregistrement de l'avis de travaux", err});
+            } else {
+                Visite.findOneAndUpdate({_id: visiteId}, {$set: {receptionDone: recept._id}}, {new: true}, (err, visit) => {
+                    if (err)
+                        console.log("error: ", err)
+                        //res.status(400).send({success: false, message: "Erreur lors de la mise à jour de la copropriété associée", err});
+                    else if (!visit)
+                        console.log("visite introuvable")
+                        //res.status(400).send({success: false, message: "visite introuvable"});
+                    else
+                        res.status(200).send({success: true, message: "Avis travaux enregistrée"});
+                });
+            }
+        });
+    }
+}
+
 /* Export Functions */
 
 module.exports = {
@@ -1105,5 +1193,6 @@ module.exports = {
     generateP,
     uploadDevisFile,
     uploadFactureFile,
+    registerAvisTravaux,
     salt
 };
