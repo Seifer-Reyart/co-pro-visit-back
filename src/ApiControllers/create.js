@@ -1175,9 +1175,16 @@ let registerAvisTravaux = async (req, res) => {
                             else if (!visit)
                                 console.log("visite introuvable")
                             //res.status(400).send({success: false, message: "visite introuvable"});
-                            else
-                                res.status(200).send({success: true, message: "Avis travaux enregistrée", receptionDone: recept});
                         });
+                        Devis.findOneAndUpdate({_id: devisId}, {$set: {note: recept.rate}}, {new: true}, (err, dev) => {
+                            if (err)
+                                console.log("error: ", err)
+                            //res.status(400).send({success: false, message: "Erreur lors de la mise à jour de la copropriété associée", err});
+                            else if (!visit)
+                                console.log("devis introuvable")
+                            //res.status(400).send({success: false, message: "visite introuvable"});
+                        });
+                        res.status(200).send({success: true, message: "Avis travaux enregistrée", receptionDone: recept});
                     }
                 });
         });
