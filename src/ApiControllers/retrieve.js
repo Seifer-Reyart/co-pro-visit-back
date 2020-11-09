@@ -925,6 +925,22 @@ let retrieveOneReception = (req, res) => {
     }
 }
 
+let retrieveAllReception = (req, res) => {
+    if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire' && req.user.role !== 'pcs')
+        res.status(401).send({success: false, message: 'accès refusé'});
+    else {
+        const {id} = req.user;
+        Reception.find({$or: [{syndicId: id}, {gestionnaireId}, {pcsId: id}]}, (err, receptions) => {
+            if (err)
+                res.status(400).send({succes: false, message: 'erreur système', err});
+            else if (!reception)
+                res.status(404).send({succes: false, message: "pas d'avis enregistré"});
+            else
+                res.status(200).send({success: true, receptions});
+        })
+    }
+}
+
 module.exports = {
     getCopro,
     postCopro,
@@ -949,5 +965,6 @@ module.exports = {
     getCoproBySyndic,
     retrieveDevis,
     retrieveDevisByCopro,
-    retrieveOneReception
+    retrieveOneReception,
+    retrieveAllReception
 }

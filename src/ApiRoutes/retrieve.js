@@ -396,7 +396,7 @@ router.post('/devis-copro', retrieveDevisByCopro);
 
 /**
  * Cette route permet de récupérer un avis de travaux, JWT necessaire.
- * @route POST /retrieve/devis-copro
+ * @route POST /retrieve/one-avis
  * @group Get_Data
  * @param {string} _id.body.required - _id d'un Avis Pre-Reception
  * @returns {object} 200 - {success: true, receptionDone: object}
@@ -408,5 +408,20 @@ router.post('/devis-copro', retrieveDevisByCopro);
  */
 
 router.post('/one-avis', retrieveOneReception);
+
+/**
+ * Cette route permet de récupérer les avis de travaux par syndic, gestionnaire ou pcs, JWT necessaire.
+ * @route GET /retrieve/all-avis
+ * @group Get_Data
+ * @param {string} _id.body.required - _id d'un Avis Pre-Reception
+ * @returns {object} 200 - {success: true, receptionDone: object}
+ * @returns {Error}  400 - {succes: false, message: 'erreur système', err}
+ * @returns {Error}  401 - si dans token, role !== architecte  {success: false, message: 'accès refusé'}
+ * @returns {Error}  404 - si aucun devis/evaluation trouvé  {succes: false, message: "ce devis/evaluation n'existe pas"}
+ * @produces application/json
+ * @security JWT
+ */
+
+router.get('/all-avis', retrieveOneReception);
 
 module.exports = router;
