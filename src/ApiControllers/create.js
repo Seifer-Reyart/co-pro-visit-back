@@ -1090,7 +1090,7 @@ let registerAvisTravaux = async (req, res) => {
     if (req.user.role !== 'architecte') {
         res.status(401).send({success: false, message: 'accès interdit'});
     } else {
-        const { src_img, evaluationTTC, metrages, comArchi, comPrest, desordre, description, situation, corpsEtat, images_bf, images_af, date, conformite, rate, remarque, incidentId, coproId, pcsId, syndicId, visiteId, courtierId, architecteId, prestataireId, gestionnaireId, demandeDevis, devisPDF, dateDepotDevis, facturePDF, dateDepotFacture } = req.body;
+        const { src_img, evaluationTTC, metrages, comArchi, comPrest, desordre, description, situation, corpsEtat, images_bf, devisId, date, conformite, rate, remarque, incidentId, coproId, pcsId, syndicId, visiteId, courtierId, architecteId, prestataireId, gestionnaireId, demandeDevis, devisPDF, dateDepotDevis, facturePDF, dateDepotFacture } = req.body;
 
         let imagesUploadErrors = [];
         let imagesUploaded = []
@@ -1143,6 +1143,7 @@ let registerAvisTravaux = async (req, res) => {
             incidentId,
             coproId,
             pcsId           : pcsId === 'null' ? null : pcsId,
+            devisId,
             syndicId,
             visiteId,
             courtierId      : courtierId === 'null' ? null : courtierId,
@@ -1156,22 +1157,29 @@ let registerAvisTravaux = async (req, res) => {
             dateDepotFacture,
         });
 
-        reception.save(function(err, recept) {
-            if (err) {
-                console.log("err: ", err)
-                res.status(400).send({ success: false, message: "Erreur lors de l'enregistrement de l'avis de travaux", err});
-            } else {
-                Visite.findOneAndUpdate({_id: visiteId}, {$set: {receptionDone: recept._id}}, {new: true}, (err, visit) => {
-                    if (err)
-                        console.log("error: ", err)
-                        //res.status(400).send({success: false, message: "Erreur lors de la mise à jour de la copropriété associée", err});
-                    else if (!visit)
-                        console.log("visite introuvable")
-                        //res.status(400).send({success: false, message: "visite introuvable"});
-                    else
-                        res.status(200).send({success: true, message: "Avis travaux enregistrée", receptionDone: recept});
+        Reception.findOne({$and: [{devisId},{architecteId: req.user.id}]}, (err, rec) => {
+            if (err)
+                res.status(400).send({success: false, message: "erreur système", err});
+            else if (rec)
+                res.status(403).send({success: false, message: "un Avis a déjà enregistré"});
+            else
+                reception.save(function(err, recept) {
+                    if (err) {
+                        console.log("err: ", err)
+                        res.status(400).send({ success: false, message: "Erreur lors de l'enregistrement de l'avis de travaux", err});
+                    } else {
+                        Visite.findOneAndUpdate({_id: visiteId}, {$set: {receptionDone: recept._id}}, {new: true}, (err, visit) => {
+                            if (err)
+                                console.log("error: ", err)
+                            //res.status(400).send({success: false, message: "Erreur lors de la mise à jour de la copropriété associée", err});
+                            else if (!visit)
+                                console.log("visite introuvable")
+                            //res.status(400).send({success: false, message: "visite introuvable"});
+                            else
+                                res.status(200).send({success: true, message: "Avis travaux enregistrée", receptionDone: recept});
+                        });
+                    }
                 });
-            }
         });
     }
 }

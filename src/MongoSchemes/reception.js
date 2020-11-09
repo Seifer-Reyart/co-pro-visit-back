@@ -20,6 +20,7 @@ let receptionSchema = new Schema({
     incidentId      : {type: Schema.Types.ObjectId, default: null},
     coproId    	    : {type: Schema.Types.ObjectId, default: null},
     pcsId           : {type: Schema.Types.ObjectId, default: null},
+    devisId         : {type: Schema.Types.ObjectId, default: null},
     syndicId        : {type: Schema.Types.ObjectId, default: null},
     visiteId        : {type: Schema.Types.ObjectId, default: null},
     courtierId      : {type: Schema.Types.ObjectId, default: null},
