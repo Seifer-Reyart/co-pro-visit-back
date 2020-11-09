@@ -1095,6 +1095,7 @@ let registerAvisTravaux = async (req, res) => {
         let imagesUploadErrors = [];
         let imagesUploaded = []
         let promisesFiles = null;
+        console.log("files: ", req.files)
         if (req.files) {
             promisesFiles = req.files.map( file => {
                 return new Promise((resolve) => {
@@ -1122,6 +1123,8 @@ let registerAvisTravaux = async (req, res) => {
             });
             await Promise.all(promisesFiles)
         }
+
+        console.log("imagesUploaded: ", imagesUploaded);
         let reception = new Reception({
             src_img,
             evaluationTTC,
@@ -1140,13 +1143,13 @@ let registerAvisTravaux = async (req, res) => {
             remarque,
             incidentId,
             coproId,
-            pcsId           : pcsId ?? null,
+            pcsId           : pcsId === 'null' ? null : pcsId,
             syndicId,
             visiteId,
-            courtierId,
+            courtierId      : courtierId === 'null' ? null : courtierId,
             architecteId,
             prestataireId,
-            gestionnaireId  : gestionnaireId ?? null,
+            gestionnaireId  : gestionnaireId === 'null' || gestionnaireId === 'undefined' ? null : gestionnaireId,
             demandeDevis,
             devisPDF,
             dateDepotDevis,
