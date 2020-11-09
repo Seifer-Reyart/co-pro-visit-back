@@ -937,6 +937,9 @@ let retrieveAllReception = (req, res) => {
                 res.status(404).send({succes: false, message: "pas d'avis enregistrés"});
             else
                 res.status(200).send({success: true, receptions});
+        }).populate({
+            path: 'prestataireId',
+            model: 'prestataires'
         })
     }
 }
