@@ -1176,7 +1176,7 @@ let registerAvisTravaux = async (req, res) => {
                                 console.log("visite introuvable")
                             //res.status(400).send({success: false, message: "visite introuvable"});
                         });
-                        Devis.findOneAndUpdate({_id: devisId}, {$set: {note: recept.rate}}, {new: true}, (err, dev) => {
+                        Devis.findOneAndUpdate({_id: devisId}, {$set: {note: recept.rate, receptionDone: true}}, {new: true}, (err, dev) => {
                             if (err)
                                 console.log("error: ", err)
                             //res.status(400).send({success: false, message: "Erreur lors de la mise à jour de la copropriété associée", err});

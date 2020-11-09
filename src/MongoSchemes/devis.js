@@ -25,6 +25,7 @@ let devisSchema = new Schema({
     dateDepotDevis  : {type: Date, default: null},
     facturePDF      : {type: String, default: null},
     dateDepotFacture: {type: Date, default: null},
+    receptionDone   : {type: Boolean, default: false},
     note            : {type: Number, default: 1}
 });
 
