@@ -407,6 +407,6 @@ router.post('/devis-copro', retrieveDevisByCopro);
  * @security JWT
  */
 
-router.post('/one-avis', retrieveDevisByCopro);
+router.post('/one-avis', retrieveOneReception);
 
 module.exports = router;
