@@ -32,7 +32,8 @@ let {
     getCoproBySyndic,
     retrieveDevis,
     retrieveDevisByCopro,
-    retrieveOneReception
+    retrieveOneReception,
+    retrieveAllReception
 } = require('../ApiControllers/retrieve');
 
 /***************/
@@ -422,6 +423,6 @@ router.post('/one-avis', retrieveOneReception);
  * @security JWT
  */
 
-router.get('/all-avis', retrieveOneReception);
+router.get('/all-avis', retrieveAllReception);
 
 module.exports = router;
