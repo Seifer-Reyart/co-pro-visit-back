@@ -31,7 +31,8 @@ let {
     postPrestataire,
     getCoproBySyndic,
     retrieveDevis,
-    retrieveDevisByCopro
+    retrieveDevisByCopro,
+    retrieveOneReception
 } = require('../ApiControllers/retrieve');
 
 /***************/
@@ -392,5 +393,20 @@ router.post('/devis-list', retrieveDevis);
  */
 
 router.post('/devis-copro', retrieveDevisByCopro);
+
+/**
+ * Cette route permet de récupérer un avis de travaux, JWT necessaire.
+ * @route POST /retrieve/devis-copro
+ * @group Get_Data
+ * @param {string} _id.body.required - _id d'un Avis Pre-Reception
+ * @returns {object} 200 - {success: true, receptionDone: object}
+ * @returns {Error}  400 - {succes: false, message: 'erreur système', err}
+ * @returns {Error}  401 - si dans token, role !== architecte  {success: false, message: 'accès refusé'}
+ * @returns {Error}  404 - si aucun devis/evaluation trouvé  {succes: false, message: "ce devis/evaluation n'existe pas"}
+ * @produces application/json
+ * @security JWT
+ */
+
+router.post('/one-avis', retrieveDevisByCopro);
 
 module.exports = router;

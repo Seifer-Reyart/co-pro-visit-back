@@ -1123,8 +1123,7 @@ let registerAvisTravaux = async (req, res) => {
             });
             await Promise.all(promisesFiles)
         }
-
-        console.log("imagesUploaded: ", imagesUploaded);
+    
         let reception = new Reception({
             src_img,
             evaluationTTC,
@@ -1170,7 +1169,7 @@ let registerAvisTravaux = async (req, res) => {
                         console.log("visite introuvable")
                         //res.status(400).send({success: false, message: "visite introuvable"});
                     else
-                        res.status(200).send({success: true, message: "Avis travaux enregistrée"});
+                        res.status(200).send({success: true, message: "Avis travaux enregistrée", receptionDone});
                 });
             }
         });

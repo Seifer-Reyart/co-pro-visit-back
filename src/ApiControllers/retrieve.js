@@ -20,12 +20,13 @@ const   Devis           = require('../MongoSchemes/devis'),
         Copro           = require('../MongoSchemes/copros'),
         Syndic          = require('../MongoSchemes/syndics'),
         Visite          = require('../MongoSchemes/visites'),
+        Incident        = require('../MongoSchemes/incidents'),
         Courtier        = require('../MongoSchemes/courtiers'),
+        Reception       = require('../MongoSchemes/reception'),
         Architecte      = require('../MongoSchemes/architectes'),
         PresidentCS     = require('../MongoSchemes/presidentCS'),
         Prestataire     = require('../MongoSchemes/prestataires'),
-        Gestionnaire    = require('../MongoSchemes/gestionnaires'),
-        Incident        = require('../MongoSchemes/incidents');
+        Gestionnaire    = require('../MongoSchemes/gestionnaires');
 /************/
 /* Function */
 /************/
@@ -908,6 +909,22 @@ let retrieveDevisByCopro = (req, res) => {
     }
 }
 
+let retrieveOneReception = (req, res) => {
+    if (req.user.role !== 'architecte')
+        res.status(401).send({success: false, message: 'accès refusé'});
+    else {
+        const { _id } = req.body;
+        Reception.findOne({_id}, (err, reception) => {
+            if (err)
+                res.status(400).send({succes: false, message: 'erreur système', err});
+            else if (!reception)
+                res.status(404).send({succes: false, message: "pas d'avis enregistré"});
+            else
+                res.status(200).send({success: true, receptionDone: reception});
+        })
+    }
+}
+
 module.exports = {
     getCopro,
     postCopro,
@@ -932,4 +949,5 @@ module.exports = {
     getCoproBySyndic,
     retrieveDevis,
     retrieveDevisByCopro,
+    retrieveOneReception
 }
