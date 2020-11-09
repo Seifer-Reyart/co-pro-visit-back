@@ -933,8 +933,8 @@ let retrieveAllReception = (req, res) => {
         Reception.find({$or: [{syndicId: id}, {gestionnaireId: id}, {pcsId: id}]}, (err, receptions) => {
             if (err)
                 res.status(400).send({succes: false, message: 'erreur système', err});
-            else if (!reception)
-                res.status(404).send({succes: false, message: "pas d'avis enregistré"});
+            else if (!receptions)
+                res.status(404).send({succes: false, message: "pas d'avis enregistrés"});
             else
                 res.status(200).send({success: true, receptions});
         })
