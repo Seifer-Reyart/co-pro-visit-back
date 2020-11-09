@@ -1156,6 +1156,7 @@ let registerAvisTravaux = async (req, res) => {
 
         reception.save(function(err, recept) {
             if (err) {
+                console.log("err: ", err)
                 res.status(400).send({ success: false, message: "Erreur lors de l'enregistrement de l'avis de travaux", err});
             } else {
                 Visite.findOneAndUpdate({_id: visiteId}, {$set: {receptionDone: recept._id}}, {new: true}, (err, visit) => {
