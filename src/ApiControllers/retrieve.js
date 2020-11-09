@@ -910,6 +910,7 @@ let retrieveDevisByCopro = (req, res) => {
 }
 
 let retrieveOneReception = (req, res) => {
+    console.log("user: ", req.user);
     if (req.user.role !== 'architecte')
         res.status(401).send({success: false, message: 'accès refusé'});
     else {
