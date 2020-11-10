@@ -933,7 +933,8 @@ let retrieveAllReception = (req, res) => {
         res.status(401).send({success: false, message: 'accès refusé'});
     else {
         const {id} = req.user;
-        Reception.find({$or: [{syndicId: id}, {gestionnaireId: id}, {pcsId: id}]}, (err, receptions) => {
+        const {coproId} = req.body;
+        Reception.find({$and: [{coproId},{$or: [{syndicId: id}, {gestionnaireId: id}, {pcsId: id}]}]}, (err, receptions) => {
             if (err)
                 res.status(400).send({succes: false, message: 'erreur système', err});
             else if (!receptions)
