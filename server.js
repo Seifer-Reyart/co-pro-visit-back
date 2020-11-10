@@ -45,7 +45,7 @@ let options = {
             title: 'Swagger',
             version: '3.0.0',
         },
-        host: 'http://54.37.157.34:3018',
+        host: 'http://54.37.157.34:3019',
         basePath: '/',
         produces: [
             "application/json",
@@ -111,7 +111,7 @@ app.get('/', async (request, response) => {
 let auth        = require('./src/ApiRoutes/auth');
 let create      = require('./src/ApiRoutes/create');
 let update      = require('./src/ApiRoutes/update');
-let gestion	= require('./src/ApiRoutes/gestion');
+let gestion	    = require('./src/ApiRoutes/gestion');
 let retrieve	= require('./src/ApiRoutes/retrieve');
 
 app.use('/auth', auth);
@@ -152,7 +152,7 @@ app.use(function(req, res, next){
     // server response encoding type
     res.setHeader('Content-Type', 'text/plain; charset=UTF-8') ;
     // server respond with error message in case of '404 not found' error
-    res.status(404).send('Page not found - request aborted') ;
+    res.status(404).send('Service invalide - requête abondonnée') ;
 });
 
 /* Server Error Handler */
