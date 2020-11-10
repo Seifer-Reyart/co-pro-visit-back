@@ -38,7 +38,7 @@ let login = async (req, res) => {
                 res.status(403).send({success: false, message: "mot de passe incorrect"});
             else {
                 let token = await jwt.sign({id: user._id, role: user.role}, secretExpr.secret, {expiresIn: 60 * 60 * 24 * 30});
-                delete user.password;
+                await delete user.password;
                 res.status(200).send({success: true, message: 'connexion réussie', user, token});
             }
         } else {

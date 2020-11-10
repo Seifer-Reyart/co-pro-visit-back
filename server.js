@@ -7,6 +7,7 @@ const   express     = require('express'),
         fs	    = require('fs'),
         https	    = require('https'),
         http        = require('http'),
+	path	    = require('path'),
         bodyParser  = require('body-parser');
 
 /************************/
@@ -70,8 +71,9 @@ expressSwagger(options);
 const serverIp   = Config.HttpServer.ip;
 const serverPort = Config.HttpServer.port;
 
+console.log('path: ', __dirname)
 //app.enable('view cache');
-app.use('/uploads', express.static(`${__dirname}/uploads`));
+app.use('/uploads', express.static(`${__dirname}/src/uploads`));
 
 app.use(bodyParser.json({limit: '10mb'}));
 app.use(bodyParser.urlencoded({ extended : true, limit : '10mb' }));
