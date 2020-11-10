@@ -412,7 +412,7 @@ router.post('/one-avis', retrieveOneReception);
 
 /**
  * Cette route permet de récupérer les avis de travaux par syndic, gestionnaire ou pcs, JWT necessaire.
- * @route GET /retrieve/all-avis
+ * @route POST /retrieve/all-avis
  * @group Get_Data
  * @param {string} _id.body.required - _id d'un Avis Pre-Reception
  * @returns {object} 200 - {success: true, receptionDone: object}
@@ -423,6 +423,6 @@ router.post('/one-avis', retrieveOneReception);
  * @security JWT
  */
 
-router.get('/all-avis', retrieveAllReception);
+router.post('/all-avis', retrieveAllReception);
 
 module.exports = router;
