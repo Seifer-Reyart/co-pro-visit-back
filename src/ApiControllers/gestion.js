@@ -5,6 +5,7 @@
 let bcrypt  = require('bcryptjs');
 let multer  = require('multer');
 let path    = require("path");
+let fs      = require('fs');
 
 /***************/
 /*** helpers ***/
@@ -901,6 +902,76 @@ let demandeDevis = (req, res) => {
     }
 }
 
+let uploadStatSinistres = async (req, res) => {
+    if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else {
+        const {coproId} = req.body;
+
+        let filesErrors = [];
+        let filesUploaded = []
+        let savedFileName = '';
+        let promisesFiles = null;
+
+        if (req.files) {
+            promisesFiles = req.files.map(file => {
+                return new Promise((resolve) => {
+                    let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
+                    let mimetype = filetypes.test(file.mimetype);
+                    const hash = crypto.createHash('sha1')
+                    let hashedBuffer = file.buffer;
+                    hash.update(hashedBuffer);
+                    let extension = file.mimetype.match(filetypes);
+                    extension = extension?.length ? extension[0] : null;
+                    savedFileName = `${hash.digest('hex')}.${extension}`
+
+                    if (mimetype) {
+                        fs.writeFile('./src/uploads/stats/' + savedFileName, file.buffer, (err) => {
+                            if (err) {
+                                filesErrors.push({fileTitle: file.originalname, err});
+                                resolve()
+                            } else {
+                                filesUploaded.push(savedFileName);
+                                resolve()
+                            }
+                        })
+                    } else {
+                        filesErrors.push({
+                            fileTitle: file.originalname,
+                            err: "Mauvais format, reçu " + file.mimetype + ", attendu: " + filetypes
+                        });
+                        resolve()
+                    }
+                })
+            });
+            await Promise.all(promisesFiles);
+
+            Copro.findOneAndUpdate(
+                {_id: coproId},
+                {$set: {statSinistres: savedFileName}},
+                {new: true},
+                (err, cpr) => {
+                    if (err) {
+                        let path = './src/uploads/stats/' + savedFileName;
+                        fs.unlink(path, (err) => {
+                            if (err)
+                                console.log(err)
+                            res.status(400).send({success: false, message: "erreur système", err});
+                        });
+                    } else if (!cpr) {
+                        let path = './src/uploads/stats/' + savedFileName;
+                        fs.unlink(path, (err) => {
+                            if (err)
+                                console.log(err)
+                            res.status(404).send({success: false, message: "copro introuvable"});
+                        });
+                    } else
+                        res.status(200).send({success: true, message: "Stats Sinistres enregistrées"});
+                })
+        }
+    }
+}
+
 /* Export Functions */
 
 module.exports = {
@@ -920,5 +991,6 @@ module.exports = {
     annulerVisite,
     sendToEtude,
     aboPrestaToSyndic,
-    demandeDevis
+    demandeDevis,
+    uploadStatSinistres
 }

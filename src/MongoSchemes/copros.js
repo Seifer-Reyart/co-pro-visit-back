@@ -113,6 +113,10 @@ let coprosSchema = new Schema({
         type    : String,
         default : null
     },
+    statSinistres      : {
+        type    : String,
+        default : null
+    }
 });
 
 let copros = mongoose.model('copros', coprosSchema);

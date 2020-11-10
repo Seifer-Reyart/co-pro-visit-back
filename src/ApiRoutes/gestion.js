@@ -25,7 +25,8 @@ let {
     annulerVisite,
     sendToEtude,
     aboPrestaToSyndic,
-    demandeDevis
+    demandeDevis,
+    uploadStatSinistres
 } = require('../ApiControllers/gestion');
 
 /***************/
@@ -314,6 +315,24 @@ router.post('/abo-presta', aboPrestaToSyndic);
  * @security JWT
  */
 router.post('/demande-devis', demandeDevis);
+
+/**
+ * @typedef Copro
+ * @property {file} data.required - fichier Facture au format jpg|jpeg|png|pdf
+ */
+/**
+ * Cette route permet d'enregistrer un Avis sur Travaux par un Architecte + photos après
+ * @route POST /gestion/stats-sinistres
+ * @group prestataire
+ * @param {Devis.model} data.body - toutes les infos sur la Pré-réception
+ * @returns {object} 200 - {success: true, message : "Avis travaux enregistré"}
+ * @returns {Error}  400 - {success: false, message: error system log, err}
+ * @returns {Error}  401 - si dans token, role !== architecte  {success: false, message: 'accès interdit'}
+ * @produces application/json
+ * @consumes multipart/form-data
+ * @security JWT
+ */
+router.post('/stats-sinistres', multer().any(), uploadStatSinistres);
 
 module.exports = router;
 
