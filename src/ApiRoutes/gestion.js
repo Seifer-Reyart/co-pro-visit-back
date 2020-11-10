@@ -2,7 +2,8 @@
 /* import modules from node_modules */
 /************************************/
 
-const express = require('express');
+const express   = require('express');
+const multer    = require('multer');
 
 /************************/
 /* import local modules */
