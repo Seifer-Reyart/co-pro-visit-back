@@ -1008,27 +1008,19 @@ let registerIncident = async (req, res) => {
                 let imagesUploadErrors = [];
                 let imagesUploaded = []
                 let promisesFiles = null;
-                let savedFileName = '';
                 if (req.files) {
                     promisesFiles = req.files.map( file => {
                         return new Promise((resolve) => {
                             let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
                             let mimetype = filetypes.test(file.mimetype);
-                            const hash = crypto.createHash('sha1')
-                            let hashedBuffer = file.buffer;
-                            hash.update(hashedBuffer);
-                            let extension = file.mimetype.match(filetypes);
-                            extension = extension?.length ? extension[0] : null;
-                            savedFileName = `${hash.digest('hex')}.${extension}`
-
                             if (mimetype) {
-                                fs.writeFile('./src/uploads/incidents/' + savedFileName, file.buffer, (err) => {
+                                fs.writeFile('./src/uploads/incidents/' + file.originalname, file.buffer, (err) => {
                                     if (err) {
                                         imagesUploadErrors.push({imageTitle: file.originalname, err});
                                         resolve()
                                     }
                                     else {
-                                        imagesUploaded.push(savedFileName);
+                                        imagesUploaded.push(file.originalname);
                                         resolve()
                                     }
                                 })
@@ -1103,27 +1095,20 @@ let registerAvisTravaux = async (req, res) => {
         let imagesUploadErrors = [];
         let imagesUploaded = []
         let promisesFiles = null;
-        let savedFileName = '';
-
+        console.log("files: ", req.files)
         if (req.files) {
             promisesFiles = req.files.map( file => {
                 return new Promise((resolve) => {
                     let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
                     let mimetype = filetypes.test(file.mimetype);
-                    const hash = crypto.createHash('sha1')
-                    let hashedBuffer = file.buffer;
-                    hash.update(hashedBuffer);
-                    let extension = file.mimetype.match(filetypes);
-                    extension = extension?.length ? extension[0] : null;
-                    savedFileName = `${hash.digest('hex')}.${extension}`
                     if (mimetype) {
-                        fs.writeFile('./src/uploads/incidents/' + savedFileName, file.buffer, (err) => {
+                        fs.writeFile('./src/uploads/incidents/' + file.originalname, file.buffer, (err) => {
                             if (err) {
                                 imagesUploadErrors.push({imageTitle: file.originalname, err});
                                 resolve()
                             }
                             else {
-                                imagesUploaded.push(savedFileName);
+                                imagesUploaded.push(file.originalname);
                                 resolve()
                             }
                         })
