@@ -6,6 +6,7 @@ let bcrypt  = require('bcryptjs');
 let multer  = require('multer');
 let path    = require("path");
 let fs      = require('fs');
+let crypto  = require('crypto');
 
 /***************/
 /*** helpers ***/
