@@ -988,6 +988,8 @@ let registerIncident = async (req, res) => {
                             let extension = file.mimetype.match(filetypes);
                             extension = extension?.length ? extension[0] : null;
                             savedFileName = `${hash.digest('hex')}.${extension}`
+                            console.log("original name: ", file.originalname);
+                            console.log("hashed name: ", savedFileName);
                             if (mimetype) {
                                 fs.writeFile('./src/uploads/incidents/' + savedFileName, file.buffer, (err) => {
                                     if (err) {
@@ -1010,7 +1012,7 @@ let registerIncident = async (req, res) => {
                     });
                     await Promise.all(promisesFiles)
                 }
-
+                console.log("imagesUploaded: ", imagesUploaded);
                 let incident = new Incident({
                     images: imagesUploaded  ,
                     date: new Date()        ,
