@@ -797,38 +797,6 @@ let registerEvaluation = async (req, res) => {
     }
 }
 
-/* upload Devis & Facture */
-/*
-let storageDevis = multer.diskStorage({
-    destination: function (req, file, cb) {
-        // Uploads is the Upload_folder_name
-        cb(null, "./src/uploads/devis")
-    },
-    filename: async function (req, file, cb) {
-        let name = await generateP();
-        cb(null, req.user + "-" + name);
-    }
-})
-
-let uploadDevis = multer({
-    storage: storageDevis,
-    fileFilter: function (req, file, cb){
-        // Set the filetypes, it is optional
-        let filetypes = /pdf|PDF|jpg|JPG|jpeg|JPEG|png|PNG/;
-        let exttypes = /pdf|PDF|jpg|JPG|jpeg|JPEG|png|PNG/
-        let mimetype = filetypes.test(file.mimetype);
-        let extname = exttypes.test(path.extname(file.originalname).toLowerCase());
-
-        if (mimetype && extname) {
-            return cb(null, true);
-        }
-
-        cb("Error: Assurez vous de transmettre un fichier au format - " + exttypes);
-    }
-
-// data is the name of file attribute sent in body
-}).single("data");
-*/
 let uploadDevisFile = (req, res) => {
     if (req.user.role !== 'prestataire') {
         res.status(403).send({success: false, message: 'accès interdit'});
@@ -957,7 +925,7 @@ let uploadFactureFile = (req, res) => {
                     else
                         Devis.findOneAndUpdate(
                             {$and: [{_id: devisId}, {prestataireId: req.user.id}, {facturePDF: null}]},
-                            {$set: {facturePDF: savedFileName, dateDepotFacture: new Date()}},
+                            {$set: {facturePDF: savedFileName, dateDepotFacture: new Date(), demandeReception: true}},
                             {new: true},
                             (err, devis) => {
                                 if (err)
