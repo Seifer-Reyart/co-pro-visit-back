@@ -1080,20 +1080,27 @@ let registerAvisTravaux = async (req, res) => {
         let imagesUploadErrors = [];
         let imagesUploaded = []
         let promisesFiles = null;
-        console.log("files: ", req.files)
+
         if (req.files) {
+            let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
             promisesFiles = req.files.map( file => {
                 return new Promise((resolve) => {
-                    let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
+                    let savedFileName = '';
                     let mimetype = filetypes.test(file.mimetype);
+                    let hash = crypto.createHash('sha1')
+                    let hashedBuffer = file.buffer;
+                    hash.update(hashedBuffer);
+                    let extension = file.mimetype.match(filetypes);
+                    extension = extension?.length ? extension[0] : null;
+                    savedFileName = `${hash.digest('hex')}.${extension}`
                     if (mimetype) {
-                        fs.writeFile('./src/uploads/incidents/' + file.originalname, file.buffer, (err) => {
+                        fs.writeFile('./src/uploads/incidents/' + savedFileName, file.buffer, (err) => {
                             if (err) {
                                 imagesUploadErrors.push({imageTitle: file.originalname, err});
                                 resolve()
                             }
                             else {
-                                imagesUploaded.push(file.originalname);
+                                imagesUploaded.push(savedFileName);
                                 resolve()
                             }
                         })
@@ -1146,7 +1153,7 @@ let registerAvisTravaux = async (req, res) => {
             if (err)
                 res.status(400).send({success: false, message: "erreur système", err});
             else if (rec)
-                res.status(403).send({success: false, message: "un Avis a déjà enregistré"});
+                res.status(403).send({success: false, message: "un Avis a déjà été enregistré"});
             else
                 reception.save(function(err, recept) {
                     if (err) {
@@ -1165,7 +1172,7 @@ let registerAvisTravaux = async (req, res) => {
                             if (err)
                                 console.log("error: ", err)
                             //res.status(400).send({success: false, message: "Erreur lors de la mise à jour de la copropriété associée", err});
-                            else if (!visit)
+                            else if (!dev)
                                 console.log("devis introuvable")
                             //res.status(400).send({success: false, message: "visite introuvable"});
                         });
