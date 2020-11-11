@@ -975,12 +975,12 @@ let registerIncident = async (req, res) => {
             } else {
                 let imagesUploadErrors = [];
                 let imagesUploaded = []
-                let savedFileName = '';
                 let promisesFiles = null;
                 if (req.files) {
+                    const filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
                     promisesFiles = req.files.map( async file => {
                         return new Promise(async (resolve) => {
-                            const filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
+                            let savedFileName = '';
                             const mimetype = filetypes.test(file.mimetype);
                             let hash = crypto.createHash('sha1')
                             let hashedBuffer = file.buffer;
