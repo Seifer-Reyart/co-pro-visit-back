@@ -975,12 +975,19 @@ let registerIncident = async (req, res) => {
             } else {
                 let imagesUploadErrors = [];
                 let imagesUploaded = []
+                let savedFileName = '';
                 let promisesFiles = null;
                 if (req.files) {
                     promisesFiles = req.files.map( file => {
                         return new Promise((resolve) => {
                             let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
                             let mimetype = filetypes.test(file.mimetype);
+                            const hash = crypto.createHash('sha1')
+                            let hashedBuffer = file.buffer;
+                            hash.update(hashedBuffer);
+                            let extension = file.mimetype.match(filetypes);
+                            extension = extension?.length ? extension[0] : null;
+                            savedFileName = `${hash.digest('hex')}.${extension}`
                             if (mimetype) {
                                 fs.writeFile('./src/uploads/incidents/' + file.originalname, file.buffer, (err) => {
                                     if (err) {
@@ -988,7 +995,7 @@ let registerIncident = async (req, res) => {
                                         resolve()
                                     }
                                     else {
-                                        imagesUploaded.push(file.originalname);
+                                        imagesUploaded.push(savedFileName);
                                         resolve()
                                     }
                                 })
@@ -1003,6 +1010,8 @@ let registerIncident = async (req, res) => {
                     });
                     await Promise.all(promisesFiles)
                 }
+                console.log("imagesUploaded: ", imagesUploaded)
+                console.log("imagesUploadErrors", imagesUploadErrors)
                 let incident = new Incident({
                     images: imagesUploaded  ,
                     date: new Date()        ,
@@ -1022,22 +1031,32 @@ let registerIncident = async (req, res) => {
 
                 incident.save(function(err, incid) {
                     if (err) {
+                        console.log("err save: ", err);
                         res.status(400).send({ success: false, message: "Erreur lors de la création de l'Incident", err});
                     } else {
                         Copro.findOneAndUpdate({_id: coproId}, {$push: {incidentId: incid._id}}, {new: true}, function (err, cpr) {
-                            console.log('Copro.findOneAndUpdate err', err);
-                            if (err || !cpr)
-                                res.status(400).send({success: false, message: "Erreur lors de la mise à jour de la copropriété associée", err});
-                            else {
+                            if (err || !cpr) {
+                                console.log('Copro.findOneAndUpdate err', err);
+                                res.status(400).send({
+                                    success: false,
+                                    message: "Erreur lors de la mise à jour de la copropriété associée",
+                                    err
+                                });
+                            } else {
                                 Prestataire.updateMany({
                                     $and: [
                                         {corpsEtat: {$elemMatch: {$in: corpsEtat}}},
                                         {syndics: {$elemMatch: {$eq: syndicId}}}
                                         ]
                                 }, {$addToSet: {incidentId: incid._id}}, {new: true}, function (err, prest) {
-                                    if (err)
-                                        res.status(400).send({success: false, message: "Erreur lors de la mise à jour de la liste des prestataires", err});
-                                    else
+                                    if (err) {
+                                        console.log('Prestataire update Many err', err);
+                                        res.status(400).send({
+                                            success: false,
+                                            message: "Erreur lors de la mise à jour de la liste des prestataires",
+                                            err
+                                        });
+                                    } else
                                         res.status(200).send({
                                             success: true,
                                             message: "L'incident a bien été créé",
