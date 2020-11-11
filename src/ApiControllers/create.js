@@ -978,11 +978,11 @@ let registerIncident = async (req, res) => {
                 let savedFileName = '';
                 let promisesFiles = null;
                 if (req.files) {
-                    promisesFiles = req.files.map( file => {
-                        return new Promise((resolve) => {
-                            let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
-                            let mimetype = filetypes.test(file.mimetype);
-                            const hash = crypto.createHash('sha1')
+                    promisesFiles = req.files.map( async file => {
+                        return new Promise(async (resolve) => {
+                            const filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
+                            const mimetype = filetypes.test(file.mimetype);
+                            let hash = crypto.createHash('sha1')
                             let hashedBuffer = file.buffer;
                             hash.update(hashedBuffer);
                             let extension = file.mimetype.match(filetypes);
@@ -991,22 +991,21 @@ let registerIncident = async (req, res) => {
                             console.log("original name: ", file.originalname);
                             console.log("hashed name: ", savedFileName);
                             if (mimetype) {
-                                fs.writeFile('./src/uploads/incidents/' + savedFileName, file.buffer, (err) => {
+                                await fs.writeFile('./src/uploads/incidents/' + savedFileName, file.buffer, async (err) => {
                                     if (err) {
-                                        imagesUploadErrors.push({imageTitle: file.originalname, err});
-                                        resolve()
-                                    }
-                                    else {
-                                        imagesUploaded.push(savedFileName);
-                                        resolve()
+                                        await imagesUploadErrors.push({imageTitle: file.originalname, err});
+                                        await resolve()
+                                    } else {
+                                        await imagesUploaded.push(savedFileName);
+                                        await resolve()
                                     }
                                 })
                             } else {
-                                imagesUploadErrors.push({
+                                await imagesUploadErrors.push({
                                     imageTitle: file.originalname,
                                     err: "Mauvais format, reçu " + file.mimetype + ", attendu: " + filetypes
                                 });
-                                resolve()
+                                await resolve()
                             }
                         })
                     });
