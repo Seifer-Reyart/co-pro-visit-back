@@ -810,37 +810,38 @@ let uploadDevisFile = (req, res) => {
                 const {devisId} = req.body;
                 let filesErrors = [];
                 let filesUploaded = []
-                let savedFileName = '';
+
                 let promisesFiles = null;
 
                 if (req.files) {
-                    promisesFiles = req.files.map(file => {
-                        return new Promise((resolve) => {
-                            let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
-                            let mimetype = filetypes.test(file.mimetype);
-                            const hash = crypto.createHash('sha1')
+                    let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
+                    promisesFiles = req.files.map( async file => {
+                        return new Promise(async (resolve) => {
+                            const mimetype = filetypes.test(file.mimetype);
+                            let savedFileName = '';
                             let hashedBuffer = file.buffer;
+                            let hash = crypto.createHash('sha1')
                             hash.update(hashedBuffer);
                             let extension = file.mimetype.match(filetypes);
                             extension = extension?.length ? extension[0] : null;
                             savedFileName = `${hash.digest('hex')}.${extension}`
 
                             if (mimetype) {
-                                fs.writeFile('./src/uploads/devis/' + savedFileName, file.buffer, (err) => {
+                                await fs.writeFile('./src/uploads/devis/' + savedFileName, file.buffer, async (err) => {
                                     if (err) {
-                                        filesErrors.push({fileTitle: file.originalname, err});
-                                        resolve()
+                                        await filesErrors.push({fileTitle: file.originalname, err});
+                                        await resolve()
                                     } else {
-                                        filesUploaded.push(savedFileName);
-                                        resolve()
+                                        await filesUploaded.push(savedFileName);
+                                        await resolve()
                                     }
                                 })
                             } else {
-                                filesErrors.push({
+                                await filesErrors.push({
                                     fileTitle: file.originalname,
                                     err: "Mauvais format, reçu " + file.mimetype + ", attendu: " + filetypes
                                 });
-                                resolve()
+                                await resolve()
                             }
                         })
                     });
@@ -851,7 +852,7 @@ let uploadDevisFile = (req, res) => {
                     else
                         Devis.findOneAndUpdate(
                             {$and: [{_id: devisId}, {prestataireId: req.user.id}]},
-                            {$set: {devisPDF: savedFileName, dateDepotDevis: new Date()}},
+                            {$set: {devisPDF: filesUploaded[0], dateDepotDevis: new Date()}},
                             {new: true},
                             (err, devis) => {
                                 if (err) {
@@ -885,13 +886,13 @@ let uploadFactureFile = (req, res) => {
                 const {devisId} = req.body;
                 let filesErrors = [];
                 let filesUploaded = []
-                let savedFileName = '';
                 let promisesFiles = null;
 
                 if (req.files) {
-                    promisesFiles = req.files.map(file => {
-                        return new Promise((resolve) => {
-                            let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
+                    let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
+                    promisesFiles = req.files.map(async file => {
+                        return new Promise(async (resolve) => {
+                            let savedFileName = '';
                             let mimetype = filetypes.test(file.mimetype);
                             const hash = crypto.createHash('sha1')
                             let hashedBuffer = file.buffer;
@@ -901,21 +902,21 @@ let uploadFactureFile = (req, res) => {
                             savedFileName = `${hash.digest('hex')}.${extension}`
 
                             if (mimetype) {
-                                fs.writeFile('./src/uploads/devis/' + savedFileName, file.buffer, (err) => {
+                                fs.writeFile('./src/uploads/devis/' + savedFileName, file.buffer, async (err) => {
                                     if (err) {
-                                        filesErrors.push({fileTitle: file.originalname, err});
-                                        resolve()
+                                        await filesErrors.push({fileTitle: file.originalname, err});
+                                        await resolve()
                                     } else {
-                                        filesUploaded.push(savedFileName);
-                                        resolve()
+                                        await filesUploaded.push(savedFileName);
+                                        await resolve()
                                     }
                                 })
                             } else {
-                                filesErrors.push({
+                                await filesErrors.push({
                                     fileTitle: file.originalname,
                                     err: "Mauvais format, reçu " + file.mimetype + ", attendu: " + filetypes
                                 });
-                                resolve()
+                                await resolve()
                             }
                         })
                     });
@@ -925,7 +926,7 @@ let uploadFactureFile = (req, res) => {
                     else
                         Devis.findOneAndUpdate(
                             {$and: [{_id: devisId}, {prestataireId: req.user.id}, {facturePDF: null}]},
-                            {$set: {facturePDF: savedFileName, dateDepotFacture: new Date(), demandeReception: true}},
+                            {$set: {facturePDF: filesUploaded[0], dateDepotFacture: new Date(), demandeReception: true}},
                             {new: true},
                             (err, devis) => {
                                 if (err)
@@ -988,8 +989,6 @@ let registerIncident = async (req, res) => {
                             let extension = file.mimetype.match(filetypes);
                             extension = extension?.length ? extension[0] : null;
                             savedFileName = `${hash.digest('hex')}.${extension}`
-                            console.log("original name: ", file.originalname);
-                            console.log("hashed name: ", savedFileName);
                             if (mimetype) {
                                 await fs.writeFile('./src/uploads/incidents/' + savedFileName, file.buffer, async (err) => {
                                     if (err) {
@@ -1011,7 +1010,6 @@ let registerIncident = async (req, res) => {
                     });
                     await Promise.all(promisesFiles)
                 }
-                console.log("imagesUploaded: ", imagesUploaded);
                 let incident = new Incident({
                     images: imagesUploaded  ,
                     date: new Date()        ,
