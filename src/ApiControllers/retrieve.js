@@ -851,20 +851,23 @@ let retrieveDevis = (req, res) => {
     if (req.user.role === 'architecte') {
         const {visiteId} = req.body;
 
-        Devis.find({$and: [{visiteId},{architecteId: req.user.id}, {facturePDF: {$ne: null}}]}, function (err, devis) {
+        Incident.find({$and: [{visiteId},{architecteId: req.user.id}]}, function (err, incidents) {
             if (err)
                 res.status(400).send({succes: false, message: 'erreur système', err});
-            else if (!devis)
+            else if (!incidents)
                 res.status(404).send({succes: false, message: "devis/evaluation introuvable"});
             else {
-                res.status(200).send({success: true, devis});
+                res.status(200).send({success: true, incidents});
             }
         }).populate({
-            path: 'visiteId',
-            model: 'visites'
+            path    : 'visiteId',
+            model   : 'visites'
         }).populate({
-            path: 'gestionnaireId',
-            model: 'gestionnaires'
+            path    : 'gestionnaireId',
+            model   : 'gestionnaires'
+        }).populate({
+            path    : 'devis',
+            model   : 'devis'
         });
     } else {
         const {prestataireId} = req.body;
