@@ -797,38 +797,6 @@ let registerEvaluation = async (req, res) => {
     }
 }
 
-/* upload Devis & Facture */
-/*
-let storageDevis = multer.diskStorage({
-    destination: function (req, file, cb) {
-        // Uploads is the Upload_folder_name
-        cb(null, "./src/uploads/devis")
-    },
-    filename: async function (req, file, cb) {
-        let name = await generateP();
-        cb(null, req.user + "-" + name);
-    }
-})
-
-let uploadDevis = multer({
-    storage: storageDevis,
-    fileFilter: function (req, file, cb){
-        // Set the filetypes, it is optional
-        let filetypes = /pdf|PDF|jpg|JPG|jpeg|JPEG|png|PNG/;
-        let exttypes = /pdf|PDF|jpg|JPG|jpeg|JPEG|png|PNG/
-        let mimetype = filetypes.test(file.mimetype);
-        let extname = exttypes.test(path.extname(file.originalname).toLowerCase());
-
-        if (mimetype && extname) {
-            return cb(null, true);
-        }
-
-        cb("Error: Assurez vous de transmettre un fichier au format - " + exttypes);
-    }
-
-// data is the name of file attribute sent in body
-}).single("data");
-*/
 let uploadDevisFile = (req, res) => {
     if (req.user.role !== 'prestataire') {
         res.status(403).send({success: false, message: 'accès interdit'});
@@ -842,37 +810,38 @@ let uploadDevisFile = (req, res) => {
                 const {devisId} = req.body;
                 let filesErrors = [];
                 let filesUploaded = []
-                let savedFileName = '';
+
                 let promisesFiles = null;
 
                 if (req.files) {
-                    promisesFiles = req.files.map(file => {
-                        return new Promise((resolve) => {
-                            let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
-                            let mimetype = filetypes.test(file.mimetype);
-                            const hash = crypto.createHash('sha1')
+                    let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
+                    promisesFiles = req.files.map( async file => {
+                        return new Promise(async (resolve) => {
+                            const mimetype = filetypes.test(file.mimetype);
+                            let savedFileName = '';
                             let hashedBuffer = file.buffer;
+                            let hash = crypto.createHash('sha1')
                             hash.update(hashedBuffer);
                             let extension = file.mimetype.match(filetypes);
                             extension = extension?.length ? extension[0] : null;
                             savedFileName = `${hash.digest('hex')}.${extension}`
 
                             if (mimetype) {
-                                fs.writeFile('./src/uploads/devis/' + savedFileName, file.buffer, (err) => {
+                                await fs.writeFile('./src/uploads/devis/' + savedFileName, file.buffer, async (err) => {
                                     if (err) {
-                                        filesErrors.push({fileTitle: file.originalname, err});
-                                        resolve()
+                                        await filesErrors.push({fileTitle: file.originalname, err});
+                                        await resolve()
                                     } else {
-                                        filesUploaded.push(savedFileName);
-                                        resolve()
+                                        await filesUploaded.push(savedFileName);
+                                        await resolve()
                                     }
                                 })
                             } else {
-                                filesErrors.push({
+                                await filesErrors.push({
                                     fileTitle: file.originalname,
                                     err: "Mauvais format, reçu " + file.mimetype + ", attendu: " + filetypes
                                 });
-                                resolve()
+                                await resolve()
                             }
                         })
                     });
@@ -883,7 +852,7 @@ let uploadDevisFile = (req, res) => {
                     else
                         Devis.findOneAndUpdate(
                             {$and: [{_id: devisId}, {prestataireId: req.user.id}]},
-                            {$set: {devisPDF: savedFileName, dateDepotDevis: new Date()}},
+                            {$set: {devisPDF: filesUploaded[0], dateDepotDevis: new Date()}},
                             {new: true},
                             (err, devis) => {
                                 if (err) {
@@ -917,13 +886,13 @@ let uploadFactureFile = (req, res) => {
                 const {devisId} = req.body;
                 let filesErrors = [];
                 let filesUploaded = []
-                let savedFileName = '';
                 let promisesFiles = null;
 
                 if (req.files) {
-                    promisesFiles = req.files.map(file => {
-                        return new Promise((resolve) => {
-                            let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
+                    let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
+                    promisesFiles = req.files.map(async file => {
+                        return new Promise(async (resolve) => {
+                            let savedFileName = '';
                             let mimetype = filetypes.test(file.mimetype);
                             const hash = crypto.createHash('sha1')
                             let hashedBuffer = file.buffer;
@@ -933,21 +902,21 @@ let uploadFactureFile = (req, res) => {
                             savedFileName = `${hash.digest('hex')}.${extension}`
 
                             if (mimetype) {
-                                fs.writeFile('./src/uploads/devis/' + savedFileName, file.buffer, (err) => {
+                                fs.writeFile('./src/uploads/devis/' + savedFileName, file.buffer, async (err) => {
                                     if (err) {
-                                        filesErrors.push({fileTitle: file.originalname, err});
-                                        resolve()
+                                        await filesErrors.push({fileTitle: file.originalname, err});
+                                        await resolve()
                                     } else {
-                                        filesUploaded.push(savedFileName);
-                                        resolve()
+                                        await filesUploaded.push(savedFileName);
+                                        await resolve()
                                     }
                                 })
                             } else {
-                                filesErrors.push({
+                                await filesErrors.push({
                                     fileTitle: file.originalname,
                                     err: "Mauvais format, reçu " + file.mimetype + ", attendu: " + filetypes
                                 });
-                                resolve()
+                                await resolve()
                             }
                         })
                     });
@@ -957,7 +926,7 @@ let uploadFactureFile = (req, res) => {
                     else
                         Devis.findOneAndUpdate(
                             {$and: [{_id: devisId}, {prestataireId: req.user.id}, {facturePDF: null}]},
-                            {$set: {facturePDF: savedFileName, dateDepotFacture: new Date()}},
+                            {$set: {facturePDF: filesUploaded[0], dateDepotFacture: new Date(), demandeReception: true}},
                             {new: true},
                             (err, devis) => {
                                 if (err)
@@ -1009,27 +978,33 @@ let registerIncident = async (req, res) => {
                 let imagesUploaded = []
                 let promisesFiles = null;
                 if (req.files) {
-                    promisesFiles = req.files.map( file => {
-                        return new Promise((resolve) => {
-                            let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
-                            let mimetype = filetypes.test(file.mimetype);
+                    const filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
+                    promisesFiles = req.files.map( async file => {
+                        return new Promise(async (resolve) => {
+                            let savedFileName = '';
+                            const mimetype = filetypes.test(file.mimetype);
+                            let hash = crypto.createHash('sha1')
+                            let hashedBuffer = file.buffer;
+                            hash.update(hashedBuffer);
+                            let extension = file.mimetype.match(filetypes);
+                            extension = extension?.length ? extension[0] : null;
+                            savedFileName = `${hash.digest('hex')}.${extension}`
                             if (mimetype) {
-                                fs.writeFile('./src/uploads/incidents/' + file.originalname, file.buffer, (err) => {
+                                await fs.writeFile('./src/uploads/incidents/' + savedFileName, file.buffer, async (err) => {
                                     if (err) {
-                                        imagesUploadErrors.push({imageTitle: file.originalname, err});
-                                        resolve()
-                                    }
-                                    else {
-                                        imagesUploaded.push(file.originalname);
-                                        resolve()
+                                        await imagesUploadErrors.push({imageTitle: file.originalname, err});
+                                        await resolve()
+                                    } else {
+                                        await imagesUploaded.push(savedFileName);
+                                        await resolve()
                                     }
                                 })
                             } else {
-                                imagesUploadErrors.push({
+                                await imagesUploadErrors.push({
                                     imageTitle: file.originalname,
                                     err: "Mauvais format, reçu " + file.mimetype + ", attendu: " + filetypes
                                 });
-                                resolve()
+                                await resolve()
                             }
                         })
                     });
@@ -1054,22 +1029,32 @@ let registerIncident = async (req, res) => {
 
                 incident.save(function(err, incid) {
                     if (err) {
+                        console.log("err save: ", err);
                         res.status(400).send({ success: false, message: "Erreur lors de la création de l'Incident", err});
                     } else {
                         Copro.findOneAndUpdate({_id: coproId}, {$push: {incidentId: incid._id}}, {new: true}, function (err, cpr) {
-                            console.log('Copro.findOneAndUpdate err', err);
-                            if (err || !cpr)
-                                res.status(400).send({success: false, message: "Erreur lors de la mise à jour de la copropriété associée", err});
-                            else {
+                            if (err || !cpr) {
+                                console.log('Copro.findOneAndUpdate err', err);
+                                res.status(400).send({
+                                    success: false,
+                                    message: "Erreur lors de la mise à jour de la copropriété associée",
+                                    err
+                                });
+                            } else {
                                 Prestataire.updateMany({
                                     $and: [
                                         {corpsEtat: {$elemMatch: {$in: corpsEtat}}},
                                         {syndics: {$elemMatch: {$eq: syndicId}}}
                                         ]
                                 }, {$addToSet: {incidentId: incid._id}}, {new: true}, function (err, prest) {
-                                    if (err)
-                                        res.status(400).send({success: false, message: "Erreur lors de la mise à jour de la liste des prestataires", err});
-                                    else
+                                    if (err) {
+                                        console.log('Prestataire update Many err', err);
+                                        res.status(400).send({
+                                            success: false,
+                                            message: "Erreur lors de la mise à jour de la liste des prestataires",
+                                            err
+                                        });
+                                    } else
                                         res.status(200).send({
                                             success: true,
                                             message: "L'incident a bien été créé",
@@ -1095,20 +1080,27 @@ let registerAvisTravaux = async (req, res) => {
         let imagesUploadErrors = [];
         let imagesUploaded = []
         let promisesFiles = null;
-        console.log("files: ", req.files)
+
         if (req.files) {
+            let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
             promisesFiles = req.files.map( file => {
                 return new Promise((resolve) => {
-                    let filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
+                    let savedFileName = '';
                     let mimetype = filetypes.test(file.mimetype);
+                    let hash = crypto.createHash('sha1')
+                    let hashedBuffer = file.buffer;
+                    hash.update(hashedBuffer);
+                    let extension = file.mimetype.match(filetypes);
+                    extension = extension?.length ? extension[0] : null;
+                    savedFileName = `${hash.digest('hex')}.${extension}`
                     if (mimetype) {
-                        fs.writeFile('./src/uploads/incidents/' + file.originalname, file.buffer, (err) => {
+                        fs.writeFile('./src/uploads/incidents/' + savedFileName, file.buffer, (err) => {
                             if (err) {
                                 imagesUploadErrors.push({imageTitle: file.originalname, err});
                                 resolve()
                             }
                             else {
-                                imagesUploaded.push(file.originalname);
+                                imagesUploaded.push(savedFileName);
                                 resolve()
                             }
                         })
@@ -1161,7 +1153,7 @@ let registerAvisTravaux = async (req, res) => {
             if (err)
                 res.status(400).send({success: false, message: "erreur système", err});
             else if (rec)
-                res.status(403).send({success: false, message: "un Avis a déjà enregistré"});
+                res.status(403).send({success: false, message: "un Avis a déjà été enregistré"});
             else
                 reception.save(function(err, recept) {
                     if (err) {
@@ -1176,11 +1168,11 @@ let registerAvisTravaux = async (req, res) => {
                                 console.log("visite introuvable")
                             //res.status(400).send({success: false, message: "visite introuvable"});
                         });
-                        Devis.findOneAndUpdate({_id: devisId}, {$set: {note: recept.rate, receptionDone: true}}, {new: true}, (err, dev) => {
+                        Devis.findOneAndUpdate({_id: devisId}, {$set: {note: recept.rate, receptionDone: recept._id}}, {new: true}, (err, dev) => {
                             if (err)
                                 console.log("error: ", err)
                             //res.status(400).send({success: false, message: "Erreur lors de la mise à jour de la copropriété associée", err});
-                            else if (!visit)
+                            else if (!dev)
                                 console.log("devis introuvable")
                             //res.status(400).send({success: false, message: "visite introuvable"});
                         });

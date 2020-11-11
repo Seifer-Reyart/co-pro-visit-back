@@ -851,7 +851,7 @@ let retrieveDevis = (req, res) => {
     if (req.user.role === 'architecte') {
         const {visiteId} = req.body;
 
-        Devis.findOne({$and: [{visiteId},{architecteId: req.user.id}, {facturePDF: {$ne: null}}]}, function (err, devis) {
+        Devis.find({$and: [{visiteId},{architecteId: req.user.id}, {demandeReception: true}]}, function (err, devis) {
             if (err)
                 res.status(400).send({succes: false, message: 'erreur système', err});
             else if (!devis)
@@ -860,11 +860,14 @@ let retrieveDevis = (req, res) => {
                 res.status(200).send({success: true, devis});
             }
         }).populate({
-            path: 'visiteId',
-            model: 'visites'
+            path    : 'visiteId',
+            model   : 'visites'
         }).populate({
-            path: 'gestionnaireId',
-            model: 'gestionnaires'
+            path    : 'gestionnaireId',
+            model   : 'gestionnaires'
+        }).populate({
+            path    : 'receptionDone',
+            model   : 'receptions'
         });
     } else {
         const {prestataireId} = req.body;
