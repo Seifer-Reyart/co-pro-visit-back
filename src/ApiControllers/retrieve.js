@@ -851,13 +851,13 @@ let retrieveDevis = (req, res) => {
     if (req.user.role === 'architecte') {
         const {visiteId} = req.body;
 
-        Incident.find({$and: [{visiteId},{architecteId: req.user.id}]}, function (err, incidents) {
+        Devis.find({$and: [{visiteId},{architecteId: req.user.id}, {demandeReception: true}]}, function (err, devis) {
             if (err)
                 res.status(400).send({succes: false, message: 'erreur système', err});
-            else if (!incidents)
+            else if (!devis)
                 res.status(404).send({succes: false, message: "devis/evaluation introuvable"});
             else {
-                res.status(200).send({success: true, incidents});
+                res.status(200).send({success: true, devis});
             }
         }).populate({
             path    : 'visiteId',
@@ -866,8 +866,8 @@ let retrieveDevis = (req, res) => {
             path    : 'gestionnaireId',
             model   : 'gestionnaires'
         }).populate({
-            path    : 'devis',
-            model   : 'devis'
+            path    : 'receptionDone',
+            model   : 'receptions'
         });
     } else {
         const {prestataireId} = req.body;
