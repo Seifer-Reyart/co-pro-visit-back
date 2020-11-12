@@ -973,6 +973,26 @@ let uploadStatSinistres = async (req, res) => {
     }
 }
 
+let updatePermissionsGest = (req, res) => {
+    if (req.user.role !== 'syndic')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else {
+        const {_id, permissions} = req.body;
+        Gestionnaire.findOneAndUpdate(
+            {_id},
+            {$set: {permissions: permissions}},
+            {new: true},
+            (err, gest) => {
+                if (err)
+                    res.status(400).send({success: false, message: 'erreur système', err});
+                else if (!gest)
+                    res.status(404).send({success: false, message: 'gestionnaire introuvable'});
+                else
+                    res.status(200).send({success: true, message: 'changement de droits effectué'});
+            });
+    }
+}
+
 /* Export Functions */
 
 module.exports = {
@@ -993,5 +1013,6 @@ module.exports = {
     sendToEtude,
     aboPrestaToSyndic,
     demandeDevis,
-    uploadStatSinistres
+    uploadStatSinistres,
+    updatePermissionsGest
 }
