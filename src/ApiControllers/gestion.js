@@ -256,30 +256,51 @@ let assignerCourtierToCopro = (req, res) => {
                                 console.log(err);
                         });
                 }
-                Copro.findOneAndUpdate(
-                    {_id: copro},
-                    {$set: {courtier: courtier}},
-                    {new: false},
-                    function (err, cop) {
-                        if (err || !cop) {
-                            res.status(400).send({success: false, message: 'erreur assigniation dans copro', err});
-                        } else {
-                            Courtier.findOneAndUpdate(
-                                {_id: courtier},
-                                {$push: {parc: cop._id}},
-                                {new: true},
-                                function (err, court) {
-                                    if (err || !court) {
-                                        res.status(400).send({
-                                            success: false,
-                                            message: 'erreur assigniation dans courtier',
-                                            err
-                                        });
-                                    } else
-                                        res.status(200).send({success: true, message: "le courtier a bien été assigné"})
+                if (cop.courtier && courtier === 'null') {
+                    Copro.findOneAndUpdate(
+                        {_id: copro},
+                        {$set: {courtier: null}},
+                        {new: false},
+                        function (err, cop) {
+                            if (err || !cop) {
+                                res.status(400).send({success: false, message: 'erreur assigniation dans copro', err});
+                            } else {
+                                res.status(200).send({
+                                    success: true,
+                                    message: "sans courtier assigné"
                                 })
-                        }
+                            }
+                        })
+                } else if (!cop.courtier && courtier === 'null') {
+                    res.status(200).send({
+                        success: true,
+                        message: "sans courtier assigné"
                     })
+                } else
+                    Copro.findOneAndUpdate(
+                        {_id: copro},
+                        {$set: {courtier: courtier}},
+                        {new: false},
+                        function (err, cop) {
+                            if (err || !cop) {
+                                res.status(400).send({success: false, message: 'erreur assigniation dans copro', err});
+                            } else {
+                                Courtier.findOneAndUpdate(
+                                    {_id: courtier},
+                                    {$push: {parc: cop._id}},
+                                    {new: true},
+                                    function (err, court) {
+                                        if (err || !court) {
+                                            res.status(400).send({
+                                                success: false,
+                                                message: 'erreur assigniation dans courtier',
+                                                err
+                                            });
+                                        } else
+                                            res.status(200).send({success: true, message: "le courtier a bien été assigné"})
+                                    })
+                            }
+                        })
             }
         })
     }
