@@ -297,6 +297,12 @@ let getCopro = (req, res) => {
                     else
                         res.status(200).send({success: true, copro});
                 });
+        }).populate({
+            path: 'batiments',
+            model: 'batiments'
+        }).populate({
+            path: 'gestionnaire',
+            model: 'gestionnaires'
         });
     else
         res.status(401).send({success: false, message: 'accès refusé'});
