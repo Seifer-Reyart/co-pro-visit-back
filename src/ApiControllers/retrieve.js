@@ -115,8 +115,8 @@ let postSyndic = (req, res) => {
 /*** get Gestionnaires ***/
 
 let getGestionnaires = (req, res) => {
-    if (req.user.role === 'syndic')
-        Gestionnaire.find({syndic: req.user.id}, (err, gestionnaires) => {
+    if (req.user.role === 'syndic' || req.user.role === 'gestionnaire')
+        Gestionnaire.find({$or: [{syndic: req.user.id}, {_id: req.user.id}]}, (err, gestionnaires) => {
             if (err)
                 res.status(400).send({success: false, message: 'erreur system', err});
             else if (!gestionnaires)
