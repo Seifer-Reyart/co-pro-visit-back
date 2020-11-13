@@ -619,15 +619,13 @@ let deleteSyndic = (req, res) => {
 }
 
 let changeStatusCopro = (req, res) => {
-console.log(req.body);
     if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
         res.status(401).send({success: false, message: 'accès interdit'});
     else {
-        const {coproId, isParc} = req.body;
+        const {coproId, isParc, sansSuite} = req.body;
         if (isParc)
             Copro.findOne({_id: coproId}, function (err, copro) {
                 if (err) {
-		    console.log("find copro: ", err);
                     res.status(400).send({success: false, message: 'erreur système', err});
                 } else
                     Copro.findOneAndUpdate(
@@ -636,7 +634,6 @@ console.log(req.body);
                         {new: true},
                         function (err, cpr) {
                             if (err) {
-				console.log("find and update copro: ", err);
                                 res.status(400).send({success: false, message: 'erreur système', err});
                             } else
                                 Syndic.findOneAndUpdate(
@@ -645,7 +642,6 @@ console.log(req.body);
                                     {new: true},
                                     function (err) {
                                         if (err) {
-					console.log("find and update syndic: ", err);
                                             res.status(400).send({success: false, message: 'erreur système', err});
                                         } else if (cpr.gestionnaire !== null)
                                             Gestionnaire.findOneAndUpdate(
@@ -657,10 +653,18 @@ console.log(req.body);
                                                     },
                                                 {new: true},
                                                 function (err) {
-                                                    if (err)
-                                                        res.status(400).send({success: false, message: 'erreur système', err});
-						    else
-							res.status(200).send({success: true, message: "la copropri  t   est maintenant dans le Parc"});
+                                                    if (err) {
+                                                        res.status(400).send({
+                                                            success: false,
+                                                            message: 'erreur système',
+                                                            err
+                                                        });
+                                                    } else {
+                                                        res.status(200).send({
+                                                            success: true,
+                                                            message: "la copropriété est maintenant dans le Parc"
+                                                        });
+                                                    }
                                                 });
                                         else
                                             res.status(200).send({success: true, message: "la copropriété est maintenant dans le Parc"});
@@ -674,11 +678,10 @@ console.log(req.body);
                 else
                     Copro.findOneAndUpdate(
                         {_id: copro._id},
-                        {$set: {syndicNominated: null}, $push: {syndicEnCours: copro.syndicNominated}},
+                        {$set: {syndicNominated: null, sansSuite}, $push: {syndicEnCours: copro.syndicNominated}},
                         {new: true},
                         (error, cpr) => {
                             if (error) {
-				console.log("find and update copro: ", error);
                                 res.status(400).send({success: false, message: 'erreur système', err: error});
                             } else
                                 Syndic.findOneAndUpdate(
@@ -687,7 +690,6 @@ console.log(req.body);
                                     {new: true},
                                     function (err) {
                                         if (err) {
-					    console.log("find and update syndic: ", err);
                                             res.status(400).send({success: false, message: 'erreur système', err});
                                         } else if (cpr.gestionnaire !== null)
                                             Gestionnaire.findOneAndUpdate(
@@ -695,10 +697,18 @@ console.log(req.body);
                                                 {$pull: {parc: cpr._id}, $push: {enCoursSelect: cpr._id}},
                                                 {new: true},
                                                 function (err) {
-                                                    if (err)
-                                                        res.status(400).send({success: false, message: 'erreur système', err});
-						    else
-							res.status(200).send({success: true, message: "la copropri  t   est maintenant en cours de s  lection"});
+                                                    if (err) {
+                                                        res.status(400).send({
+                                                            success: false,
+                                                            message: 'erreur système',
+                                                            err
+                                                        });
+                                                    } else {
+                                                        res.status(200).send({
+                                                            success: true,
+                                                            message: "la copropriété est maintenant en cours de sélection"
+                                                        });
+                                                    }
                                                 });
                                         else
                                             res.status(200).send({success: true, message: "la copropriété est maintenant en cours de sélection"});
