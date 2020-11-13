@@ -292,7 +292,7 @@ let getCopro = (req, res) => {
                 Copro.findOne({_id: pcs.coproId}, (err, copro) => {
                     if (err)
                         res.status(400).send({success: false, message: 'erreur system', err});
-                    else if (!copros)
+                    else if (!copro)
                         res.status(404).send({success: false, message: 'aucun parc enregistré'});
                     else
                         res.status(200).send({success: true, copro});
