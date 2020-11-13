@@ -58,87 +58,77 @@ let demandeVisite = (req, res) => {
                 res.status(403).send({success: false, message: 'une visite a déjà été demandé'});
             else {
                 const {coproId} = req.body;
-                Copro.findOne({_id: coproId}, function (err, copro) {
+                Syndic.findOne({$or: [{_id: req.user.id}, {gestionnaires: {$elemMatch: {$eq: req.user.id}}}]}, (err, synd) => {
                     if (err)
                         res.status(400).send({success: false, message: 'erreur system', err});
-                    else if (!copro)
-                        res.status(403).send({success: false, message: "la Copro n'existe pas"});
-                    else {
-                        let visite;
-                        if (req.user.role !== 'syndic')
-                            visite = new Visite({
-                                coproId    	    : copro._id,
-                                nomCopro        : copro.nomCopro,
-                                reference       : copro.reference,
-                                gardien         : req.body.gardien,
-                                accessCode      : req.body.accessCode,
-                                cleCabinet      : req.body.cleCabinet,
-                                commentaire     : req.body.commentaire,
-                                nomPCS          : req.body.nomPCS,
-                                emailPCS        : req.body.emailPCS,
-                                phonePCS        : req.body.phonePCS,
-                                syndicId        : copro.syndicNominated ? copro.syndicNominated : req.user.id,
-                                demandeLe       : new Date(),
-                                done            : false
-                            });
-                        else
-                            visite = new Visite({
-                                coproId    	    : copro._id,
-                                nomCopro        : copro.nomCopro,
-                                reference       : copro.reference,
-                                gardien         : req.body.gardien,
-                                accessCode      : req.body.accessCode,
-                                cleCabinet      : req.body.cleCabinet,
-                                commentaire     : req.body.commentaire,
-                                nomPCS          : req.body.nomPCS,
-                                emailPCS        : req.body.emailPCS,
-                                phonePCS        : req.body.phonePCS,
-                                syndicId        : copro.syndicNominated ? copro.syndicNominated : req.user.id,
-                                gestionnaireId  : copro.gestionnaire,
-                                demandeLe       : new Date(),
-                                done            : false
-                            });
-                        visite.save(async function(err, v) {
-                            if (err || !v)
+                    else if (!synd)
+                        res.status(400).send({success: false, message: 'syndic introuvable'});
+                    else
+                        Copro.findOne({_id: coproId}, function (err, copro) {
+                            if (err)
                                 res.status(400).send({success: false, message: 'erreur system', err});
+                            else if (!copro)
+                                res.status(403).send({success: false, message: "la Copro n'existe pas"});
                             else {
-                                await Copro.updateOne(
-                                    {_id: copro._id},
-                                    {$set: {dateDemandeVisite: new Date()}},
-                                    async function (err) {
-                                        if (err)
-                                            res.status(400).send({success: false, message: 'erreur system', err});
-                                        else {
-                                            let password = await generateP();
-                                            let pcs = new PresidentCS({
-                                                email   : req.body.emailPCS,
-                                                lastName: req.body.nomPCS,
-                                                password: bcrypt.hashSync(password, salt),
-                                                phone   : req.body.phonePCS,
-                                                coproId : copro._id,
-                                            });
-                                            pcs.save(async function (err, p) {
+                                let visite;
+                                visite = new Visite({
+                                    coproId    	    : copro._id,
+                                    nomCopro        : copro.nomCopro,
+                                    reference       : copro.reference,
+                                    gardien         : req.body.gardien,
+                                    accessCode      : req.body.accessCode,
+                                    cleCabinet      : req.body.cleCabinet,
+                                    commentaire     : req.body.commentaire,
+                                    nomPCS          : req.body.nomPCS,
+                                    emailPCS        : req.body.emailPCS,
+                                    phonePCS        : req.body.phonePCS,
+                                    syndicId        : synd._id,
+                                    gestionnaireId  : copro.gestionnaire,
+                                    demandeLe       : new Date(),
+                                    done            : false
+                                });
+                                visite.save(async function(err, v) {
+                                    if (err || !v)
+                                        res.status(400).send({success: false, message: 'erreur system', err});
+                                    else {
+                                        await Copro.updateOne(
+                                            {_id: copro._id},
+                                            {$set: {dateDemandeVisite: new Date()}},
+                                            async function (err) {
                                                 if (err)
-                                                    console.log(err);
+                                                    res.status(400).send({success: false, message: 'erreur system', err});
                                                 else {
-                                                    sendCredentials(req.body.emailPCS.toLowerCase(), password);
-                                                    await Copro.findOneAndUpdate(
-                                                        {_id: copro._id},
-                                                        {$set: {pcs: p._id}},
-                                                        {new: true},
-                                                        function (err) {
-                                                            if (err)
-                                                                console.log(err)
-                                                        });
-                                                    res.status(200).send({success: true, message: 'requête visite envoyée'});
+                                                    let password = await generateP();
+                                                    let pcs = new PresidentCS({
+                                                        email   : req.body.emailPCS,
+                                                        lastName: req.body.nomPCS,
+                                                        password: bcrypt.hashSync(password, salt),
+                                                        phone   : req.body.phonePCS,
+                                                        coproId : copro._id,
+                                                    });
+                                                    pcs.save(async function (err, p) {
+                                                        if (err)
+                                                            console.log(err);
+                                                        else {
+                                                            sendCredentials(req.body.emailPCS.toLowerCase(), password);
+                                                            await Copro.findOneAndUpdate(
+                                                                {_id: copro._id},
+                                                                {$set: {pcs: p._id}},
+                                                                {new: true},
+                                                                function (err) {
+                                                                    if (err)
+                                                                        console.log(err)
+                                                                });
+                                                            res.status(200).send({success: true, message: 'requête visite envoyée'});
+                                                        }
+                                                    });
                                                 }
                                             });
-                                        }
-                                    });
+                                    }
+                                });
                             }
-                        });
-                    }
-                })
+                        })
+                });
             }
         })
     }
