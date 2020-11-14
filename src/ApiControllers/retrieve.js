@@ -896,11 +896,11 @@ let retrieveDevis = (req, res) => {
 }
 
 let retrieveDevisByCopro = (req, res) => {
-    if (req.user.role !== 'admin' && req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
+    if (req.user.role !== 'admin' && req.user.role !== 'syndic' && req.user.role !== 'gestionnaire' && req.user.role !== 'pcs')
         res.status(401).send({success: false, message: 'accès refusé'});
     else {
         if (req.body.option)
-            Devis.find({$and: [{coproId: req.body.coproId}, {$or: [{syndicId: req.user.id},{gestionnaireId: req.user.id}]}]}, function (err, devis) {
+            Devis.find({$and: [{coproId: req.body.coproId}, {$or: [{syndicId: req.user.id},{gestionnaireId: req.user.id}, {pcsId: req.user.id}]}]}, function (err, devis) {
                 if (err) {
                     console.log(err)
                     res.status(400).send({succes: false, message: 'erreur système', err});
