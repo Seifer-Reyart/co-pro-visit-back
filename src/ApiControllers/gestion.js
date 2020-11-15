@@ -307,10 +307,8 @@ let assignerCourtierToCopro = (req, res) => {
 }
 
 let assignerCourtierToSyndic = async (req, res) => {
-    let {syndics, courtier, option} = req.body;
-    if (req.user.role !== 'admin')
-        res.status(401).send({success: false, message: 'accès interdit'});
-    else {
+    if (req.user.role !== 'admin') {
+        let {syndics, courtier, option} = req.body;
         let errorSyndic = [];
         let errorCourtier = [];
         let successId = [];
@@ -345,9 +343,6 @@ let assignerCourtierToSyndic = async (req, res) => {
             else
                 res.status(200).send({success: true, message: "le courtier a bien été assigné", successId});
         } else {
-            let errorSyndic = [];
-            let errorCourtier = [];
-            let successId = [];
             let promises = await syndics.map(syndic => {
                 Syndic.findOneAndUpdate(
                     {_id: syndic},
@@ -375,10 +370,46 @@ let assignerCourtierToSyndic = async (req, res) => {
             });
             await Promise.all(promises);
             if (errorSyndic.length > 0 || errorCourtier.length > 0)
-                res.status(400).send({success: false, message: 'erreur assigniation', errorSyndic, errorCourtier, successId});
+                res.status(400).send({success: false, message: 'erreur désassigniation', errorSyndic, errorCourtier, successId});
             else
                 res.status(200).send({success: true, message: "le courtier a bien été désassigné", successId})
         }
+    } else if (req.user.role === 'syndic' || req.user.role === 'gestionnaire') {
+        let {syndicId, courtierId} = req.body;
+
+        Syndic.findOneAndUpdate(
+            {_id: syndicId},
+            {$pull: {courtiers: courtierId}},
+            {new: true},
+            function (err, synd) {
+                if (err || !synd)
+                    res.status(400).send({success: false, message: 'erreur désassigniation dans syndic', err});
+                else {
+                    Copro.updateMany(
+                        {$and: [{_id: {$and: [{$in: synd.parc},{$in: synd.enCoursSelect}]}}, {courtier: courtierId}]},
+                        {$set: {courtier: null}}, (err) => {
+                           if (err)
+                               console.log(err);
+                        });
+                    Courtier.findOneAndUpdate(
+                        {_id: courtierId},
+                        {
+                            $pull:
+                                {
+                                    syndics: synd._id,
+                                    parc: {$elemMatch: {$or: [{$eq: {$in: synd.parc}}, {$eq: {$in: synd.enCoursSelect}}]}},
+                                    etudes: {$elemMatch: {$or: [{$eq: {$in: synd.parc}}, {$eq: {$in: synd.enCoursSelect}}]}},
+                                }
+                                },
+                        {new: true},
+                        function (err, court) {
+                            if (err || !court)
+                                res.status(400).send({success: false, message: 'erreur désassigniation dans courtier', err});
+                            else
+                                res.status(200).send({success: true, message: "le courtier a bien été désassigné du Syndic"})
+                        });
+                }
+            });
     }
 }
 
