@@ -137,8 +137,6 @@ let postGestionnaire = (req, res) => {
                 res.status(400).send({success: false, message: 'erreur system', err});
             else if (!gestionnaire)
                 res.status(404).send({success: false, message: 'aucun gestionnaire enregistré'});
-            else if (req.user.role === 'gestionnaire' && gestionnaire._id !== req.user.id)
-                res.status(401).send({success: false, message: 'accès refusé, gestionnaire mismatch'});
             else
                 res.status(200).send({success: true, gestionnaire});
         })
