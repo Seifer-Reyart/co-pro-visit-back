@@ -375,10 +375,10 @@ let assignerCourtierToSyndic = async (req, res) => {
                 res.status(200).send({success: true, message: "le courtier a bien été désassigné", successId})
         }
     } else if (req.user.role === 'syndic' || req.user.role === 'gestionnaire') {
-        let {syndicId, courtierId} = req.body;
+        let {_id, courtierId} = req.body;
 
         Syndic.findOneAndUpdate(
-            {_id: syndicId},
+            {$or: [{_id: _id}, {gestionnaires: {$elemMatch: {$eq: _id}}}]},
             {$pull: {courtiers: courtierId}},
             {new: true},
             function (err, synd) {
