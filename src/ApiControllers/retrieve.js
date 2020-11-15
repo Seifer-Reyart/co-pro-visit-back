@@ -131,12 +131,14 @@ let getGestionnaires = (req, res) => {
 /*** get one gestionnaire ***/
 
 let postGestionnaire = (req, res) => {
-    if (req.user.role === 'syndic' || req.user.role === 'admin')
+    if (req.user.role === 'syndic' || req.user.role === 'admin' || req.user.role === 'gestionnaire')
         Gestionnaire.findOne({_id: req.body._id}, (err, gestionnaire) => {
             if (err)
                 res.status(400).send({success: false, message: 'erreur system', err});
             else if (!gestionnaire)
                 res.status(404).send({success: false, message: 'aucun gestionnaire enregistré'});
+            else if (req.user.role === 'gestionnaire' && gestionnaire._id !== req.user.id)
+                res.status(401).send({success: false, message: 'accès refusé'});
             else
                 res.status(200).send({success: true, gestionnaire});
         })
