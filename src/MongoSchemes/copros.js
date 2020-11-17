@@ -116,6 +116,10 @@ let coprosSchema = new Schema({
     statSinistres      : {
         type    : String,
         default : null
+    },
+    sansSuite          : {
+        type    : Boolean,
+        default : false
     }
 });
 

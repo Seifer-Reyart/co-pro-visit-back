@@ -115,8 +115,8 @@ let postSyndic = (req, res) => {
 /*** get Gestionnaires ***/
 
 let getGestionnaires = (req, res) => {
-    if (req.user.role === 'syndic')
-        Gestionnaire.find({syndic: req.user.id}, (err, gestionnaires) => {
+    if (req.user.role === 'syndic' || req.user.role === 'gestionnaire')
+        Gestionnaire.find({$or: [{syndic: req.user.id}, {_id: req.user.id}]}, (err, gestionnaires) => {
             if (err)
                 res.status(400).send({success: false, message: 'erreur system', err});
             else if (!gestionnaires)
@@ -131,7 +131,7 @@ let getGestionnaires = (req, res) => {
 /*** get one gestionnaire ***/
 
 let postGestionnaire = (req, res) => {
-    if (req.user.role === 'syndic' || req.user.role === 'admin')
+    if (req.user.role === 'syndic' || req.user.role === 'admin' || req.user.role === 'gestionnaire')
         Gestionnaire.findOne({_id: req.body._id}, (err, gestionnaire) => {
             if (err)
                 res.status(400).send({success: false, message: 'erreur system', err});
@@ -292,10 +292,16 @@ let getCopro = (req, res) => {
                 Copro.findOne({_id: pcs.coproId}, (err, copro) => {
                     if (err)
                         res.status(400).send({success: false, message: 'erreur system', err});
-                    else if (!copros)
+                    else if (!copro)
                         res.status(404).send({success: false, message: 'aucun parc enregistré'});
                     else
                         res.status(200).send({success: true, copro});
+                }).populate({
+                    path: 'batiments',
+                    model: 'batiments'
+                }).populate({
+                    path: 'gestionnaire',
+                    model: 'gestionnaires'
                 });
         });
     else
@@ -347,7 +353,13 @@ let getEncoursSelect = (req, res) => {
                 }).populate({
                     path: 'batiments',
                     model: 'batiments'
-                })
+                }).populate({
+                    path: 'courtier',
+                    model: 'courtiers'
+                }).populate({
+                    path: 'gestionnaire',
+                    model: 'gestionnaires'
+                });
         });
     else if (req.user.role === 'courtier')
         Courtier.findOne({_id: req.user._id}, (err, courtier) => {
@@ -884,11 +896,11 @@ let retrieveDevis = (req, res) => {
 }
 
 let retrieveDevisByCopro = (req, res) => {
-    if (req.user.role !== 'admin' && req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
+    if (req.user.role !== 'admin' && req.user.role !== 'syndic' && req.user.role !== 'gestionnaire' && req.user.role !== 'pcs')
         res.status(401).send({success: false, message: 'accès refusé'});
     else {
         if (req.body.option)
-            Devis.find({$and: [{coproId: req.body.coproId}, {$or: [{syndicId: req.user.id},{gestionnaireId: req.user.id}]}]}, function (err, devis) {
+            Devis.find({$and: [{coproId: req.body.coproId}, {$or: [{syndicId: req.user.id},{gestionnaireId: req.user.id}, {pcsId: req.user.id}]}]}, function (err, devis) {
                 if (err) {
                     console.log(err)
                     res.status(400).send({succes: false, message: 'erreur système', err});

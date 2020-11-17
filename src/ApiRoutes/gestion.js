@@ -27,7 +27,8 @@ let {
     sendToEtude,
     aboPrestaToSyndic,
     demandeDevis,
-    uploadStatSinistres
+    uploadStatSinistres,
+    updatePermissionsGest
 } = require('../ApiControllers/gestion');
 
 /***************/
@@ -334,6 +335,23 @@ router.post('/demande-devis', demandeDevis);
  * @security JWT
  */
 router.post('/stats-sinistres', multer().any(), uploadStatSinistres);
+
+/**
+ * Cette route permet de mettre à jour les droits d'un Gestionnaire, JWT necessaire.
+ * @route POST /gestion/changer-droits
+ * @group gestion
+ * @param {string} _id.body.required - _id d'un Gestionnaire
+ * @param {string} permissions.body.required - tableau des permissions à assigner
+ * @param {boolean} option - true === abonner / false === désabonner
+ * @returns {object} 200 - {success: true, message: 'changement de droits effectué'}
+ * @returns {Error}  400 - {success: false, message: 'erreur système', err}
+ * @returns {Error}  401 - quand role != syndic {success: false, message: 'accès interdit'}
+ * @returns {Error}  404 - {success: false, message: 'gestionnaire introuvable'}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.post('/changer-droits', updatePermissionsGest);
 
 module.exports = router;
 

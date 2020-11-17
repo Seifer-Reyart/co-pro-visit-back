@@ -58,87 +58,77 @@ let demandeVisite = (req, res) => {
                 res.status(403).send({success: false, message: 'une visite a déjà été demandé'});
             else {
                 const {coproId} = req.body;
-                Copro.findOne({_id: coproId}, function (err, copro) {
+                Syndic.findOne({$or: [{_id: req.user.id}, {gestionnaires: {$elemMatch: {$eq: req.user.id}}}]}, (err, synd) => {
                     if (err)
                         res.status(400).send({success: false, message: 'erreur system', err});
-                    else if (!copro)
-                        res.status(403).send({success: false, message: "la Copro n'existe pas"});
-                    else {
-                        let visite;
-                        if (req.user.role !== 'syndic')
-                            visite = new Visite({
-                                coproId    	    : copro._id,
-                                nomCopro        : copro.nomCopro,
-                                reference       : copro.reference,
-                                gardien         : req.body.gardien,
-                                accessCode      : req.body.accessCode,
-                                cleCabinet      : req.body.cleCabinet,
-                                commentaire     : req.body.commentaire,
-                                nomPCS          : req.body.nomPCS,
-                                emailPCS        : req.body.emailPCS,
-                                phonePCS        : req.body.phonePCS,
-                                syndicId        : copro.syndicNominated ? copro.syndicNominated : req.user.id,
-                                demandeLe       : new Date(),
-                                done            : false
-                            });
-                        else
-                            visite = new Visite({
-                                coproId    	    : copro._id,
-                                nomCopro        : copro.nomCopro,
-                                reference       : copro.reference,
-                                gardien         : req.body.gardien,
-                                accessCode      : req.body.accessCode,
-                                cleCabinet      : req.body.cleCabinet,
-                                commentaire     : req.body.commentaire,
-                                nomPCS          : req.body.nomPCS,
-                                emailPCS        : req.body.emailPCS,
-                                phonePCS        : req.body.phonePCS,
-                                syndicId        : copro.syndicNominated ? copro.syndicNominated : req.user.id,
-                                gestionnaireId  : copro.gestionnaire,
-                                demandeLe       : new Date(),
-                                done            : false
-                            });
-                        visite.save(async function(err, v) {
-                            if (err || !v)
+                    else if (!synd)
+                        res.status(400).send({success: false, message: 'syndic introuvable'});
+                    else
+                        Copro.findOne({_id: coproId}, function (err, copro) {
+                            if (err)
                                 res.status(400).send({success: false, message: 'erreur system', err});
+                            else if (!copro)
+                                res.status(403).send({success: false, message: "la Copro n'existe pas"});
                             else {
-                                await Copro.updateOne(
-                                    {_id: copro._id},
-                                    {$set: {dateDemandeVisite: new Date()}},
-                                    async function (err) {
-                                        if (err)
-                                            res.status(400).send({success: false, message: 'erreur system', err});
-                                        else {
-                                            let password = await generateP();
-                                            let pcs = new PresidentCS({
-                                                email   : req.body.emailPCS,
-                                                lastName: req.body.nomPCS,
-                                                password: bcrypt.hashSync(password, salt),
-                                                phone   : req.body.phonePCS,
-                                                coproId : copro._id,
-                                            });
-                                            pcs.save(async function (err, p) {
+                                let visite;
+                                visite = new Visite({
+                                    coproId    	    : copro._id,
+                                    nomCopro        : copro.nomCopro,
+                                    reference       : copro.reference,
+                                    gardien         : req.body.gardien,
+                                    accessCode      : req.body.accessCode,
+                                    cleCabinet      : req.body.cleCabinet,
+                                    commentaire     : req.body.commentaire,
+                                    nomPCS          : req.body.nomPCS,
+                                    emailPCS        : req.body.emailPCS,
+                                    phonePCS        : req.body.phonePCS,
+                                    syndicId        : synd._id,
+                                    gestionnaireId  : copro.gestionnaire,
+                                    demandeLe       : new Date(),
+                                    done            : false
+                                });
+                                visite.save(async function(err, v) {
+                                    if (err || !v)
+                                        res.status(400).send({success: false, message: 'erreur system', err});
+                                    else {
+                                        await Copro.updateOne(
+                                            {_id: copro._id},
+                                            {$set: {dateDemandeVisite: new Date()}},
+                                            async function (err) {
                                                 if (err)
-                                                    console.log(err);
+                                                    res.status(400).send({success: false, message: 'erreur system', err});
                                                 else {
-                                                    sendCredentials(req.body.emailPCS.toLowerCase(), password);
-                                                    await Copro.findOneAndUpdate(
-                                                        {_id: copro._id},
-                                                        {$set: {pcs: p._id}},
-                                                        {new: true},
-                                                        function (err) {
-                                                            if (err)
-                                                                console.log(err)
-                                                        });
-                                                    res.status(200).send({success: true, message: 'requête visite envoyée'});
+                                                    let password = await generateP();
+                                                    let pcs = new PresidentCS({
+                                                        email   : req.body.emailPCS,
+                                                        lastName: req.body.nomPCS,
+                                                        password: bcrypt.hashSync(password, salt),
+                                                        phone   : req.body.phonePCS,
+                                                        coproId : copro._id,
+                                                    });
+                                                    pcs.save(async function (err, p) {
+                                                        if (err)
+                                                            console.log(err);
+                                                        else {
+                                                            sendCredentials(req.body.emailPCS.toLowerCase(), password);
+                                                            await Copro.findOneAndUpdate(
+                                                                {_id: copro._id},
+                                                                {$set: {pcs: p._id}},
+                                                                {new: true},
+                                                                function (err) {
+                                                                    if (err)
+                                                                        console.log(err)
+                                                                });
+                                                            res.status(200).send({success: true, message: 'requête visite envoyée'});
+                                                        }
+                                                    });
                                                 }
                                             });
-                                        }
-                                    });
+                                    }
+                                });
                             }
-                        });
-                    }
-                })
+                        })
+                });
             }
         })
     }
@@ -266,40 +256,59 @@ let assignerCourtierToCopro = (req, res) => {
                                 console.log(err);
                         });
                 }
-                Copro.findOneAndUpdate(
-                    {_id: copro},
-                    {$set: {courtier: courtier}},
-                    {new: false},
-                    function (err, cop) {
-                        if (err || !cop) {
-                            res.status(400).send({success: false, message: 'erreur assigniation dans copro', err});
-                        } else {
-                            Courtier.findOneAndUpdate(
-                                {_id: courtier},
-                                {$push: {parc: cop._id}},
-                                {new: true},
-                                function (err, court) {
-                                    if (err || !court) {
-                                        res.status(400).send({
-                                            success: false,
-                                            message: 'erreur assigniation dans courtier',
-                                            err
-                                        });
-                                    } else
-                                        res.status(200).send({success: true, message: "le courtier a bien été assigné"})
+                if (cop.courtier && courtier === 'null') {
+                    Copro.findOneAndUpdate(
+                        {_id: copro},
+                        {$set: {courtier: null}},
+                        {new: false},
+                        function (err, cop) {
+                            if (err || !cop) {
+                                res.status(400).send({success: false, message: 'erreur assigniation dans copro', err});
+                            } else {
+                                res.status(200).send({
+                                    success: true,
+                                    message: "sans courtier assigné"
                                 })
-                        }
+                            }
+                        })
+                } else if (!cop.courtier && courtier === 'null') {
+                    res.status(200).send({
+                        success: true,
+                        message: "sans courtier assigné"
                     })
+                } else
+                    Copro.findOneAndUpdate(
+                        {_id: copro},
+                        {$set: {courtier: courtier}},
+                        {new: false},
+                        function (err, cop) {
+                            if (err || !cop) {
+                                res.status(400).send({success: false, message: 'erreur assigniation dans copro', err});
+                            } else {
+                                Courtier.findOneAndUpdate(
+                                    {_id: courtier},
+                                    {$push: {parc: cop._id}},
+                                    {new: true},
+                                    function (err, court) {
+                                        if (err || !court) {
+                                            res.status(400).send({
+                                                success: false,
+                                                message: 'erreur assigniation dans courtier',
+                                                err
+                                            });
+                                        } else
+                                            res.status(200).send({success: true, message: "le courtier a bien été assigné"})
+                                    })
+                            }
+                        })
             }
         })
     }
 }
 
 let assignerCourtierToSyndic = async (req, res) => {
-    let {syndics, courtier, option} = req.body;
-    if (req.user.role !== 'admin')
-        res.status(401).send({success: false, message: 'accès interdit'});
-    else {
+    if (req.user.role !== 'admin') {
+        let {syndics, courtier, option} = req.body;
         let errorSyndic = [];
         let errorCourtier = [];
         let successId = [];
@@ -334,9 +343,6 @@ let assignerCourtierToSyndic = async (req, res) => {
             else
                 res.status(200).send({success: true, message: "le courtier a bien été assigné", successId});
         } else {
-            let errorSyndic = [];
-            let errorCourtier = [];
-            let successId = [];
             let promises = await syndics.map(syndic => {
                 Syndic.findOneAndUpdate(
                     {_id: syndic},
@@ -364,10 +370,46 @@ let assignerCourtierToSyndic = async (req, res) => {
             });
             await Promise.all(promises);
             if (errorSyndic.length > 0 || errorCourtier.length > 0)
-                res.status(400).send({success: false, message: 'erreur assigniation', errorSyndic, errorCourtier, successId});
+                res.status(400).send({success: false, message: 'erreur désassigniation', errorSyndic, errorCourtier, successId});
             else
                 res.status(200).send({success: true, message: "le courtier a bien été désassigné", successId})
         }
+    } else if (req.user.role === 'syndic' || req.user.role === 'gestionnaire') {
+        let {_id, courtierId} = req.body;
+
+        Syndic.findOneAndUpdate(
+            {$or: [{_id: _id}, {gestionnaires: {$elemMatch: {$eq: _id}}}]},
+            {$pull: {courtiers: courtierId}},
+            {new: true},
+            function (err, synd) {
+                if (err || !synd)
+                    res.status(400).send({success: false, message: 'erreur désassigniation dans syndic', err});
+                else {
+                    Copro.updateMany(
+                        {$and: [{_id: {$and: [{$in: synd.parc},{$in: synd.enCoursSelect}]}}, {courtier: courtierId}]},
+                        {$set: {courtier: null}}, (err) => {
+                           if (err)
+                               console.log(err);
+                        });
+                    Courtier.findOneAndUpdate(
+                        {_id: courtierId},
+                        {
+                            $pull:
+                                {
+                                    syndics: synd._id,
+                                    parc: {$elemMatch: {$or: [{$eq: {$in: synd.parc}}, {$eq: {$in: synd.enCoursSelect}}]}},
+                                    etudes: {$elemMatch: {$or: [{$eq: {$in: synd.parc}}, {$eq: {$in: synd.enCoursSelect}}]}},
+                                }
+                                },
+                        {new: true},
+                        function (err, court) {
+                            if (err || !court)
+                                res.status(400).send({success: false, message: 'erreur désassigniation dans courtier', err});
+                            else
+                                res.status(200).send({success: true, message: "le courtier a bien été désassigné du Syndic"})
+                        });
+                }
+            });
     }
 }
 
@@ -608,15 +650,13 @@ let deleteSyndic = (req, res) => {
 }
 
 let changeStatusCopro = (req, res) => {
-console.log(req.body);
     if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
         res.status(401).send({success: false, message: 'accès interdit'});
     else {
-        const {coproId, isParc} = req.body;
+        const {coproId, isParc, sansSuite} = req.body;
         if (isParc)
             Copro.findOne({_id: coproId}, function (err, copro) {
                 if (err) {
-		    console.log("find copro: ", err);
                     res.status(400).send({success: false, message: 'erreur système', err});
                 } else
                     Copro.findOneAndUpdate(
@@ -625,7 +665,6 @@ console.log(req.body);
                         {new: true},
                         function (err, cpr) {
                             if (err) {
-				console.log("find and update copro: ", err);
                                 res.status(400).send({success: false, message: 'erreur système', err});
                             } else
                                 Syndic.findOneAndUpdate(
@@ -634,7 +673,6 @@ console.log(req.body);
                                     {new: true},
                                     function (err) {
                                         if (err) {
-					console.log("find and update syndic: ", err);
                                             res.status(400).send({success: false, message: 'erreur système', err});
                                         } else if (cpr.gestionnaire !== null)
                                             Gestionnaire.findOneAndUpdate(
@@ -646,10 +684,18 @@ console.log(req.body);
                                                     },
                                                 {new: true},
                                                 function (err) {
-                                                    if (err)
-                                                        res.status(400).send({success: false, message: 'erreur système', err});
-						    else
-							res.status(200).send({success: true, message: "la copropri  t   est maintenant dans le Parc"});
+                                                    if (err) {
+                                                        res.status(400).send({
+                                                            success: false,
+                                                            message: 'erreur système',
+                                                            err
+                                                        });
+                                                    } else {
+                                                        res.status(200).send({
+                                                            success: true,
+                                                            message: "la copropriété est maintenant dans le Parc"
+                                                        });
+                                                    }
                                                 });
                                         else
                                             res.status(200).send({success: true, message: "la copropriété est maintenant dans le Parc"});
@@ -663,11 +709,10 @@ console.log(req.body);
                 else
                     Copro.findOneAndUpdate(
                         {_id: copro._id},
-                        {$set: {syndicNominated: null}, $push: {syndicEnCours: copro.syndicNominated}},
+                        {$set: {syndicNominated: null, sansSuite}, $push: {syndicEnCours: copro.syndicNominated}},
                         {new: true},
                         (error, cpr) => {
                             if (error) {
-				console.log("find and update copro: ", error);
                                 res.status(400).send({success: false, message: 'erreur système', err: error});
                             } else
                                 Syndic.findOneAndUpdate(
@@ -676,7 +721,6 @@ console.log(req.body);
                                     {new: true},
                                     function (err) {
                                         if (err) {
-					    console.log("find and update syndic: ", err);
                                             res.status(400).send({success: false, message: 'erreur système', err});
                                         } else if (cpr.gestionnaire !== null)
                                             Gestionnaire.findOneAndUpdate(
@@ -684,10 +728,18 @@ console.log(req.body);
                                                 {$pull: {parc: cpr._id}, $push: {enCoursSelect: cpr._id}},
                                                 {new: true},
                                                 function (err) {
-                                                    if (err)
-                                                        res.status(400).send({success: false, message: 'erreur système', err});
-						    else
-							res.status(200).send({success: true, message: "la copropri  t   est maintenant en cours de s  lection"});
+                                                    if (err) {
+                                                        res.status(400).send({
+                                                            success: false,
+                                                            message: 'erreur système',
+                                                            err
+                                                        });
+                                                    } else {
+                                                        res.status(200).send({
+                                                            success: true,
+                                                            message: "la copropriété est maintenant en cours de sélection"
+                                                        });
+                                                    }
                                                 });
                                         else
                                             res.status(200).send({success: true, message: "la copropriété est maintenant en cours de sélection"});
@@ -973,6 +1025,26 @@ let uploadStatSinistres = async (req, res) => {
     }
 }
 
+let updatePermissionsGest = (req, res) => {
+    if (req.user.role !== 'syndic')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else {
+        const {_id, permissions} = req.body;
+        Gestionnaire.findOneAndUpdate(
+            {_id},
+            {$set: {permissions: permissions}},
+            {new: true},
+            (err, gest) => {
+                if (err)
+                    res.status(400).send({success: false, message: 'erreur système', err});
+                else if (!gest)
+                    res.status(404).send({success: false, message: 'gestionnaire introuvable'});
+                else
+                    res.status(200).send({success: true, message: 'changement de droits effectué'});
+            });
+    }
+}
+
 /* Export Functions */
 
 module.exports = {
@@ -993,5 +1065,6 @@ module.exports = {
     sendToEtude,
     aboPrestaToSyndic,
     demandeDevis,
-    uploadStatSinistres
+    uploadStatSinistres,
+    updatePermissionsGest
 }
