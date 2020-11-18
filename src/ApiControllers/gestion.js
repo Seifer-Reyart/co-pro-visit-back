@@ -534,13 +534,26 @@ let assignerPrestataireToSyndic = async (req, res) => {
                                 res.status(200).send({success: true, message: "le Prestataire a bien été désassigné", successId, err});
                             else {
                                 let ids = [];
-                                for (let i in incidents)
-                                    ids[i] = incidents[i]._id;
-                                console.log("ids: ", ids);
+                                let result = [];
+                                let toRemove = [];
+                                for (let i in incidents) {
+                                    ids.push(incidents[i]._id);
+                                }
+                                for (let i in prest.incidentId) {
+                                    if (!ids.includes(prest.incidentId[i]))
+                                        result.push(prest.incidentId[i]);
+                                    else
+                                        toRemove.push(prest.incidentId[i]);
+                                }
+
                                 console.log("ids length: ", ids.length)
-                                let result = prest.incidentId.filter(el => !ids.includes(el));
+
                                 console.log("result: ", result)
                                 console.log("result length: ", result.length)
+
+                                console.log("toRemove: ", toRemove);
+                                console.log("toRemove length: ", toRemove.length);
+
                                 Prestataire.findOneAndUpdate(
                                     {_id: prest._id},
                                     {$set: {incidentId: result}},
@@ -554,7 +567,7 @@ let assignerPrestataireToSyndic = async (req, res) => {
                                                 err
                                             });
                                         } else {
-                                            Devis.deleteMany({$and: [{prestataireId}, {syndicId: {$in: syndics}}]}, (err, result) => {
+                                            Devis.deleteMany({$and: [{prestataireId}, {incidentId: {$in: toRemove}}]}, (err, result) => {
                                                 if (err)
                                                     console.log("err: ", err);
                                                 else
