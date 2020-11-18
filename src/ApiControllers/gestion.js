@@ -550,7 +550,10 @@ let assignerPrestataireToSyndic = async (req, res) => {
                                                 err
                                             });
                                         } else {
-                                            Devis.deleteMany({$and: [{prestataireId}, {syndicId: {$in: syndics}}]});
+                                            Devis.deleteMany({$and: [{prestataireId}, {syndicId: {$in: syndics}}]}, (err) => {
+                                                if (err)
+                                                    console.log(err)
+                                            });
                                             res.status(200).send({success: true, message: "le Prestataire a bien été désassigné", successId});
                                         }
                                     });
