@@ -536,7 +536,8 @@ let assignerPrestataireToSyndic = async (req, res) => {
                                 let ids = [];
                                 for (let i in incidents)
                                     ids[i] = incidents[i]._id;
-                                let result = prest.incidentId.filter(el => !ids.includes(el))
+                                let result = prest.incidentId.filter(el => !ids.includes(el));
+                                console.log("result: ", result)
                                 Prestataire.findOneAndUpdate(
                                     {_id: prest._id},
                                     {$set: {incidentId: result}},
@@ -550,9 +551,11 @@ let assignerPrestataireToSyndic = async (req, res) => {
                                                 err
                                             });
                                         } else {
-                                            Devis.deleteMany({$and: [{prestataireId}, {syndicId: {$in: syndics}}]}, (err) => {
+                                            Devis.deleteMany({$and: [{prestataireId}, {syndicId: {$in: syndics}}]}, (err, result) => {
                                                 if (err)
-                                                    console.log(err)
+                                                    console.log("err: ", err);
+                                                else
+                                                    console.log("deleted: ", result);
                                             });
                                             res.status(200).send({success: true, message: "le Prestataire a bien été désassigné", successId});
                                         }
