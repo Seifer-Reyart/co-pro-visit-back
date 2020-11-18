@@ -170,7 +170,7 @@ let desassignerEtudeToCourtier = async (req, res) => {
 	    res.status(401).send({succes: false, message: 'acces interdit'});
     else {
 	    const { coproId } = req.body
-        Courtier.findOneAndUpdate({_id: req.user._id}, {$pull: {etude: coproId}}, {new: true}, (err, courtier) => {
+        Courtier.findOneAndUpdate({_id: req.user.id}, {$pull: {etude: coproId}}, {new: true}, (err, courtier) => {
             if (err)
                 res.status(400).send({success: false, message: "erreur système", err});
             else if (!courtier)
