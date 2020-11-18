@@ -307,6 +307,7 @@ let assignerCourtierToCopro = (req, res) => {
 }
 
 let assignerCourtierToSyndic = async (req, res) => {
+    console.log("Body: ", req.body);
     if (req.user.role !== 'admin') {
         let {syndics, courtier, option} = req.body;
         let errorSyndic = [];
