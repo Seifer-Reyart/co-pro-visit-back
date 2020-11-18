@@ -529,7 +529,7 @@ let assignerPrestataireToSyndic = async (req, res) => {
                     if (err)
                         res.status(200).send({success: false, message: 'erreur assigniation', err, successId});
                     else
-                        Incident.find({$and: [{_id: {$in: prest.incidentId}}, {syndicId: {$in: {syndics}}}]}, (err, incidents) => {
+                        Incident.find({$and: [{_id: {$in: prest.incidentId}}, {syndicId: {$in: syndics}}]}, (err, incidents) => {
                             if (err || !incidents)
                                 res.status(200).send({success: true, message: "le Prestataire a bien été désassigné", successId, err});
                             else {
@@ -543,7 +543,6 @@ let assignerPrestataireToSyndic = async (req, res) => {
                                     {new: false},
                                     (err) => {
                                         if (err) {
-                                            console.log("unassign Prestataire.findOneAndUpdate: ", err)
                                             res.status(200).send({
                                                 success: true,
                                                 message: "le Prestataire a bien été désassigné",
