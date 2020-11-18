@@ -165,6 +165,22 @@ let assignerVisite = async (req, res) => {
     }
 }
 
+let desassignerEtudeToCourtier = async (req, res) => {
+    if (req.user.role !== 'courtier')
+	res.status(401).send({succes: false, message: 'acces interdit'});
+    else {
+	const { coproId } = req.body
+	await Courtier.findOneAndUpdate({_id: req.user._id}, {$pull: {etude: coproId}}, {new: true}, (err, courtier) => {
+            if (err)
+                res.status(400).send({success: false, message: "erreur système", err});
+            else if (!courtier)
+                res.status(404).send({success: false, message: "cette copro n'existe pas"});
+	    else
+		res.status(200).send({success: true, message: 'D�sassignation r�ussi', courtier})
+
+	})
+    }
+}
 let desassignerVisite = async (req, res) => {
     if (req.user.role !== 'admin')
         res.status(401).send({success: false, message: 'accès interdit'});
@@ -296,8 +312,23 @@ let assignerCourtierToCopro = (req, res) => {
                                                 message: 'erreur assigniation dans courtier',
                                                 err
                                             });
-                                        } else
-                                            res.status(200).send({success: true, message: "le courtier a bien été assigné"})
+                                        } else {
+                                            Courtier.updateMany(
+                                                {_id: { $ne: courtier}},
+                                                {$pull: {etudes: cop._id} },
+                                                {new: true},
+                                                function(err) {
+                                                    if (err) {
+                                                        res.status(200).send({
+                                                            success: false,
+                                                            message: 'erreur désassignation des autres courtiers en étude',
+                                                            err
+                                                        });
+                                                    } else
+                                                        res.status(200).send({success: true, message: "le courtier a bien été assigné"})
+
+                                                })
+                                        }
                                     })
                             }
                         })
@@ -340,15 +371,9 @@ let assignerCourtierToSyndic = async (req, res) => {
                     });
             });
             await Promise.all(promises);
-            if (errorSyndic.length > 0 || errorCourtier.length > 0) {
-                res.status(400).send({
-                    success: false,
-                    message: 'erreur assigniation',
-                    errorSyndic,
-                    errorCourtier,
-                    successId
-                });
-            } else
+            if (errorSyndic.length > 0 || errorCourtier.length > 0)
+                res.status(400).send({success: false, message: 'erreur assigniation', errorSyndic, errorCourtier, successId});
+            else
                 res.status(200).send({success: true, message: "le courtier a bien été assigné", successId});
         } else {
             let promises = await syndics.map(syndic => {
@@ -1164,6 +1189,7 @@ module.exports = {
     assignerPrestataireToSyndic,
     assignerGestionnaireToCopro,
     desassignerGestionnaireToCopro,
+	desassignerEtudeToCourtier,
     annulerVisite,
     sendToEtude,
     aboPrestaToSyndic,
