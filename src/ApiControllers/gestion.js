@@ -414,12 +414,12 @@ let assignerCourtierToSyndic = async (req, res) => {
 }
 
 let assignerPrestataireToSyndic = async (req, res) => {
-    const {prestataireId, syndics, option} = req.body;
     if (req.user.role !== 'admin')
         res.status(401).send({success: false, message: 'accès interdit'});
     else if (!prestataireId || !syndics)
         res.status(403).send({success: false, message: 'syndicId et prestataireId requis'});
     else {
+        const {prestataireId, syndics, option} = req.body;
         let errorSyndic = [];
         let errorPresta = [];
         let successId = [];
@@ -475,7 +475,7 @@ let assignerPrestataireToSyndic = async (req, res) => {
                                  });
                              } else {
                                  let ids = [];
-                                 
+
                                  for (let i in incidents) {
                                      if (!prest.incidentId.includes(incidents[i]._id))
                                          ids.push(incidents[i]._id);
