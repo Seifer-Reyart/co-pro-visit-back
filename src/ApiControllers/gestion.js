@@ -307,8 +307,7 @@ let assignerCourtierToCopro = (req, res) => {
 }
 
 let assignerCourtierToSyndic = async (req, res) => {
-    console.log("Body: ", req.body);
-    if (req.user.role !== 'admin') {
+    if (req.user.role === 'admin') {
         let {syndics, courtier, option} = req.body;
         let errorSyndic = [];
         let errorCourtier = [];
@@ -342,8 +341,6 @@ let assignerCourtierToSyndic = async (req, res) => {
             });
             await Promise.all(promises);
             if (errorSyndic.length > 0 || errorCourtier.length > 0) {
-                console.log("errorSyndic: ", errorSyndic);
-                console.log("errorCourtier: ", errorCourtier);
                 res.status(400).send({
                     success: false,
                     message: 'erreur assigniation',
@@ -421,6 +418,8 @@ let assignerCourtierToSyndic = async (req, res) => {
                         });
                 }
             });
+    } else {
+        res.status(401).send({success: false, message: 'accès interdit'});
     }
 }
 
