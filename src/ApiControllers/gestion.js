@@ -561,7 +561,7 @@ let assignerPrestataireToSyndic = async (req, res) => {
                                     (err) => {
                                         if (err) {
                                             res.status(200).send({
-                                                success: true,
+                                                success: false,
                                                 message: "le Prestataire a bien été désassigné",
                                                 successId,
                                                 err
