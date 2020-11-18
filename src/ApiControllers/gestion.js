@@ -474,16 +474,16 @@ let assignerPrestataireToSyndic = async (req, res) => {
                                      successId
                                  });
                              } else {
-                                 let ids = [];
-
+                                 let ids = prest.incidentId;
                                  for (let i in incidents) {
                                      if (!prest.incidentId.includes(incidents[i]._id))
                                          ids.push(incidents[i]._id);
                                  }
                                  console.log("assign ids: ", ids);
+
                                  Prestataire.findOneAndUpdate(
                                      {_id: prest._id},
-                                     {$set: {incidentId: [...prest.incidentId, ids]}},
+                                     {$set: {incidentId: ids}},
                                      {new: false},
                                      (err) => {
                                          if (err) {
