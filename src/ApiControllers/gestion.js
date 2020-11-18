@@ -475,7 +475,7 @@ let assignerPrestataireToSyndic = async (req, res) => {
                                  });
                              } else {
                                  let ids = [];
-                                 console.log("assign incidents: ", incidents)
+                                 
                                  for (let i in incidents) {
                                      if (!prest.incidentId.includes(incidents[i]._id))
                                          ids.push(incidents[i]._id);
