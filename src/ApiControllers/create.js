@@ -533,42 +533,50 @@ let parseXlsThenStore = (req, res) => {
                     message: "",
                     errors: []
                 };
-                await obj[0].data.map((item, index) => {
-                    if (index >= 1) {
-                        if (item[0] && item[2] && item[3] && item[4] && item[5]) {
-                            let copro = new Copro({
-                                nomCopro: item[1] ?? generateName(),
-                                reference: item[0],
-                                address: item[2],
-                                codePostal: item[3],
-                                ville: item[4],
-                                surface: item[5],
-                                compagnie: {
-                                    assurance: item[6],
-                                    echeance: null
-                                },
-                                syndicNominated: req.user.id
-                            })
-                            copro.save(function (err, cpr) {
-                                if (err) {
-                                    error.isError = true;
-                                    error.message = err;
-                                    error.errors.push(item)
-                                } else {
-                                    Syndic.findOneAndUpdate(
-                                        {_id: cpr.syndicNominated},
-                                        {$push: {parc: cpr._id}},
-                                    {new: true},
-                                        function (err) {
-                                            if (err) {
-                                                error.isError = true;
-                                                error.message = err;
-                                                error.errors.push(item)
-                                            }
-                                        })
+                Syndic.findOne({_id: req.user.id}, async (err, synd) => {
+                    if (err)
+                        res.status(400).send({success: false, message: "erreur système", error});
+                    else if (!synd)
+                        res.status(404).send({success: true, message: "Syndic non identifié", error})
+                    else {
+                        await obj[0].data.map((item, index) => {
+                            if (index >= 1) {
+                                if (item[0] && item[2] && item[3] && item[4] && item[5]) {
+                                    let copro = new Copro({
+                                        nomCopro: item[1] ?? synd.nomSyndic,
+                                        reference: item[0],
+                                        address: item[2],
+                                        codePostal: item[3],
+                                        ville: item[4],
+                                        surface: item[5],
+                                        compagnie: {
+                                            assurance: item[6],
+                                            echeance: null
+                                        },
+                                        syndicNominated: synd._id
+                                    })
+                                    copro.save(function (err, cpr) {
+                                        if (err) {
+                                            error.isError = true;
+                                            error.message = err;
+                                            error.errors.push(item)
+                                        } else {
+                                            Syndic.findOneAndUpdate(
+                                                {_id: cpr.syndicNominated},
+                                                {$push: {parc: cpr._id}},
+                                                {new: true},
+                                                function (err) {
+                                                    if (err) {
+                                                        error.isError = true;
+                                                        error.message = err;
+                                                        error.errors.push(item)
+                                                    }
+                                                })
+                                        }
+                                    });
                                 }
-                            });
-                        }
+                            }
+                        });
                     }
                 });
                 res.status(200).send({success: true, message: "La liste de Copros a bien été créée", error});
