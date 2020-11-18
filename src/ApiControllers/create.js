@@ -453,32 +453,52 @@ let registerCopro = (req, res) => {
                 console.log(copro)
                 res.status(403).send({success: false, message: 'La Copro existe déjà'});
             } else {
-                let copro = new Copro({
-                    nomCopro       	: req.body.nomCopro,
-                    reference       : req.body.reference,
-                    address    	    : req.body.address,
-                    codePostal      : req.body.codePostal,
-                    ville    	    : req.body.ville,
-                    nbBatiments     : req.body.nbBatiments,
-                    surface         : req.body.surface,
-                    nbrLot          : req.body.nbrLot,
-                    multiDevis      : req.body.multiDevis,
-                    maxTravaux      : req.body.maxTravaux,
-                    syndicNominated : req.body.syndicNominated ? req.body.syndicNominated : null,
-                    syndicEnCours   : req.body.syndicEnCours ? req.body.syndicEnCours : [],
-                    courtier        : req.body.courtier ? req.body.courtier : null,
-                });
-                copro.save(async function(err, cpr) {
-                    if (err) {
-                        res.send({ success: false, message: "Erreur lors de la création de la Copro", err});
-                    } else {
-                        if (req.body.syndicNominated)
-                            await Syndic.updateOne({_id: req.body.syndicNominated}, {$push: {parc: cpr._id}});
-                        else
-                            await Syndic.updateOne({_id: req.body.syndicEnCours}, {$push: {enCoursSelect: cpr._id}});
-                        res.send({ success: true, message : "La Copro a bien été créée"});
+                let _id = req.body.syndicNominated ?? req.body.syndicEnCours;
+                Syndic.findOne({$or: [{_id},{gestionnaires: {$elemMatch: {$eq: _id}}}]}, (err, synd) => {
+                    if (err)
+                        res.status(400).send({ success: false, message: "Erreur lors de la création de la Copro", err});
+                    else if (!synd)
+                        res.status(404).send({ success: false, message: "Syndic non identifié"});
+                    else {
+                        let copro = new Copro({
+                            nomCopro       	: req.body.nomCopro,
+                            reference       : req.body.reference,
+                            address    	    : req.body.address,
+                            codePostal      : req.body.codePostal,
+                            ville    	    : req.body.ville,
+                            nbBatiments     : req.body.nbBatiments,
+                            surface         : req.body.surface,
+                            nbrLot          : req.body.nbrLot,
+                            multiDevis      : req.body.multiDevis,
+                            maxTravaux      : req.body.maxTravaux,
+                            syndicNominated : req.body.syndicNominated ? synd._id : null,
+                            syndicEnCours   : req.body.syndicEnCours ? [synd._id] : [],
+                            courtier        : req.body.courtier ? req.body.courtier : null,
+                        });
+                        copro.save(async function(err, cpr) {
+                            if (err) {
+                                res.status(400).send({ success: false, message: "Erreur lors de la création de la Copro", err});
+                            } else {
+                                if (req.body.syndicNominated) {
+                                    if (req.user.role === 'syndic')
+                                        await Syndic.updateOne({_id: synd._id}, {$push: {parc: cpr._id}});
+                                    else {
+                                        await Gestionnaire.updateOne({_id: req.body.syndicNominated}, {$push: {parc: cpr._id}});
+                                        await Syndic.updateOne({_id: synd._id}, {$push: {parc: cpr._id}});
+                                    }
+                                } else {
+                                    if (req.user.role === 'syndic')
+                                        await Syndic.updateOne({_id: req.body.syndicEnCours}, {$push: {enCoursSelect: cpr._id}});
+                                    else {
+                                        await Gestionnaire.updateOne({_id: req.body.syndicEnCours}, {$push: {enCoursSelect: cpr._id}});
+                                        await Syndic.updateOne({_id: synd._id}, {$push: {enCoursSelect: cpr._id}});
+                                    }
+                                }
+                                res.status(200).send({ success: true, message : "La Copro a bien été créée"});
+                            }
+                        });
                     }
-                });
+                })
             }
         })
     }
