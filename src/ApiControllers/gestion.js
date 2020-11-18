@@ -319,28 +319,38 @@ let assignerCourtierToSyndic = async (req, res) => {
                     {$push: {courtiers: courtier}},
                     {new: true},
                     function (err, synd) {
-                        if (err || !synd)
+                        if (err || !synd) {
+                            console.log("err: ", err);
                             errorSyndic.push(synd._id);
                             //res.status(400).send({success: false, message: 'erreur assigniation dans syndic', err});
-                        else {
+                        } else {
                             Courtier.findOneAndUpdate(
                                 {_id: courtier},
                                 {$push: {syndics: synd._id}},
                                 {new: true},
                                 function (err, court) {
-                                    if (err || !court)
+                                    if (err || !court) {
+                                        console.log("err: ", err)
                                         errorCourtier.push(syndic);
                                         //res.status(400).send({success: false, message: 'erreur assigniation dans courtier', err});
-                                    else
+                                    } else
                                         successId.push(synd._id)
                                 });
                         }
                     });
             });
             await Promise.all(promises);
-            if (errorSyndic.length > 0 || errorCourtier.length > 0)
-                res.status(400).send({success: false, message: 'erreur assigniation', errorSyndic, errorCourtier, successId});
-            else
+            if (errorSyndic.length > 0 || errorCourtier.length > 0) {
+                console.log("errorSyndic: ", errorSyndic);
+                console.log("errorCourtier: ", errorCourtier);
+                res.status(400).send({
+                    success: false,
+                    message: 'erreur assigniation',
+                    errorSyndic,
+                    errorCourtier,
+                    successId
+                });
+            } else
                 res.status(200).send({success: true, message: "le courtier a bien été assigné", successId});
         } else {
             let promises = await syndics.map(syndic => {
@@ -545,14 +555,6 @@ let assignerPrestataireToSyndic = async (req, res) => {
                                     else
                                         toRemove.push(prest.incidentId[i]);
                                 }
-
-                                console.log("ids length: ", ids.length)
-
-                                console.log("result: ", result)
-                                console.log("result length: ", result.length)
-
-                                console.log("toRemove: ", toRemove);
-                                console.log("toRemove length: ", toRemove.length);
 
                                 Prestataire.findOneAndUpdate(
                                     {_id: prest._id},
