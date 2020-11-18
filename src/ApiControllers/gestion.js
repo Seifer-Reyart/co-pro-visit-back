@@ -167,18 +167,17 @@ let assignerVisite = async (req, res) => {
 
 let desassignerEtudeToCourtier = async (req, res) => {
     if (req.user.role !== 'courtier')
-	res.status(401).send({succes: false, message: 'acces interdit'});
+	    res.status(401).send({succes: false, message: 'acces interdit'});
     else {
-	const { coproId } = req.body
-	await Courtier.findOneAndUpdate({_id: req.user._id}, {$pull: {etude: coproId}}, {new: true}, (err, courtier) => {
+	    const { coproId } = req.body
+        Courtier.findOneAndUpdate({_id: req.user._id}, {$pull: {etude: coproId}}, {new: true}, (err, courtier) => {
             if (err)
                 res.status(400).send({success: false, message: "erreur système", err});
             else if (!courtier)
-                res.status(404).send({success: false, message: "cette copro n'existe pas"});
-	    else
-		res.status(200).send({success: true, message: 'D�sassignation r�ussi', courtier})
-
-	})
+                res.status(404).send({success: false, message: "ce courtier n'existe pas"});
+            else
+                res.status(200).send({success: true, message: 'Désassignation réussi', courtier})
+        })
     }
 }
 let desassignerVisite = async (req, res) => {
