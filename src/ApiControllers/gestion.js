@@ -452,14 +452,12 @@ let assignerPrestataireToSyndic = async (req, res) => {
             else {
                 Prestataire.findOne({_id: prestataireId}, (err, prest) => {
                     if (err) {
-                        console.log("assign Prestataire.findOne: ", err)
                         res.status(200).send({success: false, message: 'erreur assigniation', err, successId});
                     } else {
                         Incident.find(
                             {$and: [{corpsEtat: {$elemMatch: {$in: prest.corpsEtat}}}, {syndicId: {$in: syndics}}]},
                             (err, incidents) => {
                              if (err) {
-                                 console.log("assign Incident.find: ", err)
                                  res.status(200).send({
                                      success: true,
                                      message: "le Prestataire a bien été assigné",
@@ -467,7 +465,6 @@ let assignerPrestataireToSyndic = async (req, res) => {
                                      err
                                  });
                              } else if (!incidents) {
-                                 console.log("assign no incidents!!!")
                                  res.status(200).send({
                                      success: true,
                                      message: "le Prestataire a bien été assigné",
@@ -479,7 +476,6 @@ let assignerPrestataireToSyndic = async (req, res) => {
                                      if (!prest.incidentId.includes(incidents[i]._id))
                                          ids.push(incidents[i]._id);
                                  }
-                                 console.log("assign ids: ", ids);
 
                                  Prestataire.findOneAndUpdate(
                                      {_id: prest._id},
@@ -540,9 +536,10 @@ let assignerPrestataireToSyndic = async (req, res) => {
                                 let ids = [];
                                 for (let i in incidents)
                                     ids[i] = incidents[i]._id;
+                                ids = prest.incidentId.filter(el => !ids.includes(el))
                                 Prestataire.findOneAndUpdate(
                                     {_id: prest._id},
-                                    {$set: {incidentId: prest.incidentId.filter(el => !ids.includes(el))}},
+                                    {$set: {incidentId: ids}},
                                     {new: false},
                                     (err) => {
                                         if (err)
