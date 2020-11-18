@@ -451,30 +451,50 @@ let assignerPrestataireToSyndic = async (req, res) => {
                 res.status(400).send({success: false, message: 'erreur assigniation', errorSyndic, errorPresta, successId});
             else {
                 Prestataire.findOne({_id: prestataireId}, (err, prest) => {
-                    if (err)
+                    if (err) {
+                        console.log("assign Prestataire.findOne: ", err)
                         res.status(200).send({success: false, message: 'erreur assigniation', err, successId});
-                    else {
+                    } else {
                         Incident.find(
                             {$and: [{corpsEtat: {$elemMatch: {$in: prest.corpsEtat}}}, {syndicId: {$in: syndics}}]},
                             (err, incidents) => {
-                             if (err)
-                                 res.status(200).send({success: true, message: "le Prestataire a bien été assigné", successId, err});
-                             else if (!incidents)
-                                 res.status(200).send({success: true, message: "le Prestataire a bien été assigné", successId});
-                             else {
+                             if (err) {
+                                 console.log("assign Incident.find: ", err)
+                                 res.status(200).send({
+                                     success: true,
+                                     message: "le Prestataire a bien été assigné",
+                                     successId,
+                                     err
+                                 });
+                             } else if (!incidents) {
+                                 console.log("assign no incidents!!!")
+                                 res.status(200).send({
+                                     success: true,
+                                     message: "le Prestataire a bien été assigné",
+                                     successId
+                                 });
+                             } else {
                                  let ids = [];
+                                 console.log("assign incidents: ", incidents)
                                  for (let i in incidents) {
                                      if (!prest.incidentId.includes(incidents[i]._id))
                                          ids.push(incidents[i]._id);
                                  }
+                                 console.log("assign ids: ", ids);
                                  Prestataire.findOneAndUpdate(
                                      {_id: prest._id},
                                      {$set: {incidentId: [...prest.incidentId, ids]}},
                                      {new: false},
                                      (err) => {
-                                         if (err)
-                                             res.status(200).send({success: true, message: "le Prestataire a bien été assigné", successId, err});
-                                         else
+                                         if (err) {
+                                             console.log("assign Prestataire.findOneAndUpdate: ", err)
+                                             res.status(200).send({
+                                                 success: true,
+                                                 message: "le Prestataire a bien été assigné",
+                                                 successId,
+                                                 err
+                                             });
+                                         } else
                                              res.status(200).send({success: true, message: "le Prestataire a bien été assigné", successId});
                                      })
                              }
