@@ -165,6 +165,22 @@ let assignerVisite = async (req, res) => {
     }
 }
 
+let desassignerEtudeToCourtier = async (req, res) => {
+    if (req.user.role !== 'courtier')
+	res.status(401).send({succes: false, message: 'acces interdit'});
+    else {
+	const { coproId } = req.body
+	await Courtier.findOneAndUpdate({_id: req.user._id}, {$pull: {etude: coproId}}, {new: true}, (err, courtier) => {
+            if (err)
+                res.status(400).send({success: false, message: "erreur système", err});
+            else if (!courtier)
+                res.status(404).send({success: false, message: "cette copro n'existe pas"});
+	    else
+		res.status(200).send({success: true, message: 'D�sassignation r�ussi', courtier})
+	    
+	})
+    }
+}
 let desassignerVisite = async (req, res) => {
     if (req.user.role !== 'admin')
         res.status(401).send({success: false, message: 'accès interdit'});
@@ -236,7 +252,9 @@ let demandePrestataire = (req, res) => {
 let assignerCourtierToCopro = (req, res) => {
     let {copro, courtier} = req.body;
     if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
+	{
         res.status(401).send({success: false, message: 'accès interdit'});
+	}
     else {
         Copro.findOne({_id: copro}, function (err, cop) {
             if (err)
@@ -282,7 +300,7 @@ let assignerCourtierToCopro = (req, res) => {
                         {$set: {courtier: courtier}},
                         {new: false},
                         function (err, cop) {
-                            if (err || !cop) {
+                            if (err || !cop) {	
                                 res.status(400).send({success: false, message: 'erreur assigniation dans copro', err});
                             } else {
                                 Courtier.findOneAndUpdate(
@@ -290,14 +308,30 @@ let assignerCourtierToCopro = (req, res) => {
                                     {$push: {parc: cop._id}},
                                     {new: true},
                                     function (err, court) {
+					    
                                         if (err || !court) {
                                             res.status(400).send({
                                                 success: false,
                                                 message: 'erreur assigniation dans courtier',
                                                 err
                                             });
-                                        } else
-                                            res.status(200).send({success: true, message: "le courtier a bien été assigné"})
+                                        } else {
+						Courtier.updateMany(
+						{_id: { $not: {$eq: courtier} }}, 
+                                                {$pull: {etudes: cop._id} },
+                                                {new: true},
+                                                function(err, court) {
+							if (err || !court) {
+								res.status(400).send({
+									success: false,
+									message: 'erreur désassignation des autres couttie',
+									err
+								});
+							}
+							else
+								res.status(200).send({success: true, message: "le courtier a bien été assigné"})
+													                                                						})
+					}
                                     })
                             }
                         })
@@ -1061,6 +1095,7 @@ module.exports = {
     assignerPrestataireToSyndic,
     assignerGestionnaireToCopro,
     desassignerGestionnaireToCopro,
+	desassignerEtudeToCourtier,
     annulerVisite,
     sendToEtude,
     aboPrestaToSyndic,

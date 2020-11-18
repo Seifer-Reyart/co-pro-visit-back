@@ -23,6 +23,7 @@ let {
     assignerPrestataireToSyndic,
     assignerGestionnaireToCopro,
     desassignerGestionnaireToCopro,
+    desassignerEtudeToCourtier,
     annulerVisite,
     sendToEtude,
     aboPrestaToSyndic,
@@ -195,6 +196,8 @@ router.post('/assign-gestionnaire', assignerGestionnaireToCopro);
  */
 router.post('/unassign-gestionnaire', desassignerGestionnaireToCopro);
 
+
+router.post('/unassign-etude-courtier', desassignerEtudeToCourtier);
 /**
  * Cette route permet de supprimer un Syndic et tout ce qui le concerne, JWT necessaire.
  * @route POST /gestion/delete-syndic
