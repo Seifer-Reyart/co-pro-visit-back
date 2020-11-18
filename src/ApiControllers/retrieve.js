@@ -395,7 +395,7 @@ let getCoproBySyndic = (req, res) => {
                 res.status(404).send({success: false, message: 'aucun courtier enregistré'});
             else if (isParc)
                 Copro.find({
-                    $and: [{_id: {$in: courtier.parc}}, {$or: [{syndicNominated: syndicId}, {syndicEnCours: {$elemMatch: {$eq: syndicId}}}]}]
+                    $and: [{_id: {$in: courtier.parc}}, {$and: [{syndicNominated: syndicId}, {syndicEnCours: {$elemMatch: {$eq: syndicId}}}]}]
                 }, (err, parc) => {
                     if (err)
                         res.status(400).send({success: false, message: 'erreur system', err});
