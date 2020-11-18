@@ -625,6 +625,14 @@ let assignerGestionnaireToCopro = (req, res) => {
                 else if (!copro)
                     res.status(404).send({success: false, message: "cette Copropriété n'existe pas"});
                 else {
+                    Visite.findOneAndUpdate(
+                        {coproId: copro._id},
+                        {$set: {gestionnaireId}},
+                        {new: false},
+                        (err) => {
+                            if (err)
+                                console.log(err)
+                        });
                     if (isParc)
                         Gestionnaire.findOneAndUpdate(
                             {$and: [{_id: gestionnaireId},{syndic: req.user.id}]},
@@ -635,12 +643,12 @@ let assignerGestionnaireToCopro = (req, res) => {
                                     res.status(400).send({success: false, message: 'erreur système', err});
                                 else if (!gest)
                                     res.status(404).send({success: false, message: "ce Gestionnaire n'existe pas"});
-                                else
-                                    res.status(200).send(
-                                        {
+                                else {
+                                    res.status(200).send({
                                             success: true,
                                             message: "La copropriété ("+copro.nomCopro+") a bien été ajouté au parc de "+gest.firstName
-                                        })
+                                        });
+                                }
                             }
                         )
                     else
