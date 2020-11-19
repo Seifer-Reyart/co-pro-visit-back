@@ -882,8 +882,8 @@ let retrieveDevis = (req, res) => {
             model: 'receptions'
         });
     } else if (req.user.role === 'courtier') {
-        const {courtierId} = req.body;
-        Devis.find({courtierId: courtierId}, function (err, devis) {
+        const {courtierId, copros} = req.body;
+        Devis.find({$and: [{courtierId}, {coproId: {$in: copros}}, {receptionDone: {$ne: null}}]}, function (err, devis) {
             if (err)
                 res.status(400).send({succes: false, message: 'erreur système', err});
             else if (!devis)
