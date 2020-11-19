@@ -882,7 +882,7 @@ let retrieveDevis = (req, res) => {
             model: 'receptions'
         });
     } else if (req.user.role === 'courtier') {
-        Devis.find({}, function (err, devis) {
+        Devis.find(function (err, devis) {
             if (err)
                 res.status(400).send({succes: false, message: 'erreur système', err});
             else if (!devis)
