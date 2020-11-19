@@ -891,15 +891,6 @@ let retrieveDevis = (req, res) => {
             else {
                 res.status(200).send({success: true, devis});
             }
-        }).populate({
-            path: 'visiteId',
-            model: 'visites'
-        }).populate({
-            path: 'gestionnaireId',
-            model: 'gestionnaires'
-        }).populate({
-            path: 'receptionDone',
-            model: 'receptions'
         });
     } else {
         const {prestataireId} = req.body;
