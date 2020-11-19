@@ -883,7 +883,7 @@ let retrieveDevis = (req, res) => {
         });
     } else if (req.user.role === 'courtier') {
         const {courtierId} = req.body;
-        Devis.find({courtierId}, function (err, devis) {
+        Devis.find({courtierId: courtierId}, function (err, devis) {
             if (err)
                 res.status(400).send({succes: false, message: 'erreur système', err});
             else if (!devis)
