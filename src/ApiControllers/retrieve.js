@@ -886,7 +886,7 @@ let retrieveDevis = (req, res) => {
         Courtier.findOne({_id: req.user.id}, function (err, court) {
             if (err)
                 res.status(400).send({succes: false, message: 'erreur système', err});
-            else
+            else if (!court)
                 res.status(404).send({succes: false, message: "Courtier non identifié"});
             else
                 Devis.find({$and: [{coproId: {$in: court.parc}}, {receptionDone: {$ne: null}}]}, function (err, devis) {
