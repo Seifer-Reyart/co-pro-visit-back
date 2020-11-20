@@ -911,7 +911,7 @@ let uploadFactureFile = (req, res) => {
             else if (!presta)
                 res.status(404).send({success: false, message: "prestataire introuvable"});
             else {
-                const {devisId} = req.body;
+                const {devisId, factureTTC} = req.body;
                 let filesErrors = [];
                 let filesUploaded = []
                 let promisesFiles = null;
@@ -954,7 +954,7 @@ let uploadFactureFile = (req, res) => {
                     else
                         Devis.findOneAndUpdate(
                             {$and: [{_id: devisId}, {prestataireId: req.user.id}, {facturePDF: null}]},
-                            {$set: {facturePDF: filesUploaded[0], dateDepotFacture: new Date(), demandeReception: true}},
+                            {$set: {facturePDF: filesUploaded[0], dateDepotFacture: new Date(), factureTTC: factureTTC, demandeReception: true}},
                             {new: true},
                             (err, devis) => {
                                 if (err)
