@@ -1103,7 +1103,7 @@ let registerAvisTravaux = async (req, res) => {
     if (req.user.role !== 'architecte') {
         res.status(401).send({success: false, message: 'accès interdit'});
     } else {
-        const { src_img, evaluationTTC, metrages, comArchi, comPrest, desordre, description, situation, corpsEtat, images_bf, devisId, date, conformite, rate, remarque, incidentId, coproId, pcsId, syndicId, visiteId, courtierId, architecteId, prestataireId, gestionnaireId, demandeDevis, devisPDF, dateDepotDevis, facturePDF, dateDepotFacture } = req.body;
+        const { src_img, factureTTC, metrages, comArchi, comPrest, desordre, description, situation, corpsEtat, images_bf, devisId, date, conformite, rate, remarque, incidentId, coproId, pcsId, syndicId, visiteId, courtierId, architecteId, prestataireId, gestionnaireId, demandeDevis, devisPDF, dateDepotDevis, facturePDF, dateDepotFacture } = req.body;
 
         let imagesUploadErrors = [];
         let imagesUploaded = []
@@ -1146,7 +1146,7 @@ let registerAvisTravaux = async (req, res) => {
 
         let reception = new Reception({
             src_img,
-            evaluationTTC,
+            factureTTC,
             metrages,
             comArchi,
             comPrest,

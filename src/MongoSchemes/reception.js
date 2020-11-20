@@ -3,7 +3,7 @@ let mongoose    = require('mongoose'),
 
 let receptionSchema = new Schema({
     src_img         : {type: String, default: null},
-    evaluationTTC   : {type: Number, default: 0},
+    factureTTC      : {type: Number, default: 0},
     metrages        : {type: Number, default: 0},
     comArchi        : {type: String, default: null},
     comPrest        : {type: String, default: null},
