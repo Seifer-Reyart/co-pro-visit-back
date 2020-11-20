@@ -882,16 +882,23 @@ let retrieveDevis = (req, res) => {
             model: 'receptions'
         });
     } else if (req.user.role === 'courtier') {
-        const {courtierId, copros} = req.body;
-        Devis.find({$and: [{courtierId}, {receptionDone: {$ne: null}}]}, function (err, devis) {
+        const {courtierId} = req.body;
+        Courtier.findOne({_id: req.user.id}, function (err, court) {
             if (err)
                 res.status(400).send({succes: false, message: 'erreur système', err});
-            else if (!devis)
-                res.status(404).send({succes: false, message: "devis/evaluation introuvable"});
-            else {
-                res.status(200).send({success: true, devis});
-            }
-        });
+            else
+                res.status(404).send({succes: false, message: "Courtier non identifié"});
+            else
+                Devis.find({$and: [{coproId: {$in: court.parc}}, {receptionDone: {$ne: null}}]}, function (err, devis) {
+                    if (err)
+                        res.status(400).send({succes: false, message: 'erreur système', err});
+                    else if (!devis)
+                        res.status(404).send({succes: false, message: "devis/evaluation introuvable"});
+                    else {
+                        res.status(200).send({success: true, devis});
+                    }
+                });
+        })
     } else {
         const {prestataireId} = req.body;
 
