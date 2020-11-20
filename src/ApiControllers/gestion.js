@@ -45,6 +45,78 @@ const   Devis       = require('../MongoSchemes/devis'),
 /* Function */
 /************/
 
+/*** ouvrir accès pcs ***/
+
+let openAccessPCS = (req, res) => {
+    if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else {
+        const {nomPCS, prenomPCS, emailPCS, phonePCS, coproId} = req.body;
+
+        if (!nomPCS && !prenomPCS && !emailPCS && !phonePCS && !coproId)
+            res.status(403).send({success: false, message: 'veuillez renseigner tous les champs du formulaire'});
+        else {
+            PresidentCS.findOne(
+                {
+                    $and: [
+                        {nomPCS: nomPCS.toLowerCase()},
+                        {prenomPCS: prenomPCS.toLowerCase()},
+                        {emailPCS: emailPCS.toLowerCase()},
+                        {phonePCS},
+                        {coproId}
+                        ]
+                },
+                async (err, pcs) => {
+                   if (err)
+                       res.status(400).send({success: false, message: 'erreur système', err});
+                   else if (pcs) {
+                       Copro.findOneAndUpdate(
+                           {_id: coproId},
+                           {pcs: pcs._id},
+                           {new: true},
+                           (err, cpr) => {
+                               if (err)
+                                   res.status(400).send({success: false, message: 'erreur système', err});
+                               else if (!cpr)
+                                   res.status(404).send({success: false, message: 'Copro introuvable'});
+                               else
+                                   res.status(200).send({success: true, message: 'Accès au PCS ouvert'});
+                           })
+                   } else {
+                       let password = await generateP();
+                       let pcsSave = new PresidentCS({
+                           email    : emailPCS,
+                           firstName: prenomPCS,
+                           lastName : nomPCS,
+                           password : bcrypt.hashSync(password, salt),
+                           phone    : req.body.phonePCS,
+                           coproId  : coproId,
+                       });
+                       pcsSave.save(async function (err, p) {
+                           if (err)
+                               res.status(400).send({success: false, message: 'erreur système', err});
+                           else {
+                               sendCredentials(req.body.emailPCS.toLowerCase(), password);
+                               await Copro.findOneAndUpdate(
+                                   {_id: coproId},
+                                   {$set: {pcs: p._id}},
+                                   {new: true},
+                                   function (err, cp) {
+                                       if (err)
+                                           res.status(400).send({success: false, message: 'erreur système', err});
+                                       else if (!cp)
+                                           res.status(404).send({success: false, message: 'Copro introuvable'});
+                                       else
+                                           res.status(200).send({success: true, message: 'Accès au PCS ouvert'});
+                                   });
+                           }
+                       });
+                   }
+                });
+        }
+    }
+}
+
 /*** demande Visite ***/
 
 let demandeVisite = (req, res) => {
@@ -98,30 +170,7 @@ let demandeVisite = (req, res) => {
                                                 if (err)
                                                     res.status(400).send({success: false, message: 'erreur system', err});
                                                 else {
-                                                    let password = await generateP();
-                                                    let pcs = new PresidentCS({
-                                                        email   : req.body.emailPCS,
-                                                        lastName: req.body.nomPCS,
-                                                        password: bcrypt.hashSync(password, salt),
-                                                        phone   : req.body.phonePCS,
-                                                        coproId : copro._id,
-                                                    });
-                                                    pcs.save(async function (err, p) {
-                                                        if (err)
-                                                            console.log(err);
-                                                        else {
-                                                            sendCredentials(req.body.emailPCS.toLowerCase(), password);
-                                                            await Copro.findOneAndUpdate(
-                                                                {_id: copro._id},
-                                                                {$set: {pcs: p._id}},
-                                                                {new: true},
-                                                                function (err) {
-                                                                    if (err)
-                                                                        console.log(err)
-                                                                });
-                                                            res.status(200).send({success: true, message: 'requête visite envoyée'});
-                                                        }
-                                                    });
+                                                    res.status(200).send({success: true, message: 'requête visite envoyée'});
                                                 }
                                             });
                                     }
@@ -1202,5 +1251,6 @@ module.exports = {
     aboPrestaToSyndic,
     demandeDevis,
     uploadStatSinistres,
-    updatePermissionsGest
+    updatePermissionsGest,
+    openAccessPCS,
 }

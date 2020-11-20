@@ -9,7 +9,7 @@ let pcsSchema = new Schema({
     phone           : String,
     image           : String,
     coproId         : Schema.Types.ObjectId,
-    permissions     : [0],
+    permissions     : [0, 0, 0],
     role        	: {
         type: String,
         default: 'pcs'
