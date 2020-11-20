@@ -85,9 +85,9 @@ let openAccessPCS = (req, res) => {
                    } else {
                        let password = await generateP();
                        let pcsSave = new PresidentCS({
-                           email    : emailPCS,
-                           firstName: prenomPCS,
-                           lastName : nomPCS,
+                           email    : emailPCS.toLowerCase(),
+                           firstName: prenomPCS.toLowerCase(),
+                           lastName : nomPCS.toLowerCase(),
                            password : bcrypt.hashSync(password, salt),
                            phone    : req.body.phonePCS,
                            coproId  : coproId,
