@@ -29,7 +29,8 @@ let {
     aboPrestaToSyndic,
     demandeDevis,
     uploadStatSinistres,
-    updatePermissionsGest
+    updatePermissionsGest,
+    openAccessPCS
 } = require('../ApiControllers/gestion');
 
 /***************/
@@ -355,6 +356,26 @@ router.post('/stats-sinistres', multer().any(), uploadStatSinistres);
  * @security JWT
  */
 router.post('/changer-droits', updatePermissionsGest);
+
+/**
+ * Cette route permet d'ouvrir un accès au PCS, JWT necessaire.
+ * @route POST /gestion/access-pcs
+ * @group gestion
+ * @param {string} coproId.body.required - _id d'une Copro
+ * @param {string} nomPCS.body.required - nom du President du Conseil
+ * @param {string} prenomPCS.body.required - prenom du President du Conseil
+ * @param {string} emailPCS.body.required - email du President du Conseil
+ * @param {string} phone.body.required - téléphone du President du Conseil
+ * @returns {object} 200 - {success: true, message: 'Accès au PCS ouvert'}
+ * @returns {Error}  400 - {success: false, message: 'erreur système', err}
+ * @returns {Error}  401 - quand role != syndic ou gestionnaire {success: false, message: 'accès interdit'}
+ * @returns {Error}  403 - quand il manque des éléments {success: false, message: 'veuillez renseigner tous les champs du formulaire'}
+ * @returns {Error}  404 - {success: false, message: 'Copro introuvable'}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.post('/access-pcs', openAccessPCS);
 
 module.exports = router;
 

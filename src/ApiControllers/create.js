@@ -453,32 +453,52 @@ let registerCopro = (req, res) => {
                 console.log(copro)
                 res.status(403).send({success: false, message: 'La Copro existe déjà'});
             } else {
-                let copro = new Copro({
-                    nomCopro       	: req.body.nomCopro,
-                    reference       : req.body.reference,
-                    address    	    : req.body.address,
-                    codePostal      : req.body.codePostal,
-                    ville    	    : req.body.ville,
-                    nbBatiments     : req.body.nbBatiments,
-                    surface         : req.body.surface,
-                    nbrLot          : req.body.nbrLot,
-                    multiDevis      : req.body.multiDevis,
-                    maxTravaux      : req.body.maxTravaux,
-                    syndicNominated : req.body.syndicNominated ? req.body.syndicNominated : null,
-                    syndicEnCours   : req.body.syndicEnCours ? req.body.syndicEnCours : [],
-                    courtier        : req.body.courtier ? req.body.courtier : null,
-                });
-                copro.save(async function(err, cpr) {
-                    if (err) {
-                        res.send({ success: false, message: "Erreur lors de la création de la Copro", err});
-                    } else {
-                        if (req.body.syndicNominated)
-                            await Syndic.updateOne({_id: req.body.syndicNominated}, {$push: {parc: cpr._id}});
-                        else
-                            await Syndic.updateOne({_id: req.body.syndicEnCours}, {$push: {enCoursSelect: cpr._id}});
-                        res.send({ success: true, message : "La Copro a bien été créée"});
+                let _id = req.body.syndicNominated ?? req.body.syndicEnCours;
+                Syndic.findOne({$or: [{_id},{gestionnaires: {$elemMatch: {$eq: _id}}}]}, (err, synd) => {
+                    if (err)
+                        res.status(400).send({ success: false, message: "Erreur lors de la création de la Copro", err});
+                    else if (!synd)
+                        res.status(404).send({ success: false, message: "Syndic non identifié"});
+                    else {
+                        let copro = new Copro({
+                            nomCopro       	: req.body.nomCopro,
+                            reference       : req.body.reference,
+                            address    	    : req.body.address,
+                            codePostal      : req.body.codePostal,
+                            ville    	    : req.body.ville,
+                            nbBatiments     : req.body.nbBatiments,
+                            surface         : req.body.surface,
+                            nbrLot          : req.body.nbrLot,
+                            multiDevis      : req.body.multiDevis,
+                            maxTravaux      : req.body.maxTravaux,
+                            syndicNominated : req.body.syndicNominated ? synd._id : null,
+                            syndicEnCours   : req.body.syndicEnCours ? [synd._id] : [],
+                            courtier        : req.body.courtier ? req.body.courtier : null,
+                        });
+                        copro.save(async function(err, cpr) {
+                            if (err) {
+                                res.status(400).send({ success: false, message: "Erreur lors de la création de la Copro", err});
+                            } else {
+                                if (req.body.syndicNominated) {
+                                    if (req.user.role === 'syndic')
+                                        await Syndic.updateOne({_id: synd._id}, {$push: {parc: cpr._id}});
+                                    else {
+                                        await Gestionnaire.updateOne({_id: req.body.syndicNominated}, {$push: {parc: cpr._id}});
+                                        await Syndic.updateOne({_id: synd._id}, {$push: {parc: cpr._id}});
+                                    }
+                                } else {
+                                    if (req.user.role === 'syndic')
+                                        await Syndic.updateOne({_id: req.body.syndicEnCours}, {$push: {enCoursSelect: cpr._id}});
+                                    else {
+                                        await Gestionnaire.updateOne({_id: req.body.syndicEnCours}, {$push: {enCoursSelect: cpr._id}});
+                                        await Syndic.updateOne({_id: synd._id}, {$push: {enCoursSelect: cpr._id}});
+                                    }
+                                }
+                                res.status(200).send({ success: true, message : "La Copro a bien été créée"});
+                            }
+                        });
                     }
-                });
+                })
             }
         })
     }
@@ -533,42 +553,50 @@ let parseXlsThenStore = (req, res) => {
                     message: "",
                     errors: []
                 };
-                await obj[0].data.map((item, index) => {
-                    if (index >= 1) {
-                        if (item[0] && item[2] && item[3] && item[4] && item[5]) {
-                            let copro = new Copro({
-                                nomCopro: item[1] ?? generateName(),
-                                reference: item[0],
-                                address: item[2],
-                                codePostal: item[3],
-                                ville: item[4],
-                                surface: item[5],
-                                compagnie: {
-                                    assurance: item[6],
-                                    echeance: null
-                                },
-                                syndicNominated: req.user.id
-                            })
-                            copro.save(function (err, cpr) {
-                                if (err) {
-                                    error.isError = true;
-                                    error.message = err;
-                                    error.errors.push(item)
-                                } else {
-                                    Syndic.findOneAndUpdate(
-                                        {_id: cpr.syndicNominated},
-                                        {$push: {parc: cpr._id}},
-                                    {new: true},
-                                        function (err) {
-                                            if (err) {
-                                                error.isError = true;
-                                                error.message = err;
-                                                error.errors.push(item)
-                                            }
-                                        })
+                Syndic.findOne({_id: req.user.id}, async (err, synd) => {
+                    if (err)
+                        res.status(400).send({success: false, message: "erreur système", error});
+                    else if (!synd)
+                        res.status(404).send({success: true, message: "Syndic non identifié", error})
+                    else {
+                        await obj[0].data.map((item, index) => {
+                            if (index >= 1) {
+                                if (item[0] && item[2] && item[3] && item[4] && item[5]) {
+                                    let copro = new Copro({
+                                        nomCopro: item[1] ?? synd.nomSyndic,
+                                        reference: item[0],
+                                        address: item[2],
+                                        codePostal: item[3],
+                                        ville: item[4],
+                                        surface: item[5],
+                                        compagnie: {
+                                            assurance: item[6],
+                                            echeance: null
+                                        },
+                                        syndicNominated: synd._id
+                                    })
+                                    copro.save(function (err, cpr) {
+                                        if (err) {
+                                            error.isError = true;
+                                            error.message = err;
+                                            error.errors.push(item)
+                                        } else {
+                                            Syndic.findOneAndUpdate(
+                                                {_id: cpr.syndicNominated},
+                                                {$push: {parc: cpr._id}},
+                                                {new: true},
+                                                function (err) {
+                                                    if (err) {
+                                                        error.isError = true;
+                                                        error.message = err;
+                                                        error.errors.push(item)
+                                                    }
+                                                })
+                                        }
+                                    });
                                 }
-                            });
-                        }
+                            }
+                        });
                     }
                 });
                 res.status(200).send({success: true, message: "La liste de Copros a bien été créée", error});
@@ -807,7 +835,7 @@ let uploadDevisFile = (req, res) => {
             else if (!presta)
                 res.status(404).send({success: false, message: "prestataire introuvable"});
             else {
-                const {devisId} = req.body;
+                const {devisId, devisTTC} = req.body;
                 let filesErrors = [];
                 let filesUploaded = []
 
@@ -852,7 +880,7 @@ let uploadDevisFile = (req, res) => {
                     else
                         Devis.findOneAndUpdate(
                             {$and: [{_id: devisId}, {prestataireId: req.user.id}]},
-                            {$set: {devisPDF: filesUploaded[0], dateDepotDevis: new Date()}},
+                            {$set: {devisPDF: filesUploaded[0], dateDepotDevis: new Date(), devisTTC: devisTTC}},
                             {new: true},
                             (err, devis) => {
                                 if (err) {
@@ -883,7 +911,7 @@ let uploadFactureFile = (req, res) => {
             else if (!presta)
                 res.status(404).send({success: false, message: "prestataire introuvable"});
             else {
-                const {devisId} = req.body;
+                const {devisId, factureTTC} = req.body;
                 let filesErrors = [];
                 let filesUploaded = []
                 let promisesFiles = null;
@@ -926,7 +954,7 @@ let uploadFactureFile = (req, res) => {
                     else
                         Devis.findOneAndUpdate(
                             {$and: [{_id: devisId}, {prestataireId: req.user.id}, {facturePDF: null}]},
-                            {$set: {facturePDF: filesUploaded[0], dateDepotFacture: new Date(), demandeReception: true}},
+                            {$set: {facturePDF: filesUploaded[0], dateDepotFacture: new Date(), factureTTC: factureTTC, demandeReception: true}},
                             {new: true},
                             (err, devis) => {
                                 if (err)
@@ -1075,7 +1103,7 @@ let registerAvisTravaux = async (req, res) => {
     if (req.user.role !== 'architecte') {
         res.status(401).send({success: false, message: 'accès interdit'});
     } else {
-        const { src_img, evaluationTTC, metrages, comArchi, comPrest, desordre, description, situation, corpsEtat, images_bf, devisId, date, conformite, rate, remarque, incidentId, coproId, pcsId, syndicId, visiteId, courtierId, architecteId, prestataireId, gestionnaireId, demandeDevis, devisPDF, dateDepotDevis, facturePDF, dateDepotFacture } = req.body;
+        const { src_img, factureTTC, metrages, comArchi, comPrest, desordre, description, situation, corpsEtat, images_bf, devisId, date, conformite, rate, remarque, incidentId, coproId, pcsId, syndicId, visiteId, courtierId, architecteId, prestataireId, gestionnaireId, demandeDevis, devisPDF, dateDepotDevis, facturePDF, dateDepotFacture } = req.body;
 
         let imagesUploadErrors = [];
         let imagesUploaded = []
@@ -1118,7 +1146,7 @@ let registerAvisTravaux = async (req, res) => {
 
         let reception = new Reception({
             src_img,
-            evaluationTTC,
+            factureTTC,
             metrages,
             comArchi,
             comPrest,

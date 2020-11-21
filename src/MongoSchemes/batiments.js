@@ -43,7 +43,7 @@ let batimentsSchema = new Schema({
             specAccess1     : String,   //Interphone/digicode/aucun contrôle/autre (préciser)
             specAutre1      : String,
             isAccess2       : Boolean,
-	    porteVitreeSecond: Boolean,
+            porteVitreeSecond: Boolean,
             specAccess2     : String,   //Interphone/digicode/aucun contrôle/autre (préciser)
             specAutre2      : String,
             cameraVideo     : Boolean,
@@ -103,9 +103,9 @@ let batimentsSchema = new Schema({
     parkingST      : {
         presence      : Boolean,
         nbNiveaux     : Number,
-	extincteurs   : Boolean,
-	bacSable      : Boolean,
-	access	      : Boolean,
+        extincteurs   : Boolean,
+        bacSable      : Boolean,
+        access	      : Boolean,
         visite12mois  : Boolean,
         controlAccess : Boolean,
         etatPorte     : {
@@ -120,7 +120,7 @@ let batimentsSchema = new Schema({
         visite12moisCollecExt    : Boolean,  // à remplir si chaufferie collective
         exitincteursInt : Boolean,  // à remplir si chaufferie collective
         visite12moisCollecInt    : Boolean,  // à remplir si chaufferie collective
-	exitincteursIndivExt     : Boolean,
+        exitincteursIndivExt     : Boolean,
         visite12moisIndivExt    : Boolean,  // à remplir si chaufferie collective
         Access          : Boolean,  // à remplir si chaufferie collective
         carnet          : Boolean,  // à remplir si chaufferie collective

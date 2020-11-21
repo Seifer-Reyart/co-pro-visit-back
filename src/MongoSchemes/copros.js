@@ -117,6 +117,10 @@ let coprosSchema = new Schema({
         type    : String,
         default : null
     },
+    perdu              : {
+        type    : Boolean,
+        default : false
+    },
     sansSuite          : {
         type    : Boolean,
         default : false

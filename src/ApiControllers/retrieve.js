@@ -858,12 +858,12 @@ let postPrestataire = (req, res) => {
 /*** get devis ***/
 
 let retrieveDevis = (req, res) => {
-    if (req.user.role !== 'admin' && req.user.role !== 'prestataire' && req.user.role !== 'architecte')
+    if (req.user.role !== 'admin' && req.user.role !== 'prestataire' && req.user.role !== 'architecte' && req.user.role !== 'courtier')
         res.status(401).send({success: false, message: 'accès refusé'});
     if (req.user.role === 'architecte') {
         const {visiteId} = req.body;
 
-        Devis.find({$and: [{visiteId},{architecteId: req.user.id}, {demandeReception: true}]}, function (err, devis) {
+        Devis.find({$and: [{visiteId}, {architecteId: req.user.id}, {demandeReception: true}]}, function (err, devis) {
             if (err)
                 res.status(400).send({succes: false, message: 'erreur système', err});
             else if (!devis)
@@ -872,15 +872,33 @@ let retrieveDevis = (req, res) => {
                 res.status(200).send({success: true, devis});
             }
         }).populate({
-            path    : 'visiteId',
-            model   : 'visites'
+            path: 'visiteId',
+            model: 'visites'
         }).populate({
-            path    : 'gestionnaireId',
-            model   : 'gestionnaires'
+            path: 'gestionnaireId',
+            model: 'gestionnaires'
         }).populate({
-            path    : 'receptionDone',
-            model   : 'receptions'
+            path: 'receptionDone',
+            model: 'receptions'
         });
+    } else if (req.user.role === 'courtier') {
+        const {courtierId} = req.body;
+        Courtier.findOne({_id: req.user.id}, function (err, court) {
+            if (err)
+                res.status(400).send({succes: false, message: 'erreur système', err});
+            else if (!court)
+                res.status(404).send({succes: false, message: "Courtier non identifié"});
+            else
+                Devis.find({$and: [{coproId: {$in: court.parc}}, {receptionDone: {$ne: null}}]}, function (err, devis) {
+                    if (err)
+                        res.status(400).send({succes: false, message: 'erreur système', err});
+                    else if (!devis)
+                        res.status(404).send({succes: false, message: "devis/evaluation introuvable"});
+                    else {
+                        res.status(200).send({success: true, devis});
+                    }
+                });
+        })
     } else {
         const {prestataireId} = req.body;
 
