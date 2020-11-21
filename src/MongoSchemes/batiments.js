@@ -43,6 +43,7 @@ let batimentsSchema = new Schema({
             specAccess1     : String,   //Interphone/digicode/aucun contrôle/autre (préciser)
             specAutre1      : String,
             isAccess2       : Boolean,
+	    porteVitreeSecond: Boolean,
             specAccess2     : String,   //Interphone/digicode/aucun contrôle/autre (préciser)
             specAutre2      : String,
             cameraVideo     : Boolean,
@@ -102,26 +103,32 @@ let batimentsSchema = new Schema({
     parkingST      : {
         presence      : Boolean,
         nbNiveaux     : Number,
+	extincteurs   : Boolean,
+	bacSable      : Boolean,
+	access	      : Boolean,
         visite12mois  : Boolean,
         controlAccess : Boolean,
         etatPorte     : {
             type: String,
-            enum: ['bon', 'moyen', 'mauvais']
+            enum: ['bon', 'moyen', 'mauvais', 'sansObjet']
         },
         planEvac      : Boolean,
     },
     chaufferie              : {
         collective      : Boolean,
-        visite12mois    : Boolean,  // à remplir si chaufferie collective
         exitincteursExt : Boolean,  // à remplir si chaufferie collective
+        visite12moisCollecExt    : Boolean,  // à remplir si chaufferie collective
         exitincteursInt : Boolean,  // à remplir si chaufferie collective
+        visite12moisCollecInt    : Boolean,  // à remplir si chaufferie collective
+	exitincteursIndivExt     : Boolean,
+        visite12moisIndivExt    : Boolean,  // à remplir si chaufferie collective
         Access          : Boolean,  // à remplir si chaufferie collective
         carnet          : Boolean,  // à remplir si chaufferie collective
         dateLastVisite  : Date,     // à remplir si chaufferie collective
         individuelle    : Boolean,
         genre           : {
             type: String,
-            enum: ['Fuel', 'Gaz', 'Cpu', 'Electrique', 'Inconnu']  // Fuel ou gaz ou cpu si Collective
+            enum: ['Fuel', 'Gaz', 'Cpcu', 'Electrique', 'Inconnu']  // Fuel ou gaz ou cpu si Collective
         },                                              // Électrique ou gaz si Individuelle
     },
     image                  : {
