@@ -188,7 +188,7 @@ let assignerVisite = async (req, res) => {
         res.status(401).send({success: false, message: 'accès interdit'});
     else {
         let error = [];
-        await req.body.visites.map(visite => {
+        let promise = await req.body.visites.map(visite => {
             Visite.findOneAndUpdate(
                 {_id: visite},
                 {$set: {architecteId: req.body.architecteId}},
@@ -207,6 +207,7 @@ let assignerVisite = async (req, res) => {
                             });
                 });
         });
+        await Promise.all(promise);
         if (error.length > 0)
             res.status(400).send({success: true, message: 'une ou plusieurs visites non assignées', error});
         else
