@@ -107,7 +107,7 @@ let openAccessPCS = (req, res) => {
                                        else if (!cp)
                                            res.status(404).send({success: false, message: 'Copro introuvable'});
                                        else
-                                           res.status(200).send({success: true, message: 'Accès au PCS ouvert'});
+                                           res.status(200).send({success: true, message: 'Accès au PCS ouvert', pcs: p});
                                    });
                            }
                        });
