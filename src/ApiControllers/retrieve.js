@@ -682,7 +682,7 @@ let getOneVisite = (req,res) => {
                 res.status(404).send({success: false, message: 'aucune visite enregistrée'});
             else
                 res.status(200).send({success: true, visite});
-        }).select({accessCode: 1, cleCabinet: 1, commentaire: 1, gardien: 1, syndicId: 1, _id: 0});
+        }).select({accessCode: 1, cleCabinet: 1, commentaire: 1, gardien: 1, syndicId: 1, nomPCS: 1, emailPCS: 1, phonePCS: 1, _id: 0});
     else
         res.status(401).send({success: false, message: 'accès refusé'});
 }
