@@ -117,6 +117,10 @@ let coprosSchema = new Schema({
         type    : String,
         default : null
     },
+    depotStats         : {
+        type    : Date,
+        default : null
+    },
     perdu              : {
         type    : Boolean,
         default : false

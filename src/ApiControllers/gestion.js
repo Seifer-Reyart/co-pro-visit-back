@@ -1188,7 +1188,7 @@ let uploadStatSinistres = async (req, res) => {
 
             Copro.findOneAndUpdate(
                 {_id: coproId},
-                {$set: {statSinistres: savedFileName}},
+                {$set: {statSinistres: savedFileName, depotStats: new Date()}},
                 {new: true},
                 (err, cpr) => {
                     if (err) {
