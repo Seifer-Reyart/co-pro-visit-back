@@ -236,6 +236,9 @@ let getCopro = (req, res) => {
                 }).populate({
                     path: 'gestionnaire',
                     model: 'gestionnaires'
+                }).populate({
+                    path: 'pcs',
+                    model: 'pcs'
                 });
         });
     else if (req.user.role === 'gestionnaire')
@@ -261,6 +264,9 @@ let getCopro = (req, res) => {
                 }).populate({
                     path: 'gestionnaire',
                     model: 'gestionnaires'
+                }).populate({
+                    path: 'pcs',
+                    model: 'pcs'
                 });
         });
     else if (req.user.role === 'courtier')
