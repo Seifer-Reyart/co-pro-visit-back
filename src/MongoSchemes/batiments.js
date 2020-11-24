@@ -27,7 +27,15 @@ let batimentsSchema = new Schema({
         natCommerce : {
             type    : String,
             default : null
-        }
+        },
+	commercesContiguite : {
+	    type    : Boolean,
+	    default: false,
+	},
+	natCommerceContiguite : {
+	    type: String,
+	    default: null
+	}
     },
     facadeArriere           : {
         access      : Boolean,
@@ -129,6 +137,10 @@ let batimentsSchema = new Schema({
         genre           : {
             type: String,
             enum: ['Fuel', 'Gaz', 'Cpcu', 'Electrique', 'Inconnu']  // Fuel ou gaz ou cpu si Collective
+        },                                              // Électrique ou gaz si Individuelle
+        genreIndiv           : {
+            type: String,
+            enum: ['Gaz', 'Electrique', 'Inconnu']  // Fuel ou gaz ou cpu si Collective
         },                                              // Électrique ou gaz si Individuelle
     },
     image                  : {
