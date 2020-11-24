@@ -919,6 +919,7 @@ let retrieveDevis = (req, res) => {
         })
     } else if (req.user.role === 'syndic' || req.user.role === 'gestionnaire') {
         const {copros} = req.body;
+        console.log("Body: ", req.body);
         Devis.find({coproId: {$in: copros}}, function (err, devis) {
             if (err)
                 res.status(400).send({succes: false, message: 'erreur système', err});
