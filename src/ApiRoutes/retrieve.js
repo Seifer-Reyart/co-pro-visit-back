@@ -33,7 +33,8 @@ let {
     retrieveDevis,
     retrieveDevisByCopro,
     retrieveOneReception,
-    retrieveAllReception
+    retrieveAllReception,
+    retrieveVisisteCourtier
 } = require('../ApiControllers/retrieve');
 
 /***************/
@@ -424,5 +425,20 @@ router.post('/one-avis', retrieveOneReception);
  */
 
 router.post('/all-avis', retrieveAllReception);
+
+/**
+ * Cette route permet de récupérer les visites pour le courtier, JWT necessaire.
+ * @route POST /retrieve/all-avis
+ * @group Get_Data
+ * @param {Array.<string>} copros.body.required - _id des copros
+ * @returns {object} 200 - {success: true, receptionDone: object}
+ * @returns {Error}  400 - {succes: false, message: 'erreur système', err}
+ * @returns {Error}  401 - si dans token, role !== courtier  {success: false, message: 'accès refusé'}
+ * @returns {Error}  404 - si aucun devis/evaluation trouvé  {succes: false, message: "aucune visite enregistrée"}
+ * @produces application/json
+ * @security JWT
+ */
+
+router.post('/visites-courtier', retrieveVisisteCourtier);
 
 module.exports = router;

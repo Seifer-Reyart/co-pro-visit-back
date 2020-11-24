@@ -408,9 +408,6 @@ let getCoproBySyndic = (req, res) => {
                     else
                         res.status(200).send({success: true, parc})
                 }).populate({
-                    path: 'pcs',
-                    model: 'pcs'
-                }).populate({
                     path: 'gestionnaire',
                     model: 'gestionnaires'
                 }).populate({
@@ -593,6 +590,7 @@ let getVisitesAll = (req, res) => {
         res.status(401).send({success: false, message: 'accès refusé'});
 }
 
+
 /*** get Visites list ***/
 
 let getVisitesUnassigned = (req, res) => {
@@ -639,6 +637,20 @@ let getVisitesArchi = (req,res) => {
             model: 'copros',
             path: 'coproId'
         }).sort({done: 1, demandeLe: -1});
+}
+
+let retrieveVisisteCourtier = (req, res) => {
+    if (req.user.role !== 'courtier')
+        res.status(401).send({success: false, message: 'accès refusé'});
+    else
+        Visite.find({_id: {$in: req.body.copros}}, (err, visites) => {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur system', err});
+            else if (!visites)
+                res.status(404).send({success: false, message: 'aucune visite enregistrée'});
+            else
+                res.status(200).send({success: true, visites});
+        });
 }
 
 /*** get One visite by its _id ***/
@@ -1012,5 +1024,6 @@ module.exports = {
     retrieveDevis,
     retrieveDevisByCopro,
     retrieveOneReception,
-    retrieveAllReception
+    retrieveAllReception,
+    retrieveVisisteCourtier
 }
