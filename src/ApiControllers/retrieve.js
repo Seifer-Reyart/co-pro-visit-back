@@ -643,7 +643,7 @@ let retrieveVisisteCourtier = (req, res) => {
     if (req.user.role !== 'courtier')
         res.status(401).send({success: false, message: 'accès refusé'});
     else
-        Visite.find({_id: {$in: req.body.copros}}, (err, visites) => {
+        Visite.find({coproId: {$in: req.body.copros}}, (err, visites) => {
             if (err)
                 res.status(400).send({success: false, message: 'erreur system', err});
             else if (!visites)
