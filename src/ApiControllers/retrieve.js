@@ -919,9 +919,8 @@ let retrieveDevis = (req, res) => {
         })
     } else if (req.user.role === 'syndic' || req.user.role === 'gestionnaire') {
         const {copros, prestataires} = req.body;
-        console.log("Body: ", req.body);
         if (prestataires?.length > 0) {
-            Devis.find({prestataireId: {$in: prestataires}}, function (err, devis) {
+            Devis.find({$and: [{prestataireId: {$in: prestataires}}, {$or: [{syndicId: req.user.id}, {gestionnaireId: req.user.id}]}]}, function (err, devis) {
                 if (err)
                     res.status(400).send({succes: false, message: 'erreur système', err});
                 else if (!devis)
