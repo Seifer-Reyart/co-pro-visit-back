@@ -876,9 +876,9 @@ let postPrestataire = (req, res) => {
 /*** get devis ***/
 
 let retrieveDevis = (req, res) => {
-    if (req.user.role !== 'admin' && req.user.role !== 'prestataire' && req.user.role !== 'architecte' && req.user.role !== 'courtier')
+    if (req.user.role !== 'admin' && req.user.role !== 'prestataire' && req.user.role !== 'architecte' && req.user.role !== 'courtier' && req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
         res.status(401).send({success: false, message: 'accès refusé'});
-    if (req.user.role === 'architecte') {
+    else if (req.user.role === 'architecte') {
         const {visiteId} = req.body;
 
         Devis.find({$and: [{visiteId}, {architecteId: req.user.id}, {demandeReception: true}]}, function (err, devis) {
@@ -917,6 +917,16 @@ let retrieveDevis = (req, res) => {
                     }
                 });
         })
+    } else if (req.user.role === 'syndic' || req.user.role === 'gestionnaire') {
+        const {copros} = req.body;
+        Devis.find({coproId: {$in: copros}}, function (err, devis) {
+            if (err)
+                res.status(400).send({succes: false, message: 'erreur système', err});
+            else if (!devis)
+                res.status(404).send({succes: false, message: "ce devis/evaluation n'existe pas"});
+            else
+                res.status(200).send({success: true, list: devis});
+        });
     } else {
         const {prestataireId} = req.body;
 
