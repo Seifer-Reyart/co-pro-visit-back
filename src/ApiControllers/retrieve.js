@@ -918,16 +918,26 @@ let retrieveDevis = (req, res) => {
                 });
         })
     } else if (req.user.role === 'syndic' || req.user.role === 'gestionnaire') {
-        const {copros} = req.body;
-        console.log("Body: ", req.body);
-        Devis.find({coproId: {$in: copros}}, function (err, devis) {
-            if (err)
-                res.status(400).send({succes: false, message: 'erreur système', err});
-            else if (!devis)
-                res.status(404).send({succes: false, message: "ce devis/evaluation n'existe pas"});
-            else
-                res.status(200).send({success: true, list: devis});
-        });
+        const {copros, prestataires} = req.body;
+        if (prestataires?.length > 0) {
+            Devis.find({prestataireId: {$in: prestataires}}, function (err, devis) {
+                if (err)
+                    res.status(400).send({succes: false, message: 'erreur système', err});
+                else if (!devis)
+                    res.status(404).send({succes: false, message: "ce devis/evaluation n'existe pas"});
+                else
+                    res.status(200).send({success: true, list: devis});
+            });
+        } else {
+            Devis.find({coproId: {$in: copros}}, function (err, devis) {
+                if (err)
+                    res.status(400).send({succes: false, message: 'erreur système', err});
+                else if (!devis)
+                    res.status(404).send({succes: false, message: "ce devis/evaluation n'existe pas"});
+                else
+                    res.status(200).send({success: true, list: devis});
+            });
+        }
     } else {
         const {prestataireId} = req.body;
 
