@@ -1007,7 +1007,7 @@ let annulerVisite = (req, res) => {
             if (err) {
                 res.status(400).send({success: false, message: 'erreur système', err});
             } else if (archi)
-                res.status(403).send({success: false, message: 'Un architecte effectue la visite, opération suspendue'});
+                res.status(403).send({success: false, message: 'Désolé mais un architecte effectue la visite, merci de nous adresser rapidement un mail'});
             else
                 Copro.findOneAndUpdate(
                     {_id: coproId},
