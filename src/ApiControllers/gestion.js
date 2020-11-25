@@ -39,7 +39,7 @@ const   Copro       = require('../MongoSchemes/copros'),
 
 const   Devis       = require('../MongoSchemes/devis'),
         Visite      = require('../MongoSchemes/visites'),
-        Incident    = require('../MongoSchemes/incidents')
+        Incident    = require('../MongoSchemes/incidents'),
         Reception   = require('../MongoSchemes/reception');
 
 /************/
@@ -65,18 +65,29 @@ let openAccessPCS = (req, res) => {
                        Copro.findOneAndUpdate(
                            {_id: coproId},
                            {pcs: pcs._id},
-                           {new: true},
+                           {returnOriginal: true},
                            async (err, cpr) => {
                                if (err)
                                    res.status(400).send({success: false, message: 'erreur système', err});
                                else if (!cpr)
                                    res.status(404).send({success: false, message: 'Copro introuvable'});
-                               else {
-                                   await Devis.updateMany({coproId: cpr._id}, {pcsId: pcs._id}, {new: false}, (err) => {console.log(err)});
-                                   await Reception.updateMany({coproId: cpr._id}, {pcsId: pcs._id}, {new: false}, (err) => {console.log(err)});
+                               else if (cpr.pcs === pcs._id)
+                                   res.status(200).send({success: true, message: 'email identique, aucun changement effectué', pcs});
+                               else if (cpr.pcs !== pcs._id) {
+                                   if (cpr.pcs)
+                                       await PresidentCS.findOneAndUpdate(
+                                           {_id: cpr.pcs},
+                                           {$set: {coproId: null}},
+                                           {new: true},
+                                           (err) => {
+                                               if (err)
+                                                   console.log(err);
+                                           })
+                                   await Devis.updateMany({coproId: cpr._id}, {$set: {pcsId: pcs._id}}, {new: false}, (err) => {console.log(err)});
+                                   await Reception.updateMany({coproId: cpr._id}, {$set: {pcsId: pcs._id}}, {new: false}, (err) => {console.log(err)});
                                    res.status(200).send({success: true, message: 'Accès au PCS ouvert', pcs});
                                }
-                           })
+                           });
                    } else {
                        let password = await generateP();
                        let pcsSave = new PresidentCS({
@@ -91,19 +102,29 @@ let openAccessPCS = (req, res) => {
                            if (err)
                                res.status(400).send({success: false, message: 'erreur système', err});
                            else {
-                               sendCredentials(req.body.emailPCS.toLowerCase(), password);
                                await Copro.findOneAndUpdate(
                                    {_id: coproId},
                                    {$set: {pcs: p._id}},
-                                   {new: true},
+                                   {returnOriginal: true},
                                    async function (err, cp) {
                                        if (err)
                                            res.status(400).send({success: false, message: 'erreur système', err});
                                        else if (!cp)
                                            res.status(404).send({success: false, message: 'Copro introuvable'});
                                        else {
-                                           await Devis.updateMany({coproId: cp._id}, {pcsId: p._id}, {new: false}, (err) => {console.log(err)});
-                                           await Reception.updateMany({coproId: cp._id}, {pcsId: p._id}, {new: false}, (err) => {console.log(err)});
+                                           if (cp.pcs) {
+                                               await PresidentCS.findOneAndUpdate(
+                                                   {_id: cpr.pcs},
+                                                   {$set: {coproId: null}},
+                                                   {new: true},
+                                                   (err) => {
+                                                       if (err)
+                                                           console.log(err);
+                                                   })
+                                           }
+                                           await Devis.updateMany({coproId: cp._id}, {$set: {pcsId: p._id}}, {new: false}, (err) => {console.log(err)});
+                                           await Reception.updateMany({coproId: cp._id}, {$set: {pcsId: p._id}}, {new: false}, (err) => {console.log(err)});
+                                           await sendCredentials(req.body.emailPCS.toLowerCase(), password);
                                            res.status(200).send({success: true, message: 'Accès au PCS ouvert', pcs: p});
                                        }
                                    });
