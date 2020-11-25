@@ -75,13 +75,16 @@ let openAccessPCS = (req, res) => {
                            {_id: coproId},
                            {pcs: pcs._id},
                            {new: true},
-                           (err, cpr) => {
+                           async (err, cpr) => {
                                if (err)
                                    res.status(400).send({success: false, message: 'erreur système', err});
                                else if (!cpr)
                                    res.status(404).send({success: false, message: 'Copro introuvable'});
-                               else
+                               else {
+                                   await Devis.updateMany({coproId: cpr._id}, {pcsId: pcs._id}, {new: false}, (err) => {console.log(err)});
+                                   await Reception.updateMany({coproId: cpr._id}, {pcsId: pcs._id}, {new: false}, (err) => {console.log(err)});
                                    res.status(200).send({success: true, message: 'Accès au PCS ouvert'});
+                               }
                            })
                    } else {
                        let password = await generateP();
@@ -109,7 +112,7 @@ let openAccessPCS = (req, res) => {
                                            res.status(404).send({success: false, message: 'Copro introuvable'});
                                        else {
                                            await Devis.updateMany({coproId: cp._id}, {pcsId: p._id}, {new: false}, (err) => {console.log(err)});
-                                           Reception.updateMany({coproId: cp._id}, {pcsId: p._id}, {new: false}, (err) => {console.log(err)});
+                                           await Reception.updateMany({coproId: cp._id}, {pcsId: p._id}, {new: false}, (err) => {console.log(err)});
                                            res.status(200).send({success: true, message: 'Accès au PCS ouvert', pcs: p});
                                        }
                                    });
