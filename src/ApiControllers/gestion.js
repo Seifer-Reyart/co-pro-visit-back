@@ -82,10 +82,20 @@ let openAccessPCS = (req, res) => {
                                            (err) => {
                                                if (err)
                                                    console.log(err);
-                                           })
-                                   await Devis.updateMany({coproId: cpr._id}, {$set: {pcsId: pcs._id}}, {new: false}, (err) => {console.log(err)});
-                                   await Reception.updateMany({coproId: cpr._id}, {$set: {pcsId: pcs._id}}, {new: false}, (err) => {console.log(err)});
-                                   res.status(200).send({success: true, message: 'Accès au PCS ouvert', pcs});
+                                           });
+                                   await PresidentCS.findOneAndUpdate(
+                                       {_id: pcs._id},
+                                       {$set: {coproId: cpr._id}},
+                                       {new: true},
+                                       async (err) => {
+                                           if (err)
+                                               console.log(err);
+                                           else {
+                                               await Devis.updateMany({coproId: cpr._id}, {$set: {pcsId: pcs._id}}, {new: false}, (err) => {console.log(err)});
+                                               await Reception.updateMany({coproId: cpr._id}, {$set: {pcsId: pcs._id}}, {new: false}, (err) => {console.log(err)});
+                                               res.status(200).send({success: true, message: 'Accès au PCS ouvert', pcs});
+                                           }
+                                       });
                                }
                            });
                    } else {
@@ -114,7 +124,7 @@ let openAccessPCS = (req, res) => {
                                        else {
                                            if (cp.pcs) {
                                                await PresidentCS.findOneAndUpdate(
-                                                   {_id: cpr.pcs},
+                                                   {_id: cp.pcs},
                                                    {$set: {coproId: null}},
                                                    {new: true},
                                                    (err) => {
