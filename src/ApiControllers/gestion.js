@@ -74,7 +74,7 @@ let openAccessPCS = (req, res) => {
                                else {
                                    await Devis.updateMany({coproId: cpr._id}, {pcsId: pcs._id}, {new: false}, (err) => {console.log(err)});
                                    await Reception.updateMany({coproId: cpr._id}, {pcsId: pcs._id}, {new: false}, (err) => {console.log(err)});
-                                   res.status(200).send({success: true, message: 'Accès au PCS ouvert'});
+                                   res.status(200).send({success: true, message: 'Accès au PCS ouvert', pcs});
                                }
                            })
                    } else {
