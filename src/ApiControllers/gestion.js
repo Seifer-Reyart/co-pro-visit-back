@@ -57,7 +57,7 @@ let openAccessPCS = (req, res) => {
         if (!nomPCS && !prenomPCS && !emailPCS && !phonePCS && !coproId)
             res.status(403).send({success: false, message: 'veuillez renseigner tous les champs du formulaire'});
         else {
-            PresidentCS.findOne({$and: [{emailPCS: emailPCS.toLowerCase()}, {phonePCS},]},
+            PresidentCS.findOne({email: emailPCS.toLowerCase()},
                 async (err, pcs) => {
                    if (err)
                        res.status(400).send({success: false, message: 'erreur système', err});
