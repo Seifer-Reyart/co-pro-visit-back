@@ -887,14 +887,20 @@ let changeStatusCopro = async (req, res) => {
                     syndicId = gest.syndic;
             });
             await Promise.all(promiseId);
-            if (err.message)
+            if (err.message) {
+                console.log("promise err: ", err);
                 res.status(400).send({success: false, message: err.message, err: err.error});
-            else if (!syndicId)
+            } else if (!syndicId) {
+                console.log('pas de syndic');
                 res.status(400).send({success: false, message: "cet utilisateur n'existe pas"});
-            else {
+            } else {
+                console.log("here we are !!!!!")
+                console.log("Body: ", req.body)
+                console.log("syndicId: ", syndicId);
                 const {coproId, isParc} = req.body;
                 Copro.findOne({_id: coproId}, function (err, copro) {
                     if (err) {
+                        console.log("Copro.findOne err: ", err)
                         res.status(400).send({success: false, message: 'erreur système', err});
                     } else if (isParc) {
                         Copro.findOneAndUpdate(
@@ -906,6 +912,7 @@ let changeStatusCopro = async (req, res) => {
                             {new: true},
                             (err, cpr) => {
                                 if (err) {
+                                    console.log("inside parc Copro.findOneAndUpdate err: ", err)
                                     res.status(400).send({success: false, message: 'erreur système', err});
                                 } else {
                                     Syndic.findOneAndUpdate(
@@ -960,6 +967,7 @@ let changeStatusCopro = async (req, res) => {
                             {new: true},
                             (error, cpr) => {
                                 if (error) {
+                                    console.log("outside parc Copro.findOneAndUpdate err: ", error)
                                     res.status(400).send({
                                         success: false,
                                         message: 'erreur système',
