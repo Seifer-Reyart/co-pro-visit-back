@@ -869,7 +869,7 @@ let changeStatusCopro = (req, res) => {
     if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
         res.status(401).send({success: false, message: 'accès interdit'});
     else {
-        const {coproId, isParc, sansSuite} = req.body;
+        const {coproId, isParc} = req.body;
         if (isParc)
             Copro.findOne({_id: coproId}, function (err, copro) {
                 if (err) {
@@ -877,7 +877,7 @@ let changeStatusCopro = (req, res) => {
                 } else
                     Copro.findOneAndUpdate(
                         {_id: copro._id},
-                        {$set: {syndicNominated: req.user.id}, $pull: {syndicEnCours: req.user.id}},
+                        {$set: {syndicNominated: req.user.id, perdu: false, sansSuite: false}, $pull: {syndicEnCours: req.user.id}},
                         {new: true},
                         function (err, cpr) {
                             if (err) {
@@ -925,7 +925,7 @@ let changeStatusCopro = (req, res) => {
                 else
                     Copro.findOneAndUpdate(
                         {_id: copro._id},
-                        {$set: {syndicNominated: null, sansSuite}, $push: {syndicEnCours: copro.syndicNominated}},
+                        {$set: {syndicNominated: null, perdu: true}, $push: {syndicEnCours: copro.syndicNominated}},
                         {new: true},
                         (error, cpr) => {
                             if (error) {
@@ -966,9 +966,7 @@ let changeStatusCopro = (req, res) => {
 }
 
 let deleteCopro = (req, res) => {
-    if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
-        res.status(401).send({success: false, message: 'accès interdit'});
-    else {
+    if (req.user.role === 'syndic') {
         const {_id} = req.body;
 
         Copro.deleteOne({_id}, function (err) {
@@ -1024,6 +1022,65 @@ let deleteCopro = (req, res) => {
                         });
             }
         })
+    } else if (req.user.role === 'gestionnaire') {
+        const {_id, isParc} = req.body;
+            Copro.findOne({_id}, function (err, copro) {
+                if (err)
+                    res.status(400).send({success: false, message: 'erreur système', err});
+                else {
+                    if (isParc) {
+                        Copro.findOneAndUpdate(
+                            {_id: copro._id},
+                            {$set: {syndicNominated: null, perdu: true}, $push: {syndicEnCours: copro.syndicNominated}},
+                            {new: true},
+                            (error, cpr) => {
+                                if (error) {
+                                    res.status(400).send({success: false, message: 'erreur système', err: error});
+                                } else if (cpr.gestionnaire !== null)
+                                    Gestionnaire.findOneAndUpdate(
+                                        {_id: cpr.gestionnaire},
+                                        {$pull: {parc: cpr._id}, $push: {enCoursSelect: cpr._id}},
+                                        {new: true},
+                                        function (err) {
+                                            if (err) {
+                                                res.status(400).send({
+                                                    success: false,
+                                                    message: 'erreur système',
+                                                    err
+                                                });
+                                            } else {
+                                                res.status(200).send({
+                                                    success: true,
+                                                    message: 'la copropriété est maintenant dans en cours de sélection et requalifiée comme "Perdue"'
+                                                });
+                                            }
+                                        });
+                                else
+                                    res.status(200).send({
+                                        success: true,
+                                        message: 'la copropriété est maintenant dans en cours de sélection et requalifiée comme "Perdue"'
+                                    });
+                            });
+                    } else {
+                        Copro.findOneAndUpdate(
+                            {_id: copro._id},
+                            {$set: {sansSuite: true}},
+                            {new: true},
+                            (error) => {
+                                if (error) {
+                                    res.status(400).send({success: false, message: 'erreur système', err: error});
+                                } else {
+                                    res.status(200).send({
+                                        success: true,
+                                        message: 'la copropriété est requalifiée comme "Sans suite"',
+                                    });
+                                }
+                            });
+                    }
+                }
+            });
+    } else {
+        res.status(401).send({success: false, message: 'accès interdit'});
     }
 }
 
