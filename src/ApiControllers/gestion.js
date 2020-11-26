@@ -878,16 +878,16 @@ let changeStatusCopro = async (req, res) => {
             syndicId = req.user.id;
         else {
             let gestionnaire = {};
-            let promiseGest = Gestionnaire.findOne({_id: req.user.id}, (error, gest) => {
+            await Gestionnaire.findOne({_id: req.user.id}, (error, gest) => {
                 if (error) {
                     err.message = 'erreur système';
                     err.error = error
                 } else if (!gest)
                     console.log("ce Gestionnaire n'existe pas!");
                 else
-                    gestionnaire = gest;
-            });
-            await Promise.all(promiseGest);
+                    return gest;
+            }).then(gest => gestionnaire = gest);
+
             console.log("Gestionnaire.findOne: ", gestionnaire);
             syndicId = gestionnaire.syndic;
         }
