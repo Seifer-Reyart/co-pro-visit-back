@@ -294,12 +294,13 @@ let getCopro = (req, res) => {
                 res.status(400).send({success: false, message: 'erreur system', err});
             else if (!pcs)
                 res.status(404).send({success: false, message: 'aucun pcs enregistré'});
-            else
+            else {
+                console.log("pcs: ", pcs)
                 Copro.findOne({_id: pcs.coproId}, (err, copro) => {
                     if (err)
                         res.status(400).send({success: false, message: 'erreur system', err});
                     else if (!copro)
-                        res.status(404).send({success: false, message: 'aucun parc enregistré'});
+                        res.status(404).send({success: false, message: 'aucun Immeuble enregistré'});
                     else
                         res.status(200).send({success: true, copro});
                 }).populate({
@@ -309,6 +310,7 @@ let getCopro = (req, res) => {
                     path: 'gestionnaire',
                     model: 'gestionnaires'
                 });
+            }
         });
     else
         res.status(401).send({success: false, message: 'accès refusé'});
