@@ -888,20 +888,14 @@ let changeStatusCopro = async (req, res) => {
                     return gest;
             }).then(gest => gestionnaire = gest);
 
-            console.log("Gestionnaire.findOne: ", gestionnaire);
             syndicId = gestionnaire.syndic;
         }
         if (!syndicId) {
-            console.log('pas de syndic');
             res.status(404).send({success: false, message: "cet utilisateur n'existe pas"});
         } else {
-            console.log("here we are !!!!!")
-            console.log("Body: ", req.body)
-            console.log("syndicId: ", syndicId);
             const {coproId, isParc} = req.body;
             Copro.findOne({_id: coproId}, function (err, copro) {
                 if (err) {
-                    console.log("Copro.findOne err: ", err)
                     res.status(400).send({success: false, message: 'erreur système', err});
                 } else if (isParc) {
                     Copro.findOneAndUpdate(
@@ -913,7 +907,6 @@ let changeStatusCopro = async (req, res) => {
                         {new: true},
                         (err, cpr) => {
                             if (err) {
-                                console.log("inside parc Copro.findOneAndUpdate err: ", err)
                                 res.status(400).send({success: false, message: 'erreur système', err});
                             } else {
                                 Syndic.findOneAndUpdate(
@@ -968,7 +961,6 @@ let changeStatusCopro = async (req, res) => {
                         {new: true},
                         (error, cpr) => {
                             if (error) {
-                                console.log("outside parc Copro.findOneAndUpdate err: ", error)
                                 res.status(400).send({
                                     success: false,
                                     message: 'erreur système',
