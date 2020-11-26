@@ -65,7 +65,7 @@ let openAccessPCS = (req, res) => {
                        Copro.findOneAndUpdate(
                            {_id: coproId},
                            {pcs: pcs._id},
-                           {returnOriginal: true},
+                           {new: false},
                            async (err, cpr) => {
                                if (err)
                                    res.status(400).send({success: false, message: 'erreur système', err});
@@ -115,14 +115,14 @@ let openAccessPCS = (req, res) => {
                                await Copro.findOneAndUpdate(
                                    {_id: coproId},
                                    {$set: {pcs: p._id}},
-                                   {returnOriginal: true},
+                                   {new: false},
                                    async function (err, cp) {
                                        if (err)
                                            res.status(400).send({success: false, message: 'erreur système', err});
                                        else if (!cp)
                                            res.status(404).send({success: false, message: 'Copro introuvable'});
                                        else {
-                                           if (cp.pcs) {
+                                           if (cp.pcs && cp.pcs !== p._id) {
                                                await PresidentCS.findOneAndUpdate(
                                                    {_id: cp.pcs},
                                                    {$set: {coproId: null}},
