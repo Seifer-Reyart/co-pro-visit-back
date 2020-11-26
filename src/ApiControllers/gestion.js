@@ -877,21 +877,18 @@ let changeStatusCopro = async (req, res) => {
         if (req.user.role === 'syndic')
             syndicId = req.user.id;
         else {
-            let promiseId = Gestionnaire.findOne({_id: req.user.id}, (error, gest) => {
+            let gestionnaire = Gestionnaire.findOne({_id: req.user.id}, (error, gest) => {
                 if (error) {
                     err.message = 'erreur système';
                     err.error = error
                 } else if (!gest)
                     console.log("ce Gestionnaire n'existe pas!");
                 else
-                    syndicId = gest.syndic;
+                    return gest;
             });
-            await Promise.all(promiseId);
+            syndicId = gestionnaire.syndic;
         }
-        if (err.message) {
-            console.log("promise err: ", err);
-            res.status(400).send({success: false, message: err.message, err: err.error});
-        } else if (!syndicId) {
+        if (!syndicId) {
             console.log('pas de syndic');
             res.status(404).send({success: false, message: "cet utilisateur n'existe pas"});
         } else {
