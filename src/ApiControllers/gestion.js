@@ -886,6 +886,7 @@ let changeStatusCopro = async (req, res) => {
                 else
                     return gest;
             });
+            console.log("Gestionnaire.findOne: ", gestionnaire);
             syndicId = gestionnaire.syndic;
         }
         if (!syndicId) {
