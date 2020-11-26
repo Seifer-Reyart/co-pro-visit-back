@@ -887,134 +887,134 @@ let changeStatusCopro = async (req, res) => {
                     syndicId = gest.syndic;
             });
             await Promise.all(promiseId);
-            if (err.message) {
-                console.log("promise err: ", err);
-                res.status(400).send({success: false, message: err.message, err: err.error});
-            } else if (!syndicId) {
-                console.log('pas de syndic');
-                res.status(400).send({success: false, message: "cet utilisateur n'existe pas"});
-            } else {
-                console.log("here we are !!!!!")
-                console.log("Body: ", req.body)
-                console.log("syndicId: ", syndicId);
-                const {coproId, isParc} = req.body;
-                Copro.findOne({_id: coproId}, function (err, copro) {
-                    if (err) {
-                        console.log("Copro.findOne err: ", err)
-                        res.status(400).send({success: false, message: 'erreur système', err});
-                    } else if (isParc) {
-                        Copro.findOneAndUpdate(
-                            {_id: copro._id},
-                            {
-                                $set: {syndicNominated: syndicId, perdu: false, sansSuite: false},
-                                $pull: {syndicEnCours: syndicId}
-                            },
-                            {new: true},
-                            (err, cpr) => {
-                                if (err) {
-                                    console.log("inside parc Copro.findOneAndUpdate err: ", err)
-                                    res.status(400).send({success: false, message: 'erreur système', err});
-                                } else {
-                                    Syndic.findOneAndUpdate(
-                                        {_id: cpr.syndicNominated},
-                                        {$push: {parc: cpr._id}, $pull: {enCoursSelect: cpr._id}},
-                                        {new: true},
-                                        function (err) {
-                                            if (err) {
-                                                res.status(400).send({
-                                                    success: false,
-                                                    message: 'erreur système',
-                                                    err
+        }
+        if (err.message) {
+            console.log("promise err: ", err);
+            res.status(400).send({success: false, message: err.message, err: err.error});
+        } else if (!syndicId) {
+            console.log('pas de syndic');
+            res.status(404).send({success: false, message: "cet utilisateur n'existe pas"});
+        } else {
+            console.log("here we are !!!!!")
+            console.log("Body: ", req.body)
+            console.log("syndicId: ", syndicId);
+            const {coproId, isParc} = req.body;
+            Copro.findOne({_id: coproId}, function (err, copro) {
+                if (err) {
+                    console.log("Copro.findOne err: ", err)
+                    res.status(400).send({success: false, message: 'erreur système', err});
+                } else if (isParc) {
+                    Copro.findOneAndUpdate(
+                        {_id: copro._id},
+                        {
+                            $set: {syndicNominated: syndicId, perdu: false, sansSuite: false},
+                            $pull: {syndicEnCours: syndicId}
+                        },
+                        {new: true},
+                        (err, cpr) => {
+                            if (err) {
+                                console.log("inside parc Copro.findOneAndUpdate err: ", err)
+                                res.status(400).send({success: false, message: 'erreur système', err});
+                            } else {
+                                Syndic.findOneAndUpdate(
+                                    {_id: cpr.syndicNominated},
+                                    {$push: {parc: cpr._id}, $pull: {enCoursSelect: cpr._id}},
+                                    {new: true},
+                                    function (err) {
+                                        if (err) {
+                                            res.status(400).send({
+                                                success: false,
+                                                message: 'erreur système',
+                                                err
+                                            });
+                                        } else if (cpr.gestionnaire !== null)
+                                            Gestionnaire.findOneAndUpdate(
+                                                {_id: cpr.gestionnaire},
+                                                {
+                                                    $push: {parc: cpr._id},
+                                                    $pull: {enCoursSelect: cpr._id},
+                                                    $set: {syndicDateNom: new Date()}
+                                                },
+                                                {new: true},
+                                                function (err) {
+                                                    if (err) {
+                                                        res.status(400).send({
+                                                            success: false,
+                                                            message: 'erreur système',
+                                                            err
+                                                        });
+                                                    } else {
+                                                        res.status(200).send({
+                                                            success: true,
+                                                            message: "la copropriété est maintenant dans Mon Parc"
+                                                        });
+                                                    }
                                                 });
-                                            } else if (cpr.gestionnaire !== null)
-                                                Gestionnaire.findOneAndUpdate(
-                                                    {_id: cpr.gestionnaire},
-                                                    {
-                                                        $push: {parc: cpr._id},
-                                                        $pull: {enCoursSelect: cpr._id},
-                                                        $set: {syndicDateNom: new Date()}
-                                                    },
-                                                    {new: true},
-                                                    function (err) {
-                                                        if (err) {
-                                                            res.status(400).send({
-                                                                success: false,
-                                                                message: 'erreur système',
-                                                                err
-                                                            });
-                                                        } else {
-                                                            res.status(200).send({
-                                                                success: true,
-                                                                message: "la copropriété est maintenant dans Mon Parc"
-                                                            });
-                                                        }
-                                                    });
-                                            else
-                                                res.status(200).send({
-                                                    success: true,
-                                                    message: "la copropriété est maintenant dans Mon Parc"
-                                                });
-                                        });
-                                }
-                            });
-                    } else {
-                        Copro.findOneAndUpdate(
-                            {_id: copro._id},
-                            {
-                                $set: {syndicNominated: null, perdu: true},
-                                $push: {syndicEnCours: copro.syndicNominated}
-                            },
-                            {new: true},
-                            (error, cpr) => {
-                                if (error) {
-                                    console.log("outside parc Copro.findOneAndUpdate err: ", error)
-                                    res.status(400).send({
-                                        success: false,
-                                        message: 'erreur système',
-                                        err: error
+                                        else
+                                            res.status(200).send({
+                                                success: true,
+                                                message: "la copropriété est maintenant dans Mon Parc"
+                                            });
                                     });
-                                } else
-                                    Syndic.findOneAndUpdate(
-                                        {_id: syndicId},
-                                        {$pull: {parc: cpr._id}, $push: {enCoursSelect: cpr._id}},
-                                        {new: true},
-                                        function (err) {
-                                            if (err) {
-                                                res.status(400).send({
-                                                    success: false,
-                                                    message: 'erreur système',
-                                                    err
+                            }
+                        });
+                } else {
+                    Copro.findOneAndUpdate(
+                        {_id: copro._id},
+                        {
+                            $set: {syndicNominated: null, perdu: true},
+                            $push: {syndicEnCours: copro.syndicNominated}
+                        },
+                        {new: true},
+                        (error, cpr) => {
+                            if (error) {
+                                console.log("outside parc Copro.findOneAndUpdate err: ", error)
+                                res.status(400).send({
+                                    success: false,
+                                    message: 'erreur système',
+                                    err: error
+                                });
+                            } else
+                                Syndic.findOneAndUpdate(
+                                    {_id: syndicId},
+                                    {$pull: {parc: cpr._id}, $push: {enCoursSelect: cpr._id}},
+                                    {new: true},
+                                    function (err) {
+                                        if (err) {
+                                            res.status(400).send({
+                                                success: false,
+                                                message: 'erreur système',
+                                                err
+                                            });
+                                        } else if (cpr.gestionnaire !== null)
+                                            Gestionnaire.findOneAndUpdate(
+                                                {_id: cpr.gestionnaire},
+                                                {$pull: {parc: cpr._id}, $push: {enCoursSelect: cpr._id}},
+                                                {new: true},
+                                                function (err) {
+                                                    if (err) {
+                                                        res.status(400).send({
+                                                            success: false,
+                                                            message: 'erreur système',
+                                                            err
+                                                        });
+                                                    } else {
+                                                        res.status(200).send({
+                                                            success: true,
+                                                            message: "la copropriété est maintenant en cours de sélection"
+                                                        });
+                                                    }
                                                 });
-                                            } else if (cpr.gestionnaire !== null)
-                                                Gestionnaire.findOneAndUpdate(
-                                                    {_id: cpr.gestionnaire},
-                                                    {$pull: {parc: cpr._id}, $push: {enCoursSelect: cpr._id}},
-                                                    {new: true},
-                                                    function (err) {
-                                                        if (err) {
-                                                            res.status(400).send({
-                                                                success: false,
-                                                                message: 'erreur système',
-                                                                err
-                                                            });
-                                                        } else {
-                                                            res.status(200).send({
-                                                                success: true,
-                                                                message: "la copropriété est maintenant en cours de sélection"
-                                                            });
-                                                        }
-                                                    });
-                                            else
-                                                res.status(200).send({
-                                                    success: true,
-                                                    message: "la copropriété est maintenant en cours de sélection"
-                                                });
-                                        });
-                            });
-                    }
+                                        else
+                                            res.status(200).send({
+                                                success: true,
+                                                message: "la copropriété est maintenant en cours de sélection"
+                                            });
+                                    });
+                        });
+                }
 
-                });
-            }
+            });
         }
     }
 }
