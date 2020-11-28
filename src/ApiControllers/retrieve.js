@@ -2,6 +2,7 @@
 /* import modules from node_modules */
 /************************************/
 
+
 let bcrypt  = require('bcryptjs');
 let jwt     = require('jsonwebtoken');
 
@@ -27,9 +28,30 @@ const   Devis           = require('../MongoSchemes/devis'),
         PresidentCS     = require('../MongoSchemes/presidentCS'),
         Prestataire     = require('../MongoSchemes/prestataires'),
         Gestionnaire    = require('../MongoSchemes/gestionnaires');
+        Notification    = require('../MongoSchemes/notifications');
+
+const {pushNotifTo, notify} = require( "../Middleware/ApiHelpers");
 /************/
 /* Function */
 /************/
+
+/*** get Notifs ***/
+/*
+    METHOD: POST
+*/
+
+let getNotif = (req, res) => {
+    Notification.find({receiver_id: req.user.id}, (err, notifications) => {
+        if (err) {
+            res.status(400).send({success: false, message: 'Erreur lors de la récupération de la notification', err});
+        }
+        else {
+            res.status(200).send({success: false, notifications});
+        }
+        //notify(req, req.user.id, req.user.id, "test notif body", "test notif titre", null)
+        //pushNotifTo(req, req.user.id, "message", "titre")
+    })
+}
 
 /*** get Syndics ***/
 
@@ -1023,6 +1045,7 @@ let retrieveAllReception = (req, res) => {
 }
 
 module.exports = {
+    getNotif,
     getCopro,
     postCopro,
     getSyndics,

@@ -9,6 +9,7 @@ const express = require('express');
 /************************/
 
 let {
+    getNotif,
     getCopro,
     postCopro,
     getSyndics,
@@ -41,6 +42,11 @@ let {
 /* init router */
 /***************/
 let router = express.Router();
+
+/**
+
+ */
+router.post('/notifications', getNotif);
 
 /**
  * Cette route permet de récupérer un ou plusieurs Syndics selon le type de compte, JWT necessaire.

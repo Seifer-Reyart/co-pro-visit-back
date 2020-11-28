@@ -8,7 +8,7 @@ const   Admin           = require('../MongoSchemes/admins'),
         PresidentCS     = require('../MongoSchemes/presidentCS'),
         Prestataire     = require('../MongoSchemes/prestataires'),
         Gestionnaire    = require('../MongoSchemes/gestionnaires');
-
+        Notifications    = require('../MongoSchemes/notifications');
 /************************/
 
 /**************************************/
@@ -230,10 +230,45 @@ const identityCheck = (_id, userType, callBack, extraQuery, res) => {
             callBack()
     })
 };
+
+const pushNotifTo = (req, targetId, message, title) => {
+    let io = req.app.get('socketio');
+    for (let [nb, activity] of io.sockets.sockets) {
+        if (activity?.authenticatedUser?.id === targetId) {
+            io.to(activity.id).emit('notify', {
+                message,
+                title,
+                user: activity?.authenticatedUser?.id,
+            });
+        }
+    }
+};
+
+const notify = (req, receiver_id, emitter_id, message, title, url) => {
+    const notif = new Notifications({
+        date_seen: null,
+        date_create: new Date(),
+        title,
+        message,
+        url,
+        receiver_id,
+        emitter_id,
+    })
+    notif.save(function(err) {
+        if (err) {
+            return ({success: false, message: 'Erreur lors de la création de la notification', err});
+        } else {
+            return ({success: true, message: 'La notification a bien été créé'});
+        }
+    })
+}
+
 module.exports = {
     checkEmailExist,
     uploadFile,
     checkPassword,
     identityCheck,
-    uploadDevisFacture
+    uploadDevisFacture,
+    pushNotifTo,
+    notify,
 };

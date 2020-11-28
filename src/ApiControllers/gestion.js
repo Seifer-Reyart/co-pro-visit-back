@@ -1236,6 +1236,22 @@ let updatePermissionsGest = (req, res) => {
     }
 }
 
+let updateUnseenNotification = (req, res) => {
+    Notification.updateMany({receiver_id: req.user.id}, {date_seen: new Date()},(err) => {
+        if (err)
+            res.status(400).send({success: false, message: 'erreur système', err});
+        else {
+            Notification.find({receiver_id: req.user.id}, (err, notifications) => {
+                res.status(200).send({
+                    success: true,
+                    message: 'Mise a jour du status des notifications réussie',
+                    notifications,
+                });
+
+            })
+        }
+    })
+}
 /* Export Functions */
 
 module.exports = {
@@ -1260,4 +1276,5 @@ module.exports = {
     uploadStatSinistres,
     updatePermissionsGest,
     openAccessPCS,
+    updateUnseenNotification,
 }

@@ -30,7 +30,8 @@ let {
     demandeDevis,
     uploadStatSinistres,
     updatePermissionsGest,
-    openAccessPCS
+    openAccessPCS,
+    updateUnseenNotification,
 } = require('../ApiControllers/gestion');
 
 /***************/
@@ -376,6 +377,22 @@ router.post('/changer-droits', updatePermissionsGest);
  * @security JWT
  */
 router.post('/access-pcs', openAccessPCS);
+
+/**
+ * Cette route permet de changer le status des notification en "vu", JWT necessaire.
+ * @route POST /gestion/unseen-notif
+ * @group gestion
+ * @returns {object} 200 - {success: true, message: 'Accès au PCS ouvert'}
+ * @returns {Error}  400 - {success: false, message: 'erreur système', err}
+ * @returns {Error}  401 - quand role != syndic ou gestionnaire {success: false, message: 'accès interdit'}
+ * @returns {Error}  403 - quand il manque des éléments {success: false, message: 'veuillez renseigner tous les champs du formulaire'}
+ * @returns {Error}  404 - {success: false, message: 'Copro introuvable'}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+
+router.post('/unseen-notif', updateUnseenNotification);
 
 module.exports = router;
 
