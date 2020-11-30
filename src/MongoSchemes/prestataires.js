@@ -41,8 +41,16 @@ let prestatairesSchema = new Schema({
         type    : String,
         default : null
     },
+    echeanceRCP         : {
+        type    : Date,
+        default : null
+    },
     RCDecennale         : {
         type    : String,
+        default : null
+    },
+    echeanceRCD         : {
+        type    : Date,
         default : null
     },
     role        	: {
