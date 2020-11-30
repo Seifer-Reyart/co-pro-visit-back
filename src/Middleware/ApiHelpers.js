@@ -84,7 +84,6 @@ let checkEmailExist = async (req, res, next) => {
 }
 
 let checkEmailBeforeUpdate = async (req, res, next) => {
-    console.log(req.user);
     let {email} = req.body;
     Admin.findOne({email}, (err, user) => {
         if (err)

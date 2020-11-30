@@ -7,20 +7,6 @@ let bcrypt  = require('bcryptjs');
 /*************************************/
 /****| generate crypted password |****/
 let salt = bcrypt.genSaltSync(10);
-
-function generateP() {
-    let pass = '';
-    let str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' + 'abcdefghijklmnopqrstuvwxyz0123456789@#$';
-
-    while (pass.length <= 15) {
-        let char = Math.floor(Math.random() * str.length + 1);
-
-        pass += str.charAt(char)
-    }
-
-    return pass;
-}
-
 /*************************************/
 
 /****************************/
@@ -51,8 +37,7 @@ const   PCS = require('../MongoSchemes/presidentCS'),
 let updateCredentials = async (req, res) => {
     let password = '';
     if (req.body.password) {
-        password = await generateP();
-        password = bcrypt.hashSync(password, salt);
+        password = bcrypt.hashSync(req.body.password, salt);
     }
     const {email} = req.body;
 
