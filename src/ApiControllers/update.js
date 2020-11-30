@@ -57,42 +57,34 @@ let updateCredentials = async (req, res) => {
     const {email} = req.body;
 
     if (req.user.role === 'prestataire') {
-        Prestataire.findOne({email}, function (err, presta) {
-            if (err)
-                res.status(400).send({success: false, message: 'erreur système', err});
-            else if (presta && presta._id !== req.user.id)
-                res.status(403).send({success: false, message: "cet email est déjà utilisé"});
-            else {
-                if (password) {
-                    Prestataire.findOneAndUpdate(
-                        {_id: req.user.id},
-                        {$set: {email, password}},
-                        {new: true},
-                        (err, prest) => {
-                            if (err)
-                                res.status(400).send({success: false, message: 'erreur système', err});
-                            else if (!prest)
-                                res.status(404).send({success: false, message: "ce PRestataire n'existe pas!"});
-                            else
-                                res.status(200).send({success: true, message: "identifiants mis à jour"});
-                        });
+        if (password) {
+            Prestataire.findOneAndUpdate(
+                {_id: req.user.id},
+                {$set: {email, password}},
+                {new: true},
+                (err, prest) => {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur système', err});
+                    else if (!prest)
+                        res.status(404).send({success: false, message: "ce Prestataire n'existe pas!"});
+                    else
+                        res.status(200).send({success: true, message: "identifiants mis à jour"});
+                });
 
-                } else {
-                    Prestataire.findOneAndUpdate(
-                        {_id: req.user.id},
-                        {$set: {email}},
-                        {new: true},
-                        (err, prest) => {
-                            if (err)
-                                res.status(400).send({success: false, message: 'erreur système', err});
-                            else if (!prest)
-                                res.status(404).send({success: false, message: "ce PRestataire n'existe pas!"});
-                            else
-                                res.status(200).send({success: true, message: "identifiants mis à jour", prestataire: prest});
-                        });
-                }
-            }
-        })
+        } else {
+            Prestataire.findOneAndUpdate(
+                {_id: req.user.id},
+                {$set: {email}},
+                {new: true},
+                (err, prest) => {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur système', err});
+                    else if (!prest)
+                        res.status(404).send({success: false, message: "ce Prestataire n'existe pas!"});
+                    else
+                        res.status(200).send({success: true, message: "identifiants mis à jour", prestataire: prest});
+                });
+        }
     } else {
         res.status(401).send({success: false, message: 'accès interdit'});
     }

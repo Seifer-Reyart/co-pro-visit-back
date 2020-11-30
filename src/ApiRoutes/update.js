@@ -14,6 +14,8 @@ let {
     updateGestionnaire
 } = require('../ApiControllers/update');
 
+let { checkEmailExist } = require('../Middleware/ApiHelpers');
+
 /***************/
 /* init router */
 /***************/
@@ -98,6 +100,6 @@ router.put('/gestionnaire', updateGestionnaire);
  * @param {string} _id.body.required - _id de l'utilisateur ciblé
  * @param {string} password.body.required - mot de passe de l'utilisateur ciblé
  */
-router.put('/credentials', updateCredentials);
+router.put('/credentials', checkEmailExist, updateCredentials);
 
 module.exports = router;
