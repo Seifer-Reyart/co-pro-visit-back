@@ -120,6 +120,7 @@ let checkEmailBeforeUpdate = async (req, res, next) => {
                                                 if (err)
                                                     console.log(err)
                                                 else if (user && user._id !== req.user.id) {
+                                                    console.log("bool: ", user._id !== req.user.id)
                                                     console.log("user._id: ", user._id);
                                                     console.log("req.user.id: ", req.user.id);
                                                     res.status(403).send({
