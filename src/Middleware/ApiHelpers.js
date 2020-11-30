@@ -119,12 +119,14 @@ let checkEmailBeforeUpdate = async (req, res, next) => {
                                             Prestataire.findOne({email}, (err, user) => {
                                                 if (err)
                                                     console.log(err)
-                                                else if (user && user._id !== req.user.id)
+                                                else if (user && user._id !== req.user.id) {
+                                                    console.log("user._id: ", user._id);
+                                                    console.log("req.user.id: ", req.user.id);
                                                     res.status(403).send({
                                                         status: false,
                                                         message: "cet email est déjà utilisé"
                                                     })
-                                                else
+                                                } else
                                                     Gestionnaire.findOne({email}, (err, user) => {
                                                         if (err)
                                                             console.log(err)
