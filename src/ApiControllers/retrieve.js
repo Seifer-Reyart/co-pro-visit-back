@@ -862,7 +862,7 @@ let getPrestataire = (req, res) => {
 }
 
 let postPrestataire = (req, res) => {
-    if (req.user.role === 'admin')
+    if (req.user.role === 'admin' || (req.user.role === 'prestataire' && req.user.id === req.body._id))
         Prestataire.findOne({_id: req.body._id}, function (err, prestataire) {
             if (err)
                 res.status(400).send({succes: false, message: 'erreur système', err});
