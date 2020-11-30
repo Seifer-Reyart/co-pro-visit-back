@@ -41,11 +41,12 @@ const   Devis       = require('../MongoSchemes/devis'),
         Visite      = require('../MongoSchemes/visites'),
         Incident    = require('../MongoSchemes/incidents')
         Reception   = require('../MongoSchemes/reception');
+        Notification   = require('../MongoSchemes/notifications');
 
 /************/
 /* Function */
 /************/
-
+const {pushNotifTo, notify} = require( "../Middleware/ApiHelpers");
 /*** ouvrir accès pcs ***/
 
 let openAccessPCS = (req, res) => {
@@ -80,8 +81,11 @@ let openAccessPCS = (req, res) => {
                                    res.status(400).send({success: false, message: 'erreur système', err});
                                else if (!cpr)
                                    res.status(404).send({success: false, message: 'Copro introuvable'});
-                               else
+                               else {
+                                   notify(req, pcs?._id, req.user.id, `Vous avez maintenant accès à la copropriété ${cpr?.nomCopro}.`, "Accès copropriété", null)
+                                   pushNotifTo(req, pcs?._id, `Vous avez maintenant accès à la copropriété ${cpr?.nomCopro}.`, "Accès copropriété")
                                    res.status(200).send({success: true, message: 'Accès au PCS ouvert'});
+                               }
                            })
                    } else {
                        let password = await generateP();
@@ -108,6 +112,9 @@ let openAccessPCS = (req, res) => {
                                        else if (!cp)
                                            res.status(404).send({success: false, message: 'Copro introuvable'});
                                        else {
+                                           notify(req, p?._id, req.user.id, `Vous avez maintenant accès à la copropriété ${cp?.nomCopro}.`, "Accès copropriété", null)
+                                           pushNotifTo(req, p?._id, `Vous avez maintenant accès à la copropriété ${cp?.nomCopro}.`, "Accès copropriété")
+                                           // NOTIF ANCHOR
                                            await Devis.updateMany({coproId: cp._id}, {pcsId: p._id}, {new: false}, (err) => {console.log(err)});
                                            Reception.updateMany({coproId: cp._id}, {pcsId: p._id}, {new: false}, (err) => {console.log(err)});
                                            res.status(200).send({success: true, message: 'Accès au PCS ouvert', pcs: p});
@@ -167,6 +174,19 @@ let demandeVisite = (req, res) => {
                                     if (err || !v)
                                         res.status(400).send({success: false, message: 'erreur system', err});
                                     else {
+                                        // Si la copro est présente dans la liste de copros de l'architecte, le notifier concernant une nouvelle demande de visite
+                                        /*
+                                        Architecte.find({copros: { $in: [copro._id] }}, (err, assignedArchitects) => {
+                                            if (assignedArchitects) {
+                                                assignedArchitects.map(archi => {
+                                                    notify(req, archi._id, req.user.id, `Une nouvelle demande de visite est disponible.`, "Demande de visite", null)
+                                                    pushNotifTo(req, archi._id, `Une nouvelle demande de visite est disponible.`, "Demande de visite")
+                                                })
+
+                                            }
+                                        })*/
+                                        // NOTIF ANCHOR
+
                                         await Copro.updateOne(
                                             {_id: copro._id},
                                             {$set: {dateDemandeVisite: new Date()}},
@@ -208,6 +228,11 @@ let assignerVisite = async (req, res) => {
                             (err) => {
                                 if (err)
                                     error.push(err)
+                                else {
+                                    notify(req, req.body.architecteId, req.user.id, `Une nouvelle demande de visite est disponible.`, "Demande de visite", null)
+                                    pushNotifTo(req, req.body.architecteId, `Une nouvelle demande de visite est disponible.`, "Demande de visite")
+                                    // NOTIF ANCHOR
+                                }
                             });
                 });
         });
@@ -325,6 +350,11 @@ let assignerCourtierToCopro = (req, res) => {
                         function (err, court) {
                             if (err || !court)
                                 console.log(err);
+                            else {
+                                notify(req, court._id, req.user.id, `Vous avez été retiré de la copropriété ${cop.nomCopro}.`, "Désassignation copropriété", null)
+                                pushNotifTo(req, court._id, `Vous avez été retiré de la copropriété ${cop.nomCopro}.`, "Désassignation copropriété")
+
+                            }
                         });
                 }
                 if (cop.courtier && courtier === 'null') {
@@ -332,10 +362,12 @@ let assignerCourtierToCopro = (req, res) => {
                         {_id: copro},
                         {$set: {courtier: null}},
                         {new: false},
-                        function (err, cop) {
-                            if (err || !cop) {
+                        function (err, copr) {
+                            if (err || !copr) {
                                 res.status(400).send({success: false, message: 'erreur assigniation dans copro', err});
                             } else {
+                                notify(req, cop.courtier, req.user.id, `Vous avez été retiré de la copropriété ${cop.nomCopro}.`, "Désassignation copropriété", null)
+                                pushNotifTo(req, cop.courtier, `Vous avez été retiré de la copropriété ${cop.nomCopro}.`, "Désassignation copropriété")
                                 res.status(200).send({
                                     success: true,
                                     message: "sans courtier assigné"
@@ -368,6 +400,8 @@ let assignerCourtierToCopro = (req, res) => {
                                                 err
                                             });
                                         } else {
+                                            notify(req, courtier, req.user.id, `Vous avez été assigné à la copropriété ${cop.nomCopro}.`, "Assignation copropriété", null)
+                                            pushNotifTo(req, courtier, `Vous avez été assigné à la copropriété ${cop.nomCopro}.`, "Assignation copropriété")
                                             Courtier.updateMany(
                                                 {_id: { $ne: courtier}},
                                                 {$pull: {etudes: cop._id} },
@@ -419,8 +453,11 @@ let assignerCourtierToSyndic = async (req, res) => {
                                         console.log("err: ", err)
                                         errorCourtier.push(syndic);
                                         //res.status(400).send({success: false, message: 'erreur assigniation dans courtier', err});
-                                    } else
+                                    } else {
+                                        notify(req, courtier, req.user.id, `Vous avez été assigné au syndicat ${synd.nomSyndic}.`, "Assignation syndicat", null)
+                                        pushNotifTo(req, courtier, `Vous avez été assigné au syndicat ${synd.nomSyndic}.`, "Assignation syndicat")
                                         successId.push(synd._id)
+                                    }
                                 });
                         }
                     });
@@ -449,8 +486,11 @@ let assignerCourtierToSyndic = async (req, res) => {
                                     if (err || !court)
                                         errorCourtier.push(syndic);
                                         //res.status(400).send({success: false, message: 'erreur assigniation dans courtier', err});
-                                    else
+                                    else {
+                                        notify(req, courtier, req.user.id, `Vous avez été assigné au syndicat ${synd.nomSyndic}.`, "Assignation syndicat", null)
+                                        pushNotifTo(req, courtier, `Vous avez été assigné au syndicat ${synd.nomSyndic}.`, "Assignation syndicat")
                                         successId.push(synd._id)
+                                    }
                                         //res.status(200).send({success: true, message: "le courtier a bien été assigné"})
                                 });
                         }
@@ -493,8 +533,14 @@ let assignerCourtierToSyndic = async (req, res) => {
                         function (err, court) {
                             if (err || !court)
                                 res.status(400).send({success: false, message: 'erreur désassigniation dans courtier', err});
-                            else
-                                res.status(200).send({success: true, message: "le courtier a bien été désassigné du Syndic"})
+                            else {
+                                notify(req, courtierId, req.user.id, `Vous avez été désassigné du syndicat ${synd.nomSyndic}.`, "Désassignation syndicat", null)
+                                pushNotifTo(req, courtierId, `Vous avez été désassigné du syndicat ${synd.nomSyndic}.`, "Désassignation syndicat")
+                                res.status(200).send({
+                                    success: true,
+                                    message: "le courtier a bien été désassigné du Syndic"
+                                })
+                            }
                         });
                 }
             });
@@ -530,8 +576,11 @@ let assignerPrestataireToSyndic = async (req, res) => {
                                 function (err, prest) {
                                     if (err || !prest)
                                         errorPresta.push({success: false, message: 'erreur assigniation dans prestataire', err});
-                                    else
+                                    else {
+                                        notify(req, prestataireId, req.user.id, `Vous avez été assigné au syndicat ${synd.nomSyndic}.`, "Assignation syndicat", null)
+                                        pushNotifTo(req, prestataireId, `Vous avez été assigné au syndicat ${synd.nomSyndic}.`, "Assignation syndicat")
                                         successId.push(synd._id)
+                                    }
                                 });
                         }
                     });
@@ -605,8 +654,11 @@ let assignerPrestataireToSyndic = async (req, res) => {
                                 function (err, prest) {
                                     if (err || !prest)
                                         errorPresta.push({success: false, message: 'erreur désassigniation dans prestataire', err});
-                                    else
+                                    else {
+                                        notify(req, prestataireId, req.user.id, `Vous avez été désassigné du syndicat ${synd.nomSyndic}.`, "Désassignation syndicat", null)
+                                        pushNotifTo(req, prestataireId, `Vous avez été désassigné du syndicat ${synd.nomSyndic}.`, "Désassignation syndicat")
                                         successId.push(synd._id)
+                                    }
                                 });
                         }
                     });
@@ -700,6 +752,8 @@ let assignerGestionnaireToCopro = (req, res) => {
                                 else if (!gest)
                                     res.status(404).send({success: false, message: "ce Gestionnaire n'existe pas"});
                                 else {
+                                    notify(req, gestionnaireId, req.user.id, `La copropriété (${copro.nomCopro}) a été ajoutée à votre parc.`, "Assignation copropriété", null)
+                                    pushNotifTo(req, gestionnaireId, `La copropriété (${copro.nomCopro}) a été ajoutée à votre parc.`, "Assignation copropriété")
                                     res.status(200).send({
                                             success: true,
                                             message: "La copropriété ("+copro.nomCopro+") a bien été ajouté au parc de "+gest.firstName
@@ -717,12 +771,15 @@ let assignerGestionnaireToCopro = (req, res) => {
                                     res.status(400).send({success: false, message: 'erreur système', err});
                                 else if (!gest)
                                     res.status(404).send({success: false, message: "ce Gestionnaire n'existe pas"});
-                                else
+                                else {
+                                    notify(req, gestionnaireId, req.user.id, `La copropriété (${copro.nomCopro}) a été ajoutée à votre liste 'en cours de selection'.`, "Assignation copropriété", null)
+                                    pushNotifTo(req, gestionnaireId, `La copropriété (${copro.nomCopro}) a été ajoutée à votre liste 'en cours de selection'.`, "Assignation copropriété")
                                     res.status(200).send(
                                         {
                                             success: true,
-                                            message: "La copropriété ("+copro.nomCopro+") a bien été ajouté à la liste 'en cours de selection' de "+gest.firstName
+                                            message: "La copropriété (" + copro.nomCopro + ") a bien été ajouté à la liste 'en cours de selection' de " + gest.firstName
                                         })
+                                }
                             }
                         )
                 }
@@ -753,12 +810,15 @@ let desassignerGestionnaireToCopro = (req, res) => {
                                     res.status(400).send({success: false, message: 'erreur système', err});
                                 else if (!gest)
                                     res.status(404).send({success: false, message: "ce Gestionnaire n'existe pas"});
-                                else
+                                else {
+                                    notify(req, gestionnaireId, req.user.id, `La copropriété (${copro.nomCopro}) a été retirée de votre parc.`, "Désassignation copropriété", null)
+                                    pushNotifTo(req, gestionnaireId, `La copropriété (${copro.nomCopro}) a été retirée de votre parc.`, "Désassignation copropriété")
                                     res.status(200).send(
                                         {
                                             success: true,
-                                            message: "La copropriété ("+copro.nomCopro+") a bien été supprimée du parc de "+gest.firstName
+                                            message: "La copropriété (" + copro.nomCopro + ") a bien été supprimée du parc de " + gest.firstName
                                         })
+                                }
                             }
                         )
                     else
@@ -771,12 +831,15 @@ let desassignerGestionnaireToCopro = (req, res) => {
                                     res.status(400).send({success: false, message: 'erreur système', err});
                                 else if (!gest)
                                     res.status(404).send({success: false, message: "ce Gestionnaire n'existe pas"});
-                                else
+                                else {
+                                    notify(req, gestionnaireId, req.user.id, `La copropriété (${copro.nomCopro}) a été retirée de      votre liste 'en cours de selection'.`, "Désassignation copropriété", null)
+                                    pushNotifTo(req, gestionnaireId, `La copropriété (${copro.nomCopro}) a été retirée de      votre liste 'en cours de selection'.`, "Désassignation copropriété")
                                     res.status(200).send(
                                         {
                                             success: true,
-                                            message: "La copropriété ("+copro.nomCopro+") a bien été supprimée de la liste 'en cours de selection' de "+gest.firstName
+                                            message: "La copropriété (" + copro.nomCopro + ") a bien été supprimée de la liste 'en cours de selection' de " + gest.firstName
                                         })
+                                }
                             }
                         )
                 }
@@ -1076,8 +1139,13 @@ let sendToEtude = (req, res) => {
             function (err) {
                 if (err)
                     res.status(400).send({success: false, message: 'erreur système', err});
-                else
+                else {
+                    courtiers.map(cou => {
+                        notify(req, cou._id, req.user.id, `Une nouvelle copropriété est disponible en étude !.`, "Copropriété en étude", null)
+                        pushNotifTo(req, cou._id, `Une nouvelle copropriété est disponible en étude !.`, "Copropriété en étude")
+                    })
                     res.status(200).send({success: true, message: 'Copro envoyé en étude'})
+                }
             });
     }
 
