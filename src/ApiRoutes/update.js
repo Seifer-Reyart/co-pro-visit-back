@@ -15,7 +15,7 @@ let {
     updateInfosPresta,
 } = require('../ApiControllers/update');
 
-let { checkEmailExist } = require('../Middleware/ApiHelpers');
+let { checkEmailBeforeUpdate } = require('../Middleware/ApiHelpers');
 
 /***************/
 /* init router */
@@ -101,7 +101,7 @@ router.put('/gestionnaire', updateGestionnaire);
  * @param {string} _id.body.required - _id de l'utilisateur ciblé
  * @param {string} password.body.required - mot de passe de l'utilisateur ciblé
  */
-router.put('/credentials', checkEmailExist, updateCredentials);
+router.put('/credentials', checkEmailBeforeUpdate, updateCredentials);
 
 /**
  * Cette route permet de modifier les informations du prestataire, JWT necessaire.
