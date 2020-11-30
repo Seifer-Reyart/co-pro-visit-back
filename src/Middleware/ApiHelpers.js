@@ -89,49 +89,46 @@ let checkEmailBeforeUpdate = async (req, res, next) => {
     Admin.findOne({email}, (err, user) => {
         if (err)
             console.log(err)
-        else if (user && user._id !== req.user.id)
+        else if (user && user._id.toString() !== req.user.id.toString())
             res.status(403).send({status: false, message: "cet email est déjà utilisé"})
         else
             Syndic.findOne({email}, (err, user) => {
                 if (err)
                     console.log(err)
-                else if (user && user._id !== req.user.id)
+                else if (user && user._id.toString() !== req.user.id.toString())
                     res.status(403).send({status: false, message: "cet email est déjà utilisé"})
                 else
                     Courtier.findOne({email}, (err, user) => {
                         if (err)
                             console.log(err)
-                        else if (user && user._id !== req.user.id)
+                        else if (user && user._id.toString() !== req.user.id.toString())
                             res.status(403).send({status: false, message: "cet email est déjà utilisé"})
                         else
                             Architecte.findOne({email}, (err, user) => {
                                 if (err)
                                     console.log(err)
-                                else if (user && user._id !== req.user.id)
+                                else if (user && user._id.toString() !== req.user.id.toString())
                                     res.status(403).send({status: false, message: "cet email est déjà utilisé"})
                                 else
                                     PresidentCS.findOne({email}, (err, user) => {
                                         if (err)
                                             console.log(err)
-                                        else if (user && user._id !== req.user.id)
+                                        else if (user && user._id.toString() !== req.user.id.toString())
                                             res.status(403).send({status: false, message: "cet email est déjà utilisé"})
                                         else
                                             Prestataire.findOne({email}, (err, user) => {
                                                 if (err)
                                                     console.log(err)
-                                                else if (user && user._id !== req.user.id) {
-                                                    console.log("bool: ", user._id.toString() !== req.user.id.toString())
-                                                    console.log("user._id: ", user._id);
-                                                    console.log("req.user.id: ", req.user.id);
+                                                else if (user && user._id.toString() !== req.user.id.toString())
                                                     res.status(403).send({
                                                         status: false,
                                                         message: "cet email est déjà utilisé"
                                                     })
-                                                } else
+                                                else
                                                     Gestionnaire.findOne({email}, (err, user) => {
                                                         if (err)
                                                             console.log(err)
-                                                        else if (user && user._id !== req.user.id)
+                                                        else if (user && user._id.toString() !== req.user.id.toString())
                                                             res.status(403).send({
                                                                 status: false,
                                                                 message: "cet email est déjà utilisé"
