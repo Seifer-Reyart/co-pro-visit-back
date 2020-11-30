@@ -11,7 +11,8 @@ const express = require('express');
 let {
     updateCopro,
     updateCredentials,
-    updateGestionnaire
+    updateGestionnaire,
+    updateInfosPresta,
 } = require('../ApiControllers/update');
 
 let { checkEmailExist } = require('../Middleware/ApiHelpers');
@@ -101,5 +102,12 @@ router.put('/gestionnaire', updateGestionnaire);
  * @param {string} password.body.required - mot de passe de l'utilisateur ciblé
  */
 router.put('/credentials', checkEmailExist, updateCredentials);
+
+/**
+ * Cette route permet de modifier les informations du prestataire, JWT necessaire.
+ * @route PUT /update/prestataire-infos
+ * @group prestataire
+ */
+router.put('/prestataire-infos', updateInfosPresta);
 
 module.exports = router;

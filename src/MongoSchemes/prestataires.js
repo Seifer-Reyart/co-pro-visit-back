@@ -9,7 +9,7 @@ let prestatairesSchema = new Schema({
     codePostal          : String,
     ville               : String,
     phone               : String,
-    nbSalaries          : Number,
+    nbSalaries          : {type: Number, default: 1},
     siret               : String,
     image               : {
         type    : String,

@@ -138,7 +138,27 @@ let updateGestionnaire = (req, res) => {
 /*| update Prestataire |*/
 /************************/
 
-let update;
+let updateInfosPresta = (req, res) => {
+    if (req.user.role !== 'prestataire')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else {
+        Prestataire.findOneAndUpdate(
+            {_id: req.user.id},
+            {$set: req.body},
+            {new: true},
+            (err, prest) => {
+                if (err)
+                    res.status(400).send({success: false, message: 'erreur système', err});
+                else if (!prest)
+                    res.status(404).send({success: false, message: "ce Prestataire n'existe pas"});
+                else
+                    res.status(200).send({success: true, message: 'informations mise à jours'});
+            }
+        );
+    }
+};
+
+
 
 /************************/
 /*** Export Functions ***/
@@ -148,4 +168,5 @@ module.exports = {
     updateCopro,
     updateGestionnaire,
     updateCredentials,
+    updateInfosPresta,
 }
