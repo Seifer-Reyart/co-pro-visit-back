@@ -42,7 +42,7 @@ function generateName() {
     return name;
 }
 
-/**** slat to crypt password ****/
+/**** salt to crypt password ****/
 let salt = bcrypt.genSaltSync(10);
 
 

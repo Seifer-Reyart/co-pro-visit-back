@@ -10,6 +10,7 @@ const express = require('express');
 
 let {
     updateCopro,
+    updateCredentials,
     updateGestionnaire
 } = require('../ApiControllers/update');
 
@@ -89,5 +90,14 @@ router.put('/copro', updateCopro);
  * @param {Array.<integer>} permissions.body.required - tableau d'entiers correspondant aux permissions accordées aux Gestionnaire
  */
 router.put('/gestionnaire', updateGestionnaire);
+
+/**
+ * Cette route permet de changer les emails et mdp de compte, JWT necessaire.
+ * @route PUT /update/credentials
+ * @group auth
+ * @param {string} _id.body.required - _id de l'utilisateur ciblé
+ * @param {string} password.body.required - mot de passe de l'utilisateur ciblé
+ */
+router.put('/credentials', updateCredentials);
 
 module.exports = router;
