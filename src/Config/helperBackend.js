@@ -4,7 +4,7 @@ const secretExpr    = require('./tsconfig.json');
 function jwt(req, res, next) {
     let {secret} = secretExpr;
     // Make sure to block access to some routes if not properly connected to the system
-    if (!req && next && req.url.includes('socket.io')) {
+    if (req && next && req.url.includes('socket.io')) {
         return next()
     }
     else {

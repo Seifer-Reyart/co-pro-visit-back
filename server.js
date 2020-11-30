@@ -46,7 +46,7 @@ let options = {
             title: 'Swagger',
             version: '3.0.0',
         },
-        host: 'http://54.37.157.34:3018',
+        host: 'http://54.37.157.34:3019',
         basePath: '/',
         produces: [
             "application/json",
