@@ -720,7 +720,7 @@ let getArchitectes = (req,res) => {
 /*** get one Architecte ***/
 
 let postArchitecte = (req,res) => {
-    if (req.user.role !== 'admin')
+    if (req.user.role !== 'admin' && req.user.role !== 'architecte')
         res.status(401).send({success: false, message: 'accès refusé'});
     else
         Architecte.findOne({_id: req.body._id}, function (err, architecte) {
@@ -728,6 +728,8 @@ let postArchitecte = (req,res) => {
                 res.status(400).send({success: false, message: "erreur system", err});
             else if (!architecte)
                 res.status(403).send({success: false, message: "cet architecte n'existe pas"});
+            else if (architecte && req.user.role === 'architecte' && req.user.id !== architecte._id)
+                res.status(401).send({success: false, message: 'accès refusé'});
             else
                 res.status(200).send({success: true, architecte});
         });
