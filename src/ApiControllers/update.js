@@ -23,6 +23,7 @@ const   PCS = require('../MongoSchemes/presidentCS'),
         Syndic = require('../MongoSchemes/syndics'),
         Courtier = require('../MongoSchemes/courtiers'),
         Architecte = require('../MongoSchemes/architectes'),
+        PresidentCS = require('../MongoSchemes/presidentCS'),
         Prestataire = require('../MongoSchemes/prestataires'),
         Gestionnaire = require('../MongoSchemes/gestionnaires');
 
@@ -138,7 +139,7 @@ let updateCredentials = async (req, res) => {
                     if (err)
                         res.status(400).send({success: false, message: 'erreur système', err});
                     else if (!syndic)
-                        res.status(404).send({success: false, message: "cet Architecte n'existe pas!"});
+                        res.status(404).send({success: false, message: "ce Syndic n'existe pas!"});
                     else
                         res.status(200).send({success: true, message: "identifiants mis à jour"});
                 });
@@ -152,7 +153,7 @@ let updateCredentials = async (req, res) => {
                     if (err)
                         res.status(400).send({success: false, message: 'erreur système', err});
                     else if (!syndic)
-                        res.status(404).send({success: false, message: "cet Architecte n'existe pas!"});
+                        res.status(404).send({success: false, message: "ce Syndic n'existe pas!"});
                     else
                         res.status(200).send({success: true, message: "identifiants mis à jour", syndic});
                 });
@@ -167,7 +168,7 @@ let updateCredentials = async (req, res) => {
                     if (err)
                         res.status(400).send({success: false, message: 'erreur système', err});
                     else if (!gestionnaire)
-                        res.status(404).send({success: false, message: "cet Architecte n'existe pas!"});
+                        res.status(404).send({success: false, message: "ce Gestionnaire n'existe pas!"});
                     else
                         res.status(200).send({success: true, message: "identifiants mis à jour"});
                 });
@@ -181,9 +182,38 @@ let updateCredentials = async (req, res) => {
                     if (err)
                         res.status(400).send({success: false, message: 'erreur système', err});
                     else if (!gestionnaire)
-                        res.status(404).send({success: false, message: "cet Architecte n'existe pas!"});
+                        res.status(404).send({success: false, message: "ce Gestionnaire n'existe pas!"});
                     else
                         res.status(200).send({success: true, message: "identifiants mis à jour", gestionnaire});
+                });
+        }
+    } else if (req.user.role === 'pcs') {
+        if (password) {
+            PresidentCS.findOneAndUpdate(
+                {_id: req.user.id},
+                {$set: {email, password}},
+                {new: true},
+                (err, pcs) => {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur système', err});
+                    else if (!pcs)
+                        res.status(404).send({success: false, message: "ce PCS n'existe pas!"});
+                    else
+                        res.status(200).send({success: true, message: "identifiants mis à jour"});
+                });
+
+        } else {
+            PresidentCS.findOneAndUpdate(
+                {_id: req.user.id},
+                {$set: {email}},
+                {new: true},
+                (err, pcs) => {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur système', err});
+                    else if (!pcs)
+                        res.status(404).send({success: false, message: "ce PCS n'existe pas!"});
+                    else
+                        res.status(200).send({success: true, message: "identifiants mis à jour", pcs});
                 });
         }
     } else {

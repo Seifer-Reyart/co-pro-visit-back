@@ -9,6 +9,7 @@ const express = require('express');
 /************************/
 
 let {
+    getPCS,
     getCopro,
     postCopro,
     getSyndics,
@@ -41,6 +42,21 @@ let {
 /* init router */
 /***************/
 let router = express.Router();
+
+/**
+ * Cette route permet de récupérer un PCS, JWT necessaire.
+ * @route POST /retrieve/pcs
+ * @group Get_Data
+ * @returns {object} 200 - {success: true, copros: array of copros}
+ * @returns {Error}  400 - {success: false, message: error system log from mongoose}
+ * @returns {Error}  401 - si dans token, role !== syndic ou gestionnaire ou courtier ou pcs  {success: false, message: 'accès interdit'}
+ * @returns {Error}  403 - si le compte n'est pas enregistré {success: false, message: "ce compte n'existe pas!"}
+ * @returns {Error}  404 - si aucun syndic trouvé  {success: false, message: 'aucun parc enregistré'}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.post('/pcs', getPCS);
 
 /**
  * Cette route permet de récupérer un ou plusieurs Syndics selon le type de compte, JWT necessaire.
