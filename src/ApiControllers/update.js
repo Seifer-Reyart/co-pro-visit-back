@@ -128,6 +128,64 @@ let updateCredentials = async (req, res) => {
                         res.status(200).send({success: true, message: "identifiants mis à jour", courtier});
                 });
         }
+    } else if (req.user.role === 'syndic') {
+        if (password) {
+            Syndic.findOneAndUpdate(
+                {_id: req.user.id},
+                {$set: {email, password}},
+                {new: true},
+                (err, syndic) => {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur système', err});
+                    else if (!syndic)
+                        res.status(404).send({success: false, message: "cet Architecte n'existe pas!"});
+                    else
+                        res.status(200).send({success: true, message: "identifiants mis à jour"});
+                });
+
+        } else {
+            Syndic.findOneAndUpdate(
+                {_id: req.user.id},
+                {$set: {email}},
+                {new: true},
+                (err, syndic) => {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur système', err});
+                    else if (!syndic)
+                        res.status(404).send({success: false, message: "cet Architecte n'existe pas!"});
+                    else
+                        res.status(200).send({success: true, message: "identifiants mis à jour", syndic});
+                });
+        }
+    } else if (req.user.role === 'gestionnaire') {
+        if (password) {
+            Gestionnaire.findOneAndUpdate(
+                {_id: req.user.id},
+                {$set: {email, password}},
+                {new: true},
+                (err, gestionnaire) => {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur système', err});
+                    else if (!gestionnaire)
+                        res.status(404).send({success: false, message: "cet Architecte n'existe pas!"});
+                    else
+                        res.status(200).send({success: true, message: "identifiants mis à jour"});
+                });
+
+        } else {
+            Gestionnaire.findOneAndUpdate(
+                {_id: req.user.id},
+                {$set: {email}},
+                {new: true},
+                (err, gestionnaire) => {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur système', err});
+                    else if (!gestionnaire)
+                        res.status(404).send({success: false, message: "cet Architecte n'existe pas!"});
+                    else
+                        res.status(200).send({success: true, message: "identifiants mis à jour", gestionnaire});
+                });
+        }
     } else {
         res.status(401).send({success: false, message: 'accès interdit'});
     }
