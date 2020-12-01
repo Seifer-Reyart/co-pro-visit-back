@@ -93,7 +93,7 @@ let postSyndic = (req, res) => {
     if (req.user.role !== 'admin' && req.user.role !== 'courtier' && req.user.role !== 'prestataire' && req.user.role !== 'architecte' && req.user.role !== 'syndic')
         res.status(401).send({success: false, message: "accès interdit"})
     else
-        Syndic.findOne({_id: req.body._id}, (syndic, err) => {
+        Syndic.findOne({_id: req.body._id}, (err, syndic) => {
             if (err)
                 res.status(400).send({success: false, message: 'erreur system', err});
             else if (!syndic)
