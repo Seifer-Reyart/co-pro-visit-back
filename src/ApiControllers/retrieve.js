@@ -42,7 +42,7 @@ let getPCS = (req, res) => {
                 res.status(400).send({success: false, message: 'erreur system', err});
             else if (!pcs)
                 res.status(404).send({success: false, message: "ce PCS n'existe pas"});
-            else if (pcs && req.user.role === 'pcs' && pcs._id !== req.user.id)
+            else if (pcs && req.user.role === 'pcs' && pcs._id.toString() !== req.user.id.toString())
                 res.status(401).send({success: false, message: 'missmatch identity'});
             else
                 res.status(200).send({success: true, pcs});
