@@ -732,6 +732,9 @@ let postArchitecte = (req,res) => {
                 res.status(401).send({success: false, message: 'mismatch identity'});
             else
                 res.status(200).send({success: true, architecte});
+        }).populate({
+            path    : 'copros',
+            model   : 'copros'
         });
 }
 
