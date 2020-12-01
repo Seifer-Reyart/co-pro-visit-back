@@ -90,26 +90,25 @@ let getSyndics = (req, res) => {
 /*** get one Syndic ***/
 
 let postSyndic = (req, res) => {
-    if (req.user.role !== 'admin' && req.user.role !== 'courtier' && req.user.role !== 'prestataire' && req.user.role !== 'architecte')
+    if (req.user.role !== 'admin' && req.user.role !== 'courtier' && req.user.role !== 'prestataire' && req.user.role !== 'architecte' && req.user.role !== 'syndic')
         res.status(401).send({success: false, message: "accès interdit"})
     else
-        Syndic.findOne({_id: req.body._id})
-            .populate({
-                path: 'parc',
-                model: 'copros'
-            })
-            .populate({
-                path: 'gestionnaires',
-                model: 'gestionnaires'
-            })
-            .then((syndic, err) => {
-                if (err)
-                    res.status(400).send({success: false, message: 'erreur system', err});
-                else if (!syndic)
-                    res.status(404).send({success: false, message: "ce syndic n'existe pas"});
-                else
-                    res.status(200).send({success: true, syndic});
-            });
+        Syndic.findOne({_id: req.body._id}, (syndic, err) => {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur system', err});
+            else if (!syndic)
+                res.status(404).send({success: false, message: "ce syndic n'existe pas"});
+            else if (syndic && req.user.role === 'syndic' && req.user.id.toString() !== syndic._id.toString())
+                res.status(401).send({success: false, message: "missmatch identity"});
+            else
+                res.status(200).send({success: true, syndic});
+        }).populate({
+            path: 'parc',
+            model: 'copros'
+        }).populate({
+            path: 'gestionnaires',
+            model: 'gestionnaires'
+        });
 }
 
 /*** get Gestionnaires ***/
@@ -137,6 +136,8 @@ let postGestionnaire = (req, res) => {
                 res.status(400).send({success: false, message: 'erreur system', err});
             else if (!gestionnaire)
                 res.status(404).send({success: false, message: 'aucun gestionnaire enregistré'});
+            else if (gestionnaire && req.user.role === 'gestionnaire' && req.user.id.toString() !== gestionnaire._id.toString())
+                res.status(401).send({success: false, message: 'missmatch identity'});
             else
                 res.status(200).send({success: true, gestionnaire});
         })
