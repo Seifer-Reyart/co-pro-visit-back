@@ -728,7 +728,7 @@ let postArchitecte = (req,res) => {
                 res.status(400).send({success: false, message: "erreur system", err});
             else if (!architecte)
                 res.status(403).send({success: false, message: "cet architecte n'existe pas"});
-            else if (architecte && req.user.role === 'architecte' && req.user.id !== architecte._id)
+            else if (architecte && req.user.role === 'architecte' && req.user.id.toString() !== architecte._id.toString())
                 res.status(401).send({success: false, message: 'mismatch identity'});
             else
                 res.status(200).send({success: true, architecte});
