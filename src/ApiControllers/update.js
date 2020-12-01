@@ -22,7 +22,7 @@ const   Copro       = require('../MongoSchemes/copros'),
 const   PCS = require('../MongoSchemes/presidentCS'),
         Syndic = require('../MongoSchemes/syndics'),
         Courtier = require('../MongoSchemes/courtiers'),
-        architecte = require('../MongoSchemes/architectes'),
+        Architecte = require('../MongoSchemes/architectes'),
         Prestataire = require('../MongoSchemes/prestataires'),
         Gestionnaire = require('../MongoSchemes/gestionnaires');
 
@@ -68,6 +68,64 @@ let updateCredentials = async (req, res) => {
                         res.status(404).send({success: false, message: "ce Prestataire n'existe pas!"});
                     else
                         res.status(200).send({success: true, message: "identifiants mis à jour", prestataire: prest});
+                });
+        }
+    } else if (req.user.role === 'architecte') {
+        if (password) {
+            Architecte.findOneAndUpdate(
+                {_id: req.user.id},
+                {$set: {email, password}},
+                {new: true},
+                (err, architecte) => {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur système', err});
+                    else if (!architecte)
+                        res.status(404).send({success: false, message: "cet Architecte n'existe pas!"});
+                    else
+                        res.status(200).send({success: true, message: "identifiants mis à jour"});
+                });
+
+        } else {
+            Architecte.findOneAndUpdate(
+                {_id: req.user.id},
+                {$set: {email}},
+                {new: true},
+                (err, architecte) => {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur système', err});
+                    else if (!architecte)
+                        res.status(404).send({success: false, message: "cet Architecte n'existe pas!"});
+                    else
+                        res.status(200).send({success: true, message: "identifiants mis à jour", architecte});
+                });
+        }
+    } else if (req.user.role === 'courtier') {
+        if (password) {
+            Courtier.findOneAndUpdate(
+                {_id: req.user.id},
+                {$set: {email, password}},
+                {new: true},
+                (err, courtier) => {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur système', err});
+                    else if (!courtier)
+                        res.status(404).send({success: false, message: "ce Courtier n'existe pas!"});
+                    else
+                        res.status(200).send({success: true, message: "identifiants mis à jour"});
+                });
+
+        } else {
+            Courtier.findOneAndUpdate(
+                {_id: req.user.id},
+                {$set: {email}},
+                {new: true},
+                (err, courtier) => {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur système', err});
+                    else if (!courtier)
+                        res.status(404).send({success: false, message: "ce Courtier n'existe pas!"});
+                    else
+                        res.status(200).send({success: true, message: "identifiants mis à jour", courtier});
                 });
         }
     } else {

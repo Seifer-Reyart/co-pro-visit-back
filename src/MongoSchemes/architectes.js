@@ -55,6 +55,14 @@ let architectesSchema = new Schema({
         type: String,
         default: 'architecte'
     },
+    honnorairesVisites  : [{
+        date    : {type: Date, default: null},
+        amount  : {type: Number, default: 0}
+    }],
+    honnorairesAvis     : [{
+        date    : {type: Date, default: null},
+        amount  : {type: Number, default: 0}
+    }]
 });
 
 let architectes = mongoose.model('architectes', architectesSchema);

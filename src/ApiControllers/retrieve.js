@@ -197,7 +197,7 @@ let getCourtiers = (req, res) => {
 /*** get one courtier ***/
 
 let postCourtier = (req, res) => {
-    if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire' && req.user.role !== 'admin')
+    if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire' && req.user.role !== 'admin' && req.user.role !== 'courtier' )
         res.status(401).send({success: false, message: 'accès refusé'});
     else
         Courtier.findOne({_id: req.body._id}, (err, courtier) => {
@@ -205,6 +205,8 @@ let postCourtier = (req, res) => {
                 res.status(400).send({success: false, message: 'erreur system', err});
             else if (!courtier)
                 res.status(404).send({success: false, message: 'aucun courtier enregistré'});
+            else if (courtier && req.user.role === 'courtier' && req.user.id.toString() !== courtier._id.toString())
+                res.status(401).send({success: false, message: 'mismatch identity'});
             else
                 res.status(200).send({success: true, courtier});
         })
