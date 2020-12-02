@@ -264,6 +264,47 @@ let registerPrestataire = async (req, res) => {
                 else if (user.siret === siret)
                     res.status(403).send({success: false, message: 'siret déjà utilisé'});
             } else {
+		    let imagesUploadErrors = [];
+		    let imagesUploaded = []
+		    let RCProfessionnelle, RCDecennale;
+                if (req.files) {
+                    const filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
+                    promisesFiles = req.files.map( async file => {
+                        return new Promise(async (resolve) => {
+                            let savedFileName = '';
+                            const mimetype = filetypes.test(file.mimetype);
+                            let hash = crypto.createHash('sha1')
+                            let hashedBuffer = file.buffer;
+                            hash.update(hashedBuffer);
+                            let extension = file.mimetype.match(filetypes);
+                            extension = extension?.length ? extension[0] : null;
+                            savedFileName = `${hash.digest('hex')}.${extension}`
+                            if (mimetype) {
+                                await fs.writeFile('./src/uploads/rc/' + savedFileName, file.buffer, async (err) => {
+                                    if (err) {
+                                        await imagesUploadErrors.push({imageTitle: file.originalname, err});
+                                        await resolve()
+                                    } else {
+					if (file.fieldname === 'rcProfessionnelle')
+					    RCProfessionnelle = savedFileName;
+					else if (file.fieldname === 'rcDecennale')
+					    RCDecennale = savedFileName
+                                        await imagesUploaded.push(savedFileName);
+                                        await resolve()
+                                    }
+                                })
+                            } else {
+                                await imagesUploadErrors.push({
+                                    imageTitle: file.originalname,
+				    fileType: file.fieldname,
+                                    err: "Mauvais format, reçu " + file.mimetype + ", attendu: " + filetypes
+                                });
+                                await resolve()
+                            }
+                        })
+                    });
+                    await Promise.all(promisesFiles)
+                }
                 let password = await generateP();
                 let prestataire = new Prestataire({
                     email       	    : req.body.email.toLowerCase(),
@@ -283,16 +324,16 @@ let registerPrestataire = async (req, res) => {
                         email           : req.body.email.toLowerCase(),
                     },
                     corpsEtat           : req.body.corpsEtat,
-                    RCProfessionnelle   : req.body.RCProfessionnelle ?? null,
-                    RCDecennale         : req.body.RCDecennale ?? null,
+                    RCProfessionnelle,
+                    RCDecennale,
                     role        	    : 'prestataire'
                 })
                 prestataire.save(function(err) {
                     if (err) {
-                        res.send({ success: false, message: "Erreur lors de la création du Prestataire", err});
+                        res.send({ success: false, message: "Erreur lors de la création du Prestataire", er, uploadErrors: imagesUploadErrorsr});
                     } else {
                         sendCredentials(req.body.email.toLowerCase(), password);
-                        res.send({ success: true, message : "Le Prestataire a bien été créé"});
+                        res.send({ success: true, message : "Le Prestataire a bien été cr", uploadErrors: imagesUploadErrors});
                     }
                 });
             }
