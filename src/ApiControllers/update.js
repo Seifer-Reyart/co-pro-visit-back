@@ -289,6 +289,29 @@ let updateInfosPresta = (req, res) => {
     }
 };
 
+/***********************/
+/*| update Architecte |*/
+/***********************/
+
+let updateInfosArchi = (req, res) => {
+    if (req.user.role !== 'architecte')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else {
+        Architecte.findOneAndUpdate(
+            {_id: req.user.id},
+            {$set: req.body},
+            {new: true},
+            (err, prest) => {
+                if (err)
+                    res.status(400).send({success: false, message: 'erreur système', err});
+                else if (!prest)
+                    res.status(404).send({success: false, message: "cet Architecte n'existe pas"});
+                else
+                    res.status(200).send({success: true, message: 'informations mise à jours'});
+            }
+        );
+    }
+};
 
 
 /************************/
@@ -300,4 +323,5 @@ module.exports = {
     updateGestionnaire,
     updateCredentials,
     updateInfosPresta,
+    updateInfosArchi,
 }

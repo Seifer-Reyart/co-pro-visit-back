@@ -13,6 +13,7 @@ let {
     updateCredentials,
     updateGestionnaire,
     updateInfosPresta,
+    updateInfosArchi
 } = require('../ApiControllers/update');
 
 let { checkEmailBeforeUpdate } = require('../Middleware/ApiHelpers');
@@ -109,5 +110,12 @@ router.put('/credentials', checkEmailBeforeUpdate, updateCredentials);
  * @group prestataire
  */
 router.put('/prestataire-infos', updateInfosPresta);
+
+/**
+ * Cette route permet de modifier les informations de l'architecte, JWT necessaire.
+ * @route PUT /update/architecte-infos
+ * @group architecte
+ */
+router.put('/architecte-infos', updateInfosArchi);
 
 module.exports = router;
