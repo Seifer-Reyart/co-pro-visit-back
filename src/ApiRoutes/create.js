@@ -324,7 +324,7 @@ router.post('/rcprofessionnelle', uploadRCProfessionnelle);
  * @consumes application/json
  * @security JWT
  */
-router.post('/prestataire', checkEmailExist, registerPrestataire);
+router.post('/prestataire', multer().any(), checkEmailExist, registerPrestataire);
 
 /**
  * @typedef COPRO
