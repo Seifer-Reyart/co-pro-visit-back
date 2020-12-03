@@ -1374,11 +1374,156 @@ let updatePermissionsGest = (req, res) => {
     }
 }
 
+let deletePresta = (req, res) => {
+    if (req.user.role !== 'admin')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else {
+        const { _id } = req.body;
+        Prestataire.findOne({_id}, function(err, prestataire) {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur système', err});
+            else if (!prestataire)
+                res.status(404).send({success: false, message: 'prestataire introuvable'});
+            else {
+                Syndic.updateMany(
+                    {prestataires: {$elemMatch: {$eq: prestataire._id}}},
+                    {$pull: {prestataires: prestataire._id}},
+                    {new: true},
+                    (err) => {
+                        if (err)
+                            console.log(err);
+                    });
+                Devis.deleteMany({prestataireId: prestataire._id}, (err) => {
+                   if (err)
+                       console.log(err);
+                });
+                Prestataire.deleteOne({_id: prestataire._id}, (err) => {
+                   if (err)
+                       res.status(400).send({success: false, message: "erreur système", err});
+                   else
+                       req.status(200).send({success: true, message: "Prestataire supprimé avec succès"});
+                });
+            }
+        })
+    }
+}
+
+let deleteCourt = (req, res) => {
+    if (req.user.role !== 'admin')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else {
+        const { _id } = req.body;
+        Courtier.findOne({_id}, function(err, courtier) {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur système', err});
+            else if (!courtier)
+                res.status(404).send({success: false, message: 'prestataire introuvable'});
+            else {
+                Syndic.updateMany(
+                    {courtiers: {$elemMatch: {$eq: courtier._id}}},
+                    {$pull: {courtiers: courtier._id}},
+                    {new: true},
+                    (err) => {
+                        if (err)
+                            console.log(err);
+                    });
+                Incident.updateMany(
+                    {courtierId: courtier._id},
+                    {$set: {courtierId: null}},
+                    {new: true},
+                    (err) => {
+                        if (err)
+                            console.log(err);
+                    });
+                Devis.updateMany(
+                    {courtierId: courtier._id},
+                    {$set: {courtierId: null}},
+                    {new: true},
+                    (err) => {
+                        if (err)
+                            console.log(err);
+                    });
+                Copro.updateMany(
+                    {courtier: courtier._id},
+                    {$set: {courtier: null}},
+                    {new: true},
+                    (err) => {
+                        if (err)
+                            console.log(err);
+                    });
+                Courtier.deleteOne({_id: courtier._id}, (err) => {
+                    if (err)
+                        res.status(400).send({success: false, message: "erreur système", err});
+                    else
+                        req.status(200).send({success: true, message: "Courtier supprimé avec succès"});
+                });
+            }
+        })
+    }
+}
+
+let deleteArchi = (req, res) => {
+    if (req.user.role !== 'admin')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else {
+        Architecte.findOne({_id}, (err, architecte) => {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur système', err});
+            else if (!architecte)
+                res.status(404).send({success: false, message: 'architecte introuvable'});
+            else {
+                Visite.updateMany(
+                    {architecteId: architecte._id},
+                    {$set: {architecteId: null}},
+                    {new: true},
+                    (err) => {
+                        if (err)
+                            console.log(err);
+                    });
+                Reception.updateMany(
+                    {architecteId: architecte._id},
+                    {$set: {architecteId: null}},
+                    {new: true},
+                    (err) => {
+                        if (err)
+                            console.log(err);
+                    });
+                Incident.updateMany(
+                    {architecteId: architecte._id},
+                    {$set: {architecteId: null}},
+                    {new: true},
+                    (err) => {
+                        if (err)
+                            console.log(err);
+                    });
+                Devis.updateMany(
+                    {architecteId: architecte._id},
+                    {$set: {architecteId: null}},
+                    {new: true},
+                    (err) => {
+                        if (err)
+                            console.log(err);
+                    });
+                Architecte.deleteOne({_id: architecte._id}, (err) => {
+                    if (err)
+                        res.status(400).send({success: false, message: "erreur système", err});
+                    else
+                        req.status(200).send({success: true, message: "Architecte supprimé avec succès"});
+                })
+            }
+        })
+    }
+}
+
+
 /* Export Functions */
 
 module.exports = {
     deleteCopro,
+    deleteCourt,
+    deleteArchi,
     deleteSyndic,
+    deletePresta,
     demandeVisite,
     assignerVisite,
     desassignerVisite,

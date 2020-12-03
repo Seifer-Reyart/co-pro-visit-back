@@ -11,6 +11,9 @@ const multer    = require('multer');
 
 let {
     deleteCopro,
+    deleteArchi,
+    deleteCourt,
+    deletePresta,
     deleteSyndic,
     demandeVisite,
     assignerVisite,
@@ -376,6 +379,48 @@ router.post('/changer-droits', updatePermissionsGest);
  * @security JWT
  */
 router.post('/access-pcs', openAccessPCS);
+
+/**
+ * Cette route permet de supprimer un Architecte et tout ce qui le concerne, JWT necessaire.
+ * @route POST /gestion/delete-archi
+ * @group gestion
+ * @param {string} _id.body.required - _id de l'Architecte
+ * @returns {object} 200 - {success: true, message: "l'Architecte a bien été supprimé"}
+ * @returns {Error}  400 - {success: false, message: 'erreur système', err: mongoose system log error}
+ * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.post('/delete-archi', deleteArchi);
+
+/**
+ * Cette route permet de supprimer un Courtier et tout ce qui le concerne, JWT necessaire.
+ * @route POST /gestion/delete-courtier
+ * @group gestion
+ * @param {string} _id.body.required - _id du Courtier
+ * @returns {object} 200 - {success: true, message: "le Courtier a bien été supprimé"}
+ * @returns {Error}  400 - {success: false, message: 'erreur système', err: mongoose system log error}
+ * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.post('/delete-courtier', deleteCourt);
+
+/**
+ * Cette route permet de supprimer un Prestataire et tout ce qui le concerne, JWT necessaire.
+ * @route POST /gestion/delete-presta
+ * @group gestion
+ * @param {string} _id.body.required - _id du Prestataire
+ * @returns {object} 200 - {success: true, message: "le Prestataire a bien été supprimé"}
+ * @returns {Error}  400 - {success: false, message: 'erreur système', err: mongoose system log error}
+ * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.post('/delete-presta', deletePresta);
 
 module.exports = router;
 
