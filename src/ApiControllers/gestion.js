@@ -1401,7 +1401,7 @@ let deletePresta = (req, res) => {
                    if (err)
                        res.status(400).send({success: false, message: "erreur système", err});
                    else
-                       req.status(200).send({success: true, message: "Prestataire supprimé avec succès"});
+                       res.status(200).send({success: true, message: "Prestataire supprimé avec succès"});
                 });
             }
         })
@@ -1455,7 +1455,7 @@ let deleteCourt = (req, res) => {
                     if (err)
                         res.status(400).send({success: false, message: "erreur système", err});
                     else
-                        req.status(200).send({success: true, message: "Courtier supprimé avec succès"});
+                        res.status(200).send({success: true, message: "Courtier supprimé avec succès"});
                 });
             }
         })
@@ -1508,7 +1508,7 @@ let deleteArchi = (req, res) => {
                     if (err)
                         res.status(400).send({success: false, message: "erreur système", err});
                     else
-                        req.status(200).send({success: true, message: "Architecte supprimé avec succès"});
+                        res.status(200).send({success: true, message: "Architecte supprimé avec succès"});
                 })
             }
         })
