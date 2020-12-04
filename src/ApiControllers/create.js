@@ -29,17 +29,17 @@ function generateP() {
     return pass;
 }
 
-function generateName() {
+function generateRefDesordre(ref, num) {
     let name = 'Copro ';
     let str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
-    while (name.length <= 6) {
+    while (name.length <= 5) {
         let char = Math.floor(Math.random() * str.length + 1);
 
         name += str.charAt(char)
     }
 
-    return name;
+    return name + '-' + new Date().getFullYear().toString();
 }
 
 /**** salt to crypt password ****/
@@ -1080,8 +1080,8 @@ let registerIncident = async (req, res) => {
                     await Promise.all(promisesFiles)
                 }
                 let incident = new Incident({
-                    images: imagesUploaded  ,
-                    date: new Date()        ,
+                    images          : imagesUploaded  ,
+                    date            : new Date()        ,
                     metrages                ,
                     desordre                ,
                     situation               ,
@@ -1093,17 +1093,16 @@ let registerIncident = async (req, res) => {
                     visiteId                ,
                     syndicId                ,
                     coproId                 ,
-                    commentaire
+                    commentaire             ,
+                    refDesordre     : copr.reference + '-' + copr.incidentCounter.toString(),
                 });
 
                 incident.save(function(err, incid) {
                     if (err) {
-                        console.log("err save: ", err);
                         res.status(400).send({ success: false, message: "Erreur lors de la création de l'Incident", err});
                     } else {
-                        Copro.findOneAndUpdate({_id: coproId}, {$push: {incidentId: incid._id}}, {new: true}, function (err, cpr) {
+                        Copro.findOneAndUpdate({_id: coproId}, {$push: {incidentId: incid._id}, $inc: {incidentCounter: 1}}, {new: true}, function (err, cpr) {
                             if (err || !cpr) {
-                                console.log('Copro.findOneAndUpdate err', err);
                                 res.status(400).send({
                                     success: false,
                                     message: "Erreur lors de la mise à jour de la copropriété associée",
@@ -1117,7 +1116,6 @@ let registerIncident = async (req, res) => {
                                         ]
                                 }, {$addToSet: {incidentId: incid._id}}, {new: true}, function (err, prest) {
                                     if (err) {
-                                        console.log('Prestataire update Many err', err);
                                         res.status(400).send({
                                             success: false,
                                             message: "Erreur lors de la mise à jour de la liste des prestataires",

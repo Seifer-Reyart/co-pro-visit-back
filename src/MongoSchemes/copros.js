@@ -101,6 +101,10 @@ let coprosSchema = new Schema({
         type    : [Schema.Types.ObjectId],
         default : []
     },
+    incidentCounter : {
+        type    : Number,
+        default : 0
+    },
     assignableImage : {
         type    : [String],
         default : []

@@ -2,6 +2,10 @@ let mongoose    = require('mongoose'),
     Schema      = mongoose.Schema;
 
 let incidentsSchema = new Schema({
+    refDesordre             : {
+        type    : String,
+        default : null
+    },
     date                    : {
         type    : Date,
         default : new Date()
