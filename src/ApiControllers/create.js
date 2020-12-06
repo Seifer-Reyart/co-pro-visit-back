@@ -814,53 +814,62 @@ let registerEvaluation = async (req, res) => {
     if (req.user.role !== 'admin' && req.user.role !== 'prestataire') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
-        let devis = new Devis({
-            incidentId      : incidentId,
-            evaluationTTC   : req.body.evaluationTTC,
-            coproId    	    : coproId,
-            prestataireId   : prestataireId,
-            pcsId           : req.body.pcsId,
-            syndicId        : syndicId,
-            commentaire     : req.body.commentaire,
-            gestionnaireId  : req.body.gestionnaireId,
-            corpsEtat       : req.body.corpsEtat,
-            metrages        : req.body.metrages,
-            desordre        : req.body.desordre,
-            situation       : req.body.situation,
-            description     : req.body.description,
-            courtierId      : req.body.courtierId,
-            architecteId    : req.body.architecteId,
-            visiteId        : req.body.visiteId,
-            images          : req.body.images,
-            date            : new Date()
-        });
-        Devis.findOne({$and: [{coproId}, {prestataireId}, {syndicId}, {incidentId}]}, async (err, Devis) => {
-            if (err) {
+        Incident.findOne({_id: incidentId}, (err, incident) => {
+            if (err)
                 res.status(400).send({success: false, message: err});
-            } else if (Devis) {
-                res.status(403).send({success: false, message: 'Un devis a déjà été crée'});
-            } else {
-                devis.save(function(err, dev) {
-                    if (err) {
-                        console.log(err)
-                        res.send({ success: false, message: "Erreur lors de la création de l'évaluation", err});
-                    } else {
-                        Incident.findOneAndUpdate(
-                            {_id: incidentId},
-                            {$push: {devis: dev._id}},
-                            {new: true},
-                            (err, result) => {
-                                if (err) {
-                                    res.status(400).send({success: false, message: "erreur update Incident", err});
-                                } else if (!result) {
-                                    res.status(404).send({success: false, message: 'Incident introuvable'});
-                                } else {
-                                    res.status(200).send({success: true, message:"Evaluation envoyée!"})
-                                }
-                            }
-                        )
-                    }
+            else if (!incident)
+                res.status(404).send({success: false, message: 'Incident introuvable'});
+            else {
+                let devis = new Devis({
+                    refDesordre     : incident.refDesordre,
+                    incidentId      : incidentId,
+                    evaluationTTC   : req.body.evaluationTTC,
+                    coproId    	    : coproId,
+                    prestataireId   : prestataireId,
+                    pcsId           : req.body.pcsId,
+                    syndicId        : syndicId,
+                    commentaire     : req.body.commentaire,
+                    gestionnaireId  : req.body.gestionnaireId,
+                    corpsEtat       : req.body.corpsEtat,
+                    metrages        : req.body.metrages,
+                    desordre        : req.body.desordre,
+                    situation       : req.body.situation,
+                    description     : req.body.description,
+                    courtierId      : req.body.courtierId,
+                    architecteId    : req.body.architecteId,
+                    visiteId        : req.body.visiteId,
+                    images          : req.body.images,
+                    date            : new Date()
                 });
+                Devis.findOne({$and: [{coproId}, {prestataireId}, {syndicId}, {incidentId}]}, async (err, Devis) => {
+                    if (err) {
+                        res.status(400).send({success: false, message: err});
+                    } else if (Devis) {
+                        res.status(403).send({success: false, message: 'Un devis a déjà été crée'});
+                    } else {
+                        devis.save(function(err, dev) {
+                            if (err) {
+                                console.log(err)
+                                res.send({ success: false, message: "Erreur lors de la création de l'évaluation", err});
+                            } else {
+                                Incident.findOneAndUpdate(
+                                    {_id: incidentId},
+                                    {$push: {devis: dev._id}},
+                                    {new: true},
+                                    (err, result) => {
+                                        if (err) {
+                                            res.status(400).send({success: false, message: "erreur update Incident", err});
+                                        } else if (!result) {
+                                            res.status(404).send({success: false, message: 'Incident introuvable'});
+                                        } else {
+                                            res.status(200).send({success: true, message:"Evaluation envoyée!"})
+                                        }
+                                    }
+                                )
+                            }
+                        });
+                    }
+                })
             }
         })
     }
@@ -1142,7 +1151,7 @@ let registerAvisTravaux = async (req, res) => {
     if (req.user.role !== 'architecte') {
         res.status(401).send({success: false, message: 'accès interdit'});
     } else {
-        const { src_img, factureTTC, metrages, comArchi, comPrest, desordre, description, situation, corpsEtat, images_bf, devisId, date, conformite, rate, remarque, incidentId, coproId, pcsId, syndicId, visiteId, courtierId, architecteId, prestataireId, gestionnaireId, demandeDevis, devisPDF, dateDepotDevis, facturePDF, dateDepotFacture } = req.body;
+        const { src_img, factureTTC, metrages, comArchi, comPrest, desordre, description, situation, corpsEtat, images_bf, devisId, date, conformite, rate, remarque, incidentId, coproId, pcsId, syndicId, visiteId, courtierId, architecteId, prestataireId, gestionnaireId, demandeDevis, devisPDF, dateDepotDevis, facturePDF, dateDepotFacture, refDesordre } = req.body;
 
         let imagesUploadErrors = [];
         let imagesUploaded = []
@@ -1214,6 +1223,7 @@ let registerAvisTravaux = async (req, res) => {
             dateDepotDevis,
             facturePDF,
             dateDepotFacture,
+            refDesordre
         });
 
         Reception.findOne({$and: [{devisId},{architecteId: req.user.id}]}, (err, rec) => {

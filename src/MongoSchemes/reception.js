@@ -31,7 +31,8 @@ let receptionSchema = new Schema({
     devisPDF        : {type: String, default: null},
     dateDepotDevis  : {type: Date, default: null},
     facturePDF      : {type: String, default: null},
-    dateDepotFacture: {type: Date, default: null}
+    dateDepotFacture: {type: Date, default: null},
+    refDesordre     : {type: String, default: null}
 });
 
 let receptions = mongoose.model('receptions', receptionSchema);

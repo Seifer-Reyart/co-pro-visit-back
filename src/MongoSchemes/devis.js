@@ -3,6 +3,7 @@ let mongoose    = require('mongoose'),
 
 let devisSchema = new Schema({
     incidentId      : {type: Schema.Types.ObjectId, default: null},
+    refDesordre     : {type: String, default: null},
     evaluationTTC   : {type: Number, default: 0},
     devisTTC        : {type: Number, default: 0},
     factureTTC      : {type: Number, default: 0},
