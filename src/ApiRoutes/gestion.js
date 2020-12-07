@@ -30,7 +30,8 @@ let {
     demandeDevis,
     uploadStatSinistres,
     updatePermissionsGest,
-    openAccessPCS
+    openAccessPCS,
+    deleteIncident,
 } = require('../ApiControllers/gestion');
 
 /***************/
@@ -96,6 +97,23 @@ router.post('/assign-visite', assignerVisite);
  * @security JWT
  */
 router.post('/unassign-visite', desassignerVisite);
+
+/**
+ *  * Cette route permet de supprimer un incident (si c'est possible0, JWT necessaire.
+ *   * @route POST /gestion/delete-incident
+ *    * @group gestion
+ *     * @param {INCIDENT.model} incidentId.body.required - _id de l'incident
+ *      * @returns {object} 200 - {success: true, message: 'Incident supprimé avec succès'}
+ *       * @returns {Error}  400 - {success: false, message: 'erreur system', err: mongoose system log error}
+ *        * @returns {Error}  401 - si dans token, role !== architecte {success: false, message: 'accès interdit'}
+ *         * @returns {Error}  403 - si visite existe  {success: false, message: 'Architecte introuvable'}
+ *          * @returns {Error}  403 - si visite existe  {success: false, message: 'Incident introuvable'}
+ *           * @returns {Error}  403 - si visite existe  {success: false, message: 'Impossible à supprimer car travaux en cours.'}
+ *            * @produces application/json
+ *             * @consumes application/json
+ *              * @security JWT
+ *               */
+router.post('/delete-incident', deleteIncident);
 
 /**
  * Cette route permet au Syndic de demander la création/assignation d'un courtier, JWT necessaire.

@@ -15,14 +15,13 @@ let {
     updateInfosPresta,
     updateInfosArchi
 } = require('../ApiControllers/update');
-
+const multer = require('multer');
 let { checkEmailBeforeUpdate } = require('../Middleware/ApiHelpers');
 
 /***************/
 /* init router */
 /***************/
 let router = express.Router();
-
 
 /**
  * @typedef COPRO
@@ -109,7 +108,7 @@ router.put('/credentials', checkEmailBeforeUpdate, updateCredentials);
  * @route PUT /update/prestataire-infos
  * @group prestataire
  */
-router.put('/prestataire-infos', updateInfosPresta);
+router.put('/prestataire-infos', multer().any(), updateInfosPresta);
 
 /**
  * Cette route permet de modifier les informations de l'architecte, JWT necessaire.
