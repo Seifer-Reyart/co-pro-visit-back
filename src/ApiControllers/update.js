@@ -291,7 +291,7 @@ console.log('UPDATE INFO PRESTA----- ', req.body)
 						savedFileName = `${hash.digest('hex')}.${extension}`
 						console.log('savedfgile', savedFileName)
 						if (mimetype) {
-							await fs.writeFile('./src/uploads/rc/' + savedFileName, file.buffer, async (err) => {
+							await fs.writeFile('./src/uploads/RC-files/' + savedFileName, file.buffer, async (err) => {
 								if (err) {
 									await imagesUploadErrors.push({imageTitle: file.originalname, err});
 									await resolve()
