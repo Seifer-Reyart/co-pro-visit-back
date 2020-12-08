@@ -46,6 +46,59 @@ const   Devis       = require('../MongoSchemes/devis'),
 /* Function */
 /************/
 
+/************/
+/* Function */
+/************/
+
+/*** suppression incident ***/
+let deleteIncident = (req, res) => {
+	if (req.user.role !== 'architecte')
+		res.status(401).send({success: false, message: 'accès interdit'});
+	else {
+		const { incidentId } = req.body
+		Architecte.findOne({_id: req.user.id}, (err, presta) => {
+			if (err)
+				res.status(400).send({success: false, message: 'erreur system', err});
+			else if (!presta)
+				res.status(403).send({success: false, message: 'Architecte introuvable'});
+			else {
+				Incident.findOne({_id: incidentId, architecteId: req.user.id}, (err, incident) => {
+					if (err)
+						res.status(400).send({success: false, message: 'erreur system', err});
+					else if (!incident)
+						res.status(403).send({success: false, message: 'Incident introuvable'});
+					// else if (!incident.devis?.find(dev => dev.devisPDF))
+					//           res.status(403).send({success: false, message: 'Impossible à supprimer car travaux en cours.'});
+					else {
+						Copro.updateOne({_id: incident.coproId},
+							{$pull: {incidentId}},
+							(err, copr) => {
+								if (err)
+									res.status(400).send({success: false, message: 'erreur system désassignation prestataires', err});
+								else {
+									Prestataire.updateMany({_id: incidentId, architecteId: req.user.id},
+										{$pull: {incidentId}},
+										(err, prestaWithInci) => {
+											if (err)
+												res.status(400).send({success: false, message: 'erreur system désassignation prestataires', err});
+											else {
+												Incident.deleteOne({_id: incidentId}, (err) => {
+													if (err)
+														res.status(400).send({success: false, message: 'erreur system suppression incident', err});
+													else
+														res.status(200).send({success: true, message: 'Incident supprimé avec succès'});
+												})
+											}
+										})
+								}
+							})
+					}
+				}).populate('devis')
+			}
+		})
+	}
+}
+
 /*** ouvrir accès pcs ***/
 
 let openAccessPCS = (req, res) => {
@@ -1543,4 +1596,5 @@ module.exports = {
     uploadStatSinistres,
     updatePermissionsGest,
     openAccessPCS,
+    deleteIncident,
 }
