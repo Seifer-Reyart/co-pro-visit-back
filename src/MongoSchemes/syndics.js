@@ -67,6 +67,10 @@ let syndicsSchema = new Schema({
         type: Date,
         default: new Date()
     },
+    credit          : {
+        type    : Number,
+        default : 0
+    },
     role        	: {
         type: String,
         default: 'syndic'

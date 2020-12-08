@@ -111,16 +111,40 @@ let getSyndics = (req, res) => {
 let postSyndic = (req, res) => {
     if (req.user.role !== 'admin' && req.user.role !== 'courtier' && req.user.role !== 'prestataire' && req.user.role !== 'architecte' && req.user.role !== 'syndic')
         res.status(401).send({success: false, message: "accès interdit"})
-    else
+    else if (req.user.role === 'admin')
         Syndic.findOne({_id: req.body._id}, (err, syndic) => {
             if (err)
                 res.status(400).send({success: false, message: 'erreur system', err});
             else if (!syndic)
                 res.status(404).send({success: false, message: "ce syndic n'existe pas"});
-            else if (syndic && req.user.role === 'syndic' && req.user.id.toString() !== syndic._id.toString())
-                res.status(401).send({success: false, message: "missmatch identity"});
             else
                 res.status(200).send({success: true, syndic});
+        }).populate({
+            path: 'parc',
+            model: 'copros'
+        }).populate({
+            path: 'enCoursSelect',
+            model: 'copros'
+        }).populate({
+            path: 'gestionnaires',
+            model: 'gestionnaires'
+        }).populate({
+            path: 'courtiers',
+            model: 'courtiers'
+        }).populate({
+            path: 'prestataires',
+            model: 'prestataires'
+        });
+    else
+        Syndic.findOne({_id: req.body._id}, (err, synd) => {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur system', err});
+            else if (!synd)
+                res.status(404).send({success: false, message: "ce syndic n'existe pas"});
+            else if (synd && req.user.role === 'syndic' && req.user.id.toString() !== synd._id.toString())
+                res.status(401).send({success: false, message: "missmatch identity"});
+            else
+                res.status(200).send({success: true, syndic: synd});
         }).populate({
             path: 'parc',
             model: 'copros'
