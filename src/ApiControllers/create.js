@@ -797,7 +797,7 @@ let registerBatiment = async (req, res) => {
                             console.log('update err: ', err)
                         }
                     });
-                    await Architecte.findOneAndUpdate({_id: req.user.id}, {$push: {honnorairesVisites: {date: new Date(), amount: 0.02 * copr.surface}}}, {new: true}, (err, arch) => {
+                    await Architecte.findOneAndUpdate({_id: req.user.id}, {$addToSet: {honnorairesVisites: {date: new Date(), amount: 0.02 * copr.surface}}}, {new: true}, (err, arch) => {
                         if (err)
                             console.log("error: ", err)
                         else if (!arch)
@@ -1259,7 +1259,7 @@ let registerAvisTravaux = async (req, res) => {
                                 console.log("devis introuvable")
                             //res.status(400).send({success: false, message: "visite introuvable"});
                         });
-                        Architecte.findOneAndUpdate({_id: req.user.id}, {$push: {honnorairesAvis: {date: new Date(), amount: 25}}}, {new: true}, (err, arch) => {
+                        Architecte.findOneAndUpdate({_id: req.user.id}, {$addToSet: {honnorairesAvis: {date: new Date(), amount: 25}}}, {new: true}, (err, arch) => {
                             if (err)
                                 console.log("error: ", err)
                             else if (!arch)
