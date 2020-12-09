@@ -1242,7 +1242,7 @@ let annulerVisiteBis = (req, res) => {
                                            else if (!syndic)
                                                res.status(404).send({success: false, message: "ce syndic n'existe pas"});
                                            else
-                                               res.status(200).send({success: true, message: "demande annulée"});
+                                               res.status(200).send({success: true, message: "demande annulée", credit: syndic.credit});
                                         });
                                 }
                             });
