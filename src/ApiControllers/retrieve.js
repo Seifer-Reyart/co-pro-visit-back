@@ -1079,8 +1079,8 @@ let retrieveCredit = (req, res) => {
     if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire') {
         res.status(401).send({success: false, message: 'accès refusé'});
     } else {
-        let _id = req.user.role === 'syndic' ? req.user.id : req.body._id
-        Syndic.findOne({_id}, (err, syndic) => {
+        let _id = req.user.id;
+        Syndic.findOne({$or: [{_id}, {gestionnaires: {$elemMatch: {$eq: _id}}}]}, (err, syndic) => {
             if (err)
                 res.status(400).send({succes: false, message: 'erreur système', err});
             else if (!syndic)
