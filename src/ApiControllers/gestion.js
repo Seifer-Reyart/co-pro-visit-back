@@ -241,18 +241,29 @@ let demandeVisite = (req, res) => {
                                     demandeLe       : new Date(),
                                     done            : false
                                 });
-                                visite.save(async function(err, v) {
+                                visite.save(function(err, v) {
                                     if (err || !v)
                                         res.status(400).send({success: false, message: 'erreur system', err});
                                     else {
-                                        await Copro.updateOne(
+                                        Copro.updateOne(
                                             {_id: copro._id},
                                             {$set: {dateDemandeVisite: new Date()}},
-                                            async function (err) {
+                                            (err) => {
                                                 if (err)
                                                     res.status(400).send({success: false, message: 'erreur system', err});
                                                 else {
-                                                    res.status(200).send({success: true, message: 'requête visite envoyée'});
+                                                    Syndic.findOneAndUpdate(
+                                                        {_id: synd._id},
+                                                        {$inc: {credit: (-1 * copro.surface)}},
+                                                        {new: true},
+                                                        (err, s) => {
+                                                            if (err)
+                                                                res.status(400).send({success: false, message: 'erreur system', err});
+                                                            else if (!s)
+                                                                res.status(404).send({success: false, message: "ce syndic n'existe pas"});
+                                                            else
+                                                                res.status(200).send({success: true, message: 'requête visite envoyée', credit: s.credit});
+                                                        });
                                                 }
                                             });
                                     }
@@ -1193,6 +1204,55 @@ let deleteCopro = (req, res) => {
     }
 }
 
+let annulerVisiteBis = (req, res) => {
+    if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else {
+        const {coproId} = req.body;
+        Architecte.findOne({copros: {$elemMatch: {$eq: coproId}}}, function (err, archi) {
+            if (err) {
+                res.status(400).send({success: false, message: 'erreur système', err});
+            } else if (archi)
+                res.status(403).send({success: false, message: 'Désolé mais un architecte effectue la visite, merci de nous adresser rapidement un mail'});
+            else {
+                let _id = req.user.id;
+                Copro.findOneAndUpdate(
+                    {_id: coproId},
+                    {dateDemandeVisite: null, dateVisite: null},
+                    {new: true},
+                    function (err, cpr) {
+                        if (err) {
+                            res.status(400).send({success: false, message: 'erreur système', err});
+                        } else if (!cpr)
+                            res.status(404).send({success: false, message: "cette copropriété n'existe pas"});
+                        else {
+                            Visite.findOneAndDelete({coproId}, function (err, visite) {
+                                if (err) {
+                                    res.status(400).send({success: false, message: 'erreur système', err});
+                                } else if (!visite)
+                                    res.status(404).send({success: false, message: "cette visite n'existe pas"});
+                                else {
+                                    Syndic.findOneAndUpdate(
+                                        {$or: [{_id}, {gestionnaires: {$elemMatch: {$eq: _id}}}]},
+                                        {$inc: {credit: cpr.surface}},
+                                        {new: true},
+                                        (err, syndic) => {
+                                           if (err)
+                                               res.status(400).send({success: false, message: 'erreur système', err});
+                                           else if (!syndic)
+                                               res.status(404).send({success: false, message: "ce syndic n'existe pas"});
+                                           else
+                                               res.status(200).send({success: true, message: "demande annulée"});
+                                        });
+                                }
+                            });
+                        }
+                    });
+            }
+        });
+    }
+}
+
 let annulerVisite = (req, res) => {
     if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
         res.status(401).send({success: false, message: 'accès interdit'});
@@ -1232,7 +1292,6 @@ let annulerVisite = (req, res) => {
                                                let enCours = [];
                                                let i;
                                                for (i in copros) {
-                                                   console.log(copros[i])
                                                    if (copros[i].syndicNominated)
                                                        await parc.push(copros[i]);
                                                    else
@@ -1608,6 +1667,7 @@ module.exports = {
     desassignerGestionnaireToCopro,
 	desassignerEtudeToCourtier,
     annulerVisite,
+    annulerVisiteBis,
     sendToEtude,
     aboPrestaToSyndic,
     demandeDevis,

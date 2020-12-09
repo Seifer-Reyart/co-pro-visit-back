@@ -28,6 +28,7 @@ let {
     desassignerGestionnaireToCopro,
     desassignerEtudeToCourtier,
     annulerVisite,
+    annulerVisiteBis,
     sendToEtude,
     aboPrestaToSyndic,
     demandeDevis,
@@ -293,7 +294,7 @@ router.post('/delete-copro', deleteCopro);
  * @consumes application/json
  * @security JWT
  */
-router.post('/annuler-visite', annulerVisite);
+router.post('/annuler-visite', annulerVisiteBis);
 
 /**
  * Cette route permet d'envoyer une Copro en étude à plusieurs Courtiers, JWT necessaire.
