@@ -1568,6 +1568,24 @@ let deleteArchi = (req, res) => {
     }
 }
 
+let ajoutCreditSyndic = (req, res) => {
+    if (req.user.role !== 'admin')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else {
+        Syndic.findOneAndUpdate(
+            {_id: req.body.syndic},
+            {$inc: {credit: req.body.credit}},
+            {new: true},
+            (err, syndic) => {
+                if (err)
+                    res.status(400).send({success: false, message: "une erreur est survenue", err});
+                else if (!syndic)
+                    res.status(404).send({success: false, message: "ce syndic n'existe pas dans la base"});
+                else
+                    res.status(200).send({success: true, message: "le crédit a bien été mis à jour", credit: syndic.credit});
+            })
+    }
+}
 
 /* Export Functions */
 
@@ -1597,4 +1615,5 @@ module.exports = {
     updatePermissionsGest,
     openAccessPCS,
     deleteIncident,
+    ajoutCreditSyndic
 }

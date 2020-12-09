@@ -35,6 +35,7 @@ let {
     updatePermissionsGest,
     openAccessPCS,
     deleteIncident,
+    ajoutCreditSyndic
 } = require('../ApiControllers/gestion');
 
 /***************/
@@ -439,6 +440,22 @@ router.post('/delete-courtier', deleteCourt);
  * @security JWT
  */
 router.post('/delete-presta', deletePresta);
+
+/**
+ * Cette route permet d'ajouter du crédit visite à un Syndic', JWT necessaire.
+ * @route POST /gestion/credit
+ * @group gestion
+ * @param {string} syndic.body.required - _id du Syndic
+ * @param {string} credit.body.required - credit à ajouter
+ * @returns {object} 200 - {success: true, message: "le crédit a bien été mis à jour"}
+ * @returns {Error}  400 - {success: false, message: 'erreur système', err: mongoose system log error}
+ * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
+ * @returns {Error}  404 - {success: false, message: "ce syndic n'existe pas"}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.post('/credit', ajoutCreditSyndic);
 
 module.exports = router;
 
