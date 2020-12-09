@@ -35,7 +35,8 @@ let {
     retrieveDevisByCopro,
     retrieveOneReception,
     retrieveAllReception,
-    retrieveVisisteCourtier
+    retrieveVisisteCourtier,
+    retrieveCredit
 } = require('../ApiControllers/retrieve');
 
 /***************/
@@ -456,5 +457,19 @@ router.post('/all-avis', retrieveAllReception);
  */
 
 router.post('/visites-courtier', retrieveVisisteCourtier);
+
+/**
+ * Cette route permet de récupérer le credit visite d'un syndic, JWT necessaire.
+ * @route POST /retrieve/credit
+ * @group Get_Data
+ * @returns {object} 200 - {success: true, credit: credit du syndic}
+ * @returns {Error}  400 - {success: false, message: error system log from mongoose}
+ * @returns {Error}  401 - si dans token, role !== syndic ou gestionnaire  {success: false, message: 'accès interdit'}
+ * @returns {Error}  404 - si aucun syndic trouvé  {success: false, message: 'aucun syndic enregistré'}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.post('/credit', retrieveCredit);
 
 module.exports = router;

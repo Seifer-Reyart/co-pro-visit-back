@@ -1075,6 +1075,22 @@ let retrieveAllReception = (req, res) => {
     }
 }
 
+let retrieveCredit = (req, res) => {
+    if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire') {
+        res.status(401).send({success: false, message: 'accès refusé'});
+    } else {
+        let _id = req.user.role === 'syndic' ? req.user.id : req.body._id
+        Syndic.findOne({_id}, (err, syndic) => {
+            if (err)
+                res.status(400).send({succes: false, message: 'erreur système', err});
+            else if (!syndic)
+                res.status(404).send({succes: false, message: "ce syndic n'existe pas"});
+            else
+                res.status(200).send({success: true, credit: syndic.credit});
+        });
+    }
+}
+
 module.exports = {
     getPCS,
     getCopro,
@@ -1102,5 +1118,6 @@ module.exports = {
     retrieveDevisByCopro,
     retrieveOneReception,
     retrieveAllReception,
-    retrieveVisisteCourtier
+    retrieveVisisteCourtier,
+    retrieveCredit
 }
