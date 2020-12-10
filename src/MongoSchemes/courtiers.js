@@ -51,6 +51,10 @@ let courtiersSchema = new Schema({
         type    : [Schema.Types.ObjectId],
         default : []
     },
+    dateEtudes: [{
+        coproId : {type: Schema.Types.ObjectId, default: null},
+        date    : {type: Date, default: null}
+    }],
     role        	: {
         type    : String,
         default : 'courtier'

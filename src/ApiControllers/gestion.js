@@ -1322,7 +1322,7 @@ let sendToEtude = (req, res) => {
         const {coproId, courtiers} = req.body;
         Courtier.updateMany(
             {_id: {$in: courtiers}},
-            {$addToSet: {etudes: coproId}},
+            {$addToSet: {etudes: coproId, dateEtudes: {coproId, date: new Date()}}},
             function (err) {
                 if (err)
                     res.status(400).send({success: false, message: 'erreur système', err});
