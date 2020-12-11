@@ -13,6 +13,7 @@ let {
     updateCredentials,
     updateGestionnaire,
     updateInfosPresta,
+    updateRCfiles,
     updateInfosArchi
 } = require('../ApiControllers/update');
 const multer = require('multer');
@@ -108,7 +109,14 @@ router.put('/credentials', checkEmailBeforeUpdate, updateCredentials);
  * @route PUT /update/prestataire-infos
  * @group prestataire
  */
-router.put('/prestataire-infos', multer().any(), updateInfosPresta);
+router.put('/prestataire-infos', updateInfosPresta);
+
+/**
+ * Cette route permet de modifier les informations du prestataire, JWT necessaire.
+ * @route PUT /update/prestataire-rcfiles
+ * @group prestataire
+ */
+router.put('/prestataire-rcfiles', multer().any(), updateRCfiles);
 
 /**
  * Cette route permet de modifier les informations de l'architecte, JWT necessaire.

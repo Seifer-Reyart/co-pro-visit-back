@@ -270,68 +270,12 @@ let updateGestionnaire = (req, res) => {
 /************************/
 
 let updateInfosPresta = async (req, res) => {
-console.log('UPDATE INFO PRESTA----- ', req.body)
     if (req.user.role !== 'prestataire')
         res.status(401).send({success: false, message: 'accès interdit'});
     else {
-	    let imagesUploadErrors = [];
-	    let imagesUploaded = []
-	    let RCProfessionnelle, RCDecennale;
-			if (req.files) {
-				const filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
-				promisesFiles = req.files.map( async file => {
-					return new Promise(async (resolve) => {
-						let savedFileName = '';
-						const mimetype = filetypes.test(file.mimetype);
-						let hash = crypto.createHash('sha1')
-						let hashedBuffer = file.buffer;
-						hash.update(hashedBuffer);
-						let extension = file.mimetype.match(filetypes);
-						extension = extension?.length ? extension[0] : null;
-						savedFileName = `${hash.digest('hex')}.${extension}`
-						console.log('savedfgile', savedFileName)
-						if (mimetype) {
-							await fs.writeFile('./src/uploads/RC-files/' + savedFileName, file.buffer, async (err) => {
-								if (err) {
-									await imagesUploadErrors.push({imageTitle: file.originalname, err});
-									await resolve()
-								} else {
-									if (file.fieldname === 'rcProfessionnelle')
-										RCProfessionnelle = savedFileName;
-									else if (file.fieldname === 'RCDecennale')
-										RCDecennale = savedFileName
-									await imagesUploaded.push(savedFileName);
-									await resolve()
-								}
-							})
-						} else {
-							await imagesUploadErrors.push({
-								imageTitle: file.originalname,
-								fileType: file.fieldname,
-								err: "Mauvais format, reçu " + file.mimetype + ", attendu: " + filetypes
-							});
-							await resolve()
-						}
-					})
-				});
-				await Promise.all(promisesFiles)
-			}
-	let newBody = req.body;
-	newBody.RCDecennale = RCDecennale;
-	newBody.RCProfessionnelle = RCProfessionnelle;
-	if (req.body.RCPdetailsEcheanceAnnuelle || req.body.RCPdetailsCompagnie) {
-		newBody.RCPdetails = {echeanceAnnuelle: req.body.RCPdetailsEcheanceAnnuelle, compagnie: req.body.RCPdetailsCompagnie}
-		delete newBody.RCPdetailsEcheanceAnnuelle;
-		delete newBody.RCPdetailsCompagnie;
-	}
-	if (req.body.RCDdetailsEcheanceAnnuelle || req.body.RCDdetailsCompagnie) {
-		newBody.RCDdetails = {echeanceAnnuelle: req.body.RCDdetailsEcheanceAnnuelle, compagnie: req.body.RCDdetailsCompagnie}
-		delete newBody.RCDdetailsEcheanceAnnuelle;
-		delete newBody.RCDdetailsCompagnie;
-	}
         Prestataire.findOneAndUpdate(
             {_id: req.user.id},
-            {$set: newBody},
+            {$set: req.body},
             {new: true},
             (err, prest) => {
                 if (err)
@@ -344,6 +288,101 @@ console.log('UPDATE INFO PRESTA----- ', req.body)
         );
     }
 };
+
+let updateRCfiles = async (req, res) => {
+    if (req.user.role !== 'prestataire')
+        res.status(401).send({success: false, message: 'accès refusé'});
+    else {
+        let imagesUploadErrors = [];
+        let imagesUploaded = []
+        let RCProfessionnelle = "", RCDecennale = "";
+        if (req.files) {
+            const filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
+            let promisesFiles = req.files.map( async file => {
+                return new Promise(async (resolve) => {
+                    //let savedFileName = '';
+                    const mimetype = filetypes.test(file.mimetype);
+                    let hash = crypto.createHash('sha1')
+                    let hashedBuffer = file.buffer;
+                    hash.update(hashedBuffer);
+                    let extension = file.mimetype.match(filetypes);
+                    extension = extension?.length ? extension[0] : null;
+                    let savedFileName = `${hash.digest('hex')}.${extension}`
+                    if (mimetype) {
+                        await fs.writeFile('./src/uploads/RC-files/' + savedFileName, file.buffer, async (err) => {
+                            if (err) {
+                                await imagesUploadErrors.push({imageTitle: file.originalname, err});
+                                await resolve()
+                            } else {
+                                if (file.fieldname === 'rcProfessionnelle')
+                                    RCProfessionnelle = savedFileName;
+                                else if (file.fieldname === 'RCDecennale')
+                                    RCDecennale = savedFileName
+                                await imagesUploaded.push(savedFileName);
+                                await resolve()
+                            }
+                        })
+                    } else {
+                        await imagesUploadErrors.push({
+                            imageTitle: file.originalname,
+                            fileType: file.fieldname,
+                            err: "Mauvais format, reçu " + file.mimetype + ", attendu: " + filetypes
+                        });
+                        await resolve()
+                    }
+                })
+            });
+            await Promise.all(promisesFiles)
+        }
+
+        const {RCPdetailsEcheanceAnnuelle, RCPdetailsCompagnie, RCDdetailsEcheanceAnnuelle, RCDdetailsCompagnie} = req.body;
+        let update = {};
+
+        if (RCPdetailsEcheanceAnnuelle && RCPdetailsCompagnie) {
+            update = {
+                "RCPdetails.compagnie": RCPdetailsCompagnie,
+                "RCPdetails.echeanceAnnuelle": RCPdetailsEcheanceAnnuelle,
+                RCProfessionnelle
+            }
+        } else if (RCDdetailsEcheanceAnnuelle && RCDdetailsCompagnie) {
+            update = {
+                "RCDdetails.compagnie": RCDdetailsCompagnie,
+                "RCDdetails.echeanceAnnuelle": RCDdetailsEcheanceAnnuelle,
+                RCDecennale
+            }
+        }
+
+        if (imagesUploadErrors.length > 0) {
+            res.status(400).send({success: false, message: imagesUploadErrors[0].err});
+        } else {
+            Prestataire.findOneAndUpdate(
+                {_id: req.user.id},
+                {$set: update},
+                {new: true},
+                (err, prest) => {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur système', err});
+                    else if (!prest)
+                        res.status(404).send({success: false, message: "ce Prestataire n'existe pas"});
+                    else
+                        res.status(200).send({success: true, message: 'informations mise à jours'});
+                });
+        }
+
+        /*
+        if (req.body.RCPdetailsEcheanceAnnuelle || req.body.RCPdetailsCompagnie) {
+            newBody.RCPdetails = {echeanceAnnuelle: req.body.RCPdetailsEcheanceAnnuelle, compagnie: req.body.RCPdetailsCompagnie}
+            delete newBody.RCPdetailsEcheanceAnnuelle;
+            delete newBody.RCPdetailsCompagnie;
+        }
+        if (req.body.RCDdetailsEcheanceAnnuelle || req.body.RCDdetailsCompagnie) {
+            newBody.RCDdetails = {echeanceAnnuelle: req.body.RCDdetailsEcheanceAnnuelle, compagnie: req.body.RCDdetailsCompagnie}
+            delete newBody.RCDdetailsEcheanceAnnuelle;
+            delete newBody.RCDdetailsCompagnie;
+        }
+        */
+    }
+}
 
 /***********************/
 /*| update Architecte |*/
@@ -379,5 +418,6 @@ module.exports = {
     updateGestionnaire,
     updateCredentials,
     updateInfosPresta,
+    updateRCfiles,
     updateInfosArchi,
 }
