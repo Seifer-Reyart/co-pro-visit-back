@@ -489,13 +489,10 @@ let getCoproBySyndic = (req, res) => {
                 res.status(404).send({success: false, message: 'aucun prestataire enregistré'});
             else
                 Copro.find({
-                    $and: [
-                        {
-                            $or: [
-                                {syndicNominated: syndicId}, {syndicEnCours: {$elemMatch: {$eq: syndicId}}}
-                                ]
-                        },
-                        {incidentId: {$elemMatch: {$in: presta.incidentId}}}
+                    $and:
+                        [
+                            {$or: [{syndicNominated: syndicId}, {syndicEnCours: {$elemMatch: {$eq: syndicId}}}]},
+                            {incidentId: {$elemMatch: {$in: presta.incidentId}}}
                         ]
                 }, (err, copros) => {
                     if (err)
@@ -996,7 +993,7 @@ let retrieveDevis = (req, res) => {
     } else {
         const {prestataireId} = req.body;
 
-        Devis.find({prestataireId}, function (err, devis) {
+        Devis.find({}, function (err, devis) {
             if (err)
                 res.status(400).send({succes: false, message: 'erreur système', err});
             else if (!devis)
