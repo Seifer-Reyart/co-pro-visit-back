@@ -888,9 +888,9 @@ let getPrestataire = (req, res) => {
     if (req.user.role === 'admin')
         Prestataire.find({}, function (err, prestataires) {
             if (err)
-                res.status(400).send({succes: false, message: 'erreur système', err});
+                res.status(400).send({success: false, message: 'erreur système', err});
             else if (!prestataires || prestataires.length === 0)
-                res.status(404).send({succes: false, message: 'pas de prestataires enregistrés'});
+                res.status(404).send({success: false, message: 'pas de prestataires enregistrés'});
             else
                 res.status(200).send({success: true, prestataires});
         });
@@ -898,9 +898,9 @@ let getPrestataire = (req, res) => {
         Syndic.findOne({$or: [{_id: req.user.id}, {gestionnaires: {$elemMatch: {$eq: req.user.id}}}]}, (err, user) => {
             Prestataire.find({_id: {$in: user.prestataires}}, function (err, prestataires) {
                 if (err)
-                    res.status(400).send({succes: false, message: 'erreur système', err});
+                    res.status(400).send({success: false, message: 'erreur système', err});
                 else if (!prestataires || prestataires.length === 0)
-                    res.status(404).send({succes: false, message: 'pas de prestataires enregistrés'});
+                    res.status(404).send({success: false, message: 'pas de prestataires enregistrés'});
                 else
                     res.status(200).send({success: true, prestataires});
             });
@@ -913,9 +913,9 @@ let postPrestataire = (req, res) => {
     if (req.user.role === 'admin' || (req.user.role === 'prestataire' && req.user.id === req.body._id))
         Prestataire.findOne({_id: req.body._id}, function (err, prestataire) {
             if (err)
-                res.status(400).send({succes: false, message: 'erreur système', err});
+                res.status(400).send({success: false, message: 'erreur système', err});
             else if (!prestataire)
-                res.status(404).send({succes: false, message: "ce prestataire n'existe pas"});
+                res.status(404).send({success: false, message: "ce prestataire n'existe pas"});
             else
                 res.status(200).send({success: true, prestataire});
         })
@@ -933,9 +933,9 @@ let retrieveDevis = (req, res) => {
 
         Devis.find({$and: [{visiteId}, {architecteId: req.user.id}, {demandeReception: true}]}, function (err, devis) {
             if (err)
-                res.status(400).send({succes: false, message: 'erreur système', err});
+                res.status(400).send({success: false, message: 'erreur système', err});
             else if (!devis)
-                res.status(404).send({succes: false, message: "devis/evaluation introuvable"});
+                res.status(404).send({success: false, message: "devis/evaluation introuvable"});
             else {
                 res.status(200).send({success: true, devis});
             }
@@ -953,15 +953,15 @@ let retrieveDevis = (req, res) => {
         const {courtierId} = req.body;
         Courtier.findOne({_id: req.user.id}, function (err, court) {
             if (err)
-                res.status(400).send({succes: false, message: 'erreur système', err});
+                res.status(400).send({success: false, message: 'erreur système', err});
             else if (!court)
-                res.status(404).send({succes: false, message: "Courtier non identifié"});
+                res.status(404).send({success: false, message: "Courtier non identifié"});
             else
                 Devis.find({$and: [{coproId: {$in: court.parc}}, {receptionDone: {$ne: null}}]}, function (err, devis) {
                     if (err)
-                        res.status(400).send({succes: false, message: 'erreur système', err});
+                        res.status(400).send({success: false, message: 'erreur système', err});
                     else if (!devis)
-                        res.status(404).send({succes: false, message: "devis/evaluation introuvable"});
+                        res.status(404).send({success: false, message: "devis/evaluation introuvable"});
                     else {
                         res.status(200).send({success: true, devis});
                     }
@@ -972,9 +972,9 @@ let retrieveDevis = (req, res) => {
         if (prestataires?.length > 0) {
             Devis.find({$and: [{prestataireId: {$in: prestataires}}, {$or: [{syndicId: req.user.id}, {gestionnaireId: req.user.id}]}]}, function (err, devis) {
                 if (err)
-                    res.status(400).send({succes: false, message: 'erreur système', err});
+                    res.status(400).send({success: false, message: 'erreur système', err});
                 else if (!devis)
-                    res.status(404).send({succes: false, message: "ce devis/evaluation n'existe pas"});
+                    res.status(404).send({success: false, message: "ce devis/evaluation n'existe pas"});
                 else {
                     console.log("list: ", devis);
                     res.status(200).send({success: true, list: devis});
@@ -983,9 +983,9 @@ let retrieveDevis = (req, res) => {
         } else {
             Devis.find({coproId: {$in: copros}}, function (err, devis) {
                 if (err)
-                    res.status(400).send({succes: false, message: 'erreur système', err});
+                    res.status(400).send({success: false, message: 'erreur système', err});
                 else if (!devis)
-                    res.status(404).send({succes: false, message: "ce devis/evaluation n'existe pas"});
+                    res.status(404).send({success: false, message: "ce devis/evaluation n'existe pas"});
                 else
                     res.status(200).send({success: true, list: devis});
             });
@@ -995,9 +995,9 @@ let retrieveDevis = (req, res) => {
 
         Devis.find({}, function (err, devis) {
             if (err)
-                res.status(400).send({succes: false, message: 'erreur système', err});
+                res.status(400).send({success: false, message: 'erreur système', err});
             else if (!devis)
-                res.status(404).send({succes: false, message: "ce devis/evaluation n'existe pas"});
+                res.status(404).send({success: false, message: "ce devis/evaluation n'existe pas"});
             else
                 res.status(200).send({success: true, list: devis});
         });
@@ -1012,9 +1012,9 @@ let retrieveDevisByCopro = (req, res) => {
             Devis.find({$and: [{coproId: req.body.coproId}, {$or: [{syndicId: req.user.id},{gestionnaireId: req.user.id}, {pcsId: req.user.id}]}]}, function (err, devis) {
                 if (err) {
                     console.log(err)
-                    res.status(400).send({succes: false, message: 'erreur système', err});
+                    res.status(400).send({success: false, message: 'erreur système', err});
                 } else if (!devis)
-                    res.status(404).send({succes: false, message: "ce devis/evaluation n'existe pas"});
+                    res.status(404).send({success: false, message: "ce devis/evaluation n'existe pas"});
                 else
                     res.status(200).send({success: true, list: devis});
             }).populate({
@@ -1027,9 +1027,9 @@ let retrieveDevisByCopro = (req, res) => {
         else
             Devis.find({$and: [{coproId: req.body.coproId}, {$or: [{syndicId: req.user.id},{gestionnaireId: req.user.id}]}]}, function (err, devis) {
                 if (err)
-                    res.status(400).send({succes: false, message: 'erreur système', err});
+                    res.status(400).send({success: false, message: 'erreur système', err});
                 else if (!devis)
-                    res.status(404).send({succes: false, message: "ce devis/evaluation n'existe pas"});
+                    res.status(404).send({success: false, message: "ce devis/evaluation n'existe pas"});
                 else
                     res.status(200).send({success: true, list: devis});
             });
@@ -1043,9 +1043,9 @@ let retrieveOneReception = (req, res) => {
         const { _id } = req.body;
         Reception.findOne({_id}, (err, reception) => {
             if (err)
-                res.status(400).send({succes: false, message: 'erreur système', err});
+                res.status(400).send({success: false, message: 'erreur système', err});
             else if (!reception)
-                res.status(404).send({succes: false, message: "pas d'avis enregistré"});
+                res.status(404).send({success: false, message: "pas d'avis enregistré"});
             else
                 res.status(200).send({success: true, receptionDone: reception});
         })
@@ -1060,9 +1060,9 @@ let retrieveAllReception = (req, res) => {
         const {coproId} = req.body;
         Reception.find({$and: [{coproId},{$or: [{syndicId: id}, {gestionnaireId: id}, {pcsId: id}]}]}, (err, receptions) => {
             if (err)
-                res.status(400).send({succes: false, message: 'erreur système', err});
+                res.status(400).send({success: false, message: 'erreur système', err});
             else if (!receptions)
-                res.status(404).send({succes: false, message: "pas d'avis enregistrés"});
+                res.status(404).send({success: false, message: "pas d'avis enregistrés"});
             else
                 res.status(200).send({success: true, receptions});
         }).populate({
@@ -1079,11 +1079,49 @@ let retrieveCredit = (req, res) => {
         let _id = req.user.id;
         Syndic.findOne({$or: [{_id}, {gestionnaires: {$elemMatch: {$eq: _id}}}]}, (err, syndic) => {
             if (err)
-                res.status(400).send({succes: false, message: 'erreur système', err});
+                res.status(400).send({success: false, message: 'erreur système', err});
             else if (!syndic)
-                res.status(404).send({succes: false, message: "ce syndic n'existe pas"});
+                res.status(404).send({success: false, message: "ce syndic n'existe pas"});
             else
                 res.status(200).send({success: true, credit: syndic.credit});
+        });
+    }
+}
+
+let retrieveDataByPeriod = (req, res) => {
+    if (req.user.role !== 'admin') {
+        res.status(401).send({success: false, message: 'accès refusé'});
+    } else {
+        const {syndicId, dateDebut, dateFin} = req.body;
+        Syndic.findOne({_id: syndicId}, (err, syndic) => {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur système', err});
+            else if (!syndic)
+                res.status(404).send({success: false, message: "ce syndic n'existe pas"});
+            else {
+                Copro.find({$and: [{_id: {$in: syndic.parc}}, {dateDemandeVisite: {$gt: dateDebut}}, {dateDemandeVisite: {$lt: dateFin}}]}, (err, parc) => {
+                    if (err)
+                        res.status(400).send({success: false, message: 'erreur système', err});
+                    else {
+                        Copro.find({$and: [{_id: {$in: syndic.enCoursSelect}}, {dateDemandeVisite: {$gte: dateDebut}}, {dateDemandeVisite: {$lte: dateFin}}]}, (err, encours) => {
+                            if (err)
+                                res.status(400).send({success: false, message: 'erreur système', err});
+                            else {
+                                if (!parc && !encours)
+                                    res.status(404).send({success: false, message: "Aucune donnée à afficher"});
+                                else
+                                    res.status(200).send({success: true, parc, encours});
+                            }
+                        }).populate({
+                            path: 'courtier',
+                            model: 'courtiers'
+                        });
+                    }
+                }).populate({
+                    path: 'courtier',
+                    model: 'courtiers'
+                });
+            }
         });
     }
 }
@@ -1116,5 +1154,6 @@ module.exports = {
     retrieveOneReception,
     retrieveAllReception,
     retrieveVisisteCourtier,
-    retrieveCredit
+    retrieveCredit,
+    retrieveDataByPeriod
 }

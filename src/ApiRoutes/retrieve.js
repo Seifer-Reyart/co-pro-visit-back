@@ -36,7 +36,8 @@ let {
     retrieveOneReception,
     retrieveAllReception,
     retrieveVisisteCourtier,
-    retrieveCredit
+    retrieveCredit,
+    retrieveDataByPeriod
 } = require('../ApiControllers/retrieve');
 
 /***************/
@@ -471,5 +472,19 @@ router.post('/visites-courtier', retrieveVisisteCourtier);
  * @security JWT
  */
 router.post('/credit', retrieveCredit);
+
+/**
+ * Cette route permet de récupérer la liste des demandes de visites d'un syndic par période, JWT necessaire.
+ * @route POST /retrieve/demande-period
+ * @group Get_Data
+ * @returns {object} 200 - {success: true, copros}
+ * @returns {Error}  400 - {success: false, message: error system log from mongoose}
+ * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
+ * @returns {Error}  404 - si aucune donnée trouvée  {success: false, message: 'aucune donnée à afficher'}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+router.post('/demande-period', retrieveDataByPeriod);
 
 module.exports = router;
