@@ -53,6 +53,10 @@ let prestatairesSchema = new Schema({
         compagnie           : {type: String, default: null},
         echeanceAnnuelle    : {type: Date, default: null}
     },
+    noteGlobale         : {
+        type    : Number,
+        default : 1
+    },
     role        	: {
         type: String,
         default: 'prestataire'

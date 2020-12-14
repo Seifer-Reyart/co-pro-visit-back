@@ -1264,6 +1264,29 @@ let registerAvisTravaux = async (req, res) => {
                             else if (!arch)
                                 console.log("devis introuvable")
                         });
+                        Reception.find({prestataireId: recept.prestataireId}, (err, recepts) => {
+                            if (err)
+                                console.log("error: ", err)
+                            else if (!recepts)
+                                console.log("no recpets")
+                            else {
+                                let noteGlobale = 0;
+                                for (let i in recepts) {
+                                    noteGlobale += recepts[i].rate;
+                                }
+                                noteGlobale = noteGlobale / recepts.length;
+                                Prestataire.findOneAndUpdate(
+                                    {_id: recept.prestataireId},
+                                    {$set: {noteGlobale}},
+                                    {new: true},
+                                    (err, prest) => {
+                                        if (err)
+                                            console.log("error: ", err)
+                                        else if (!prest)
+                                            console.log("no prest")
+                                    })
+                            }
+                        });
                         res.status(200).send({success: true, message: "Avis travaux enregistrée", receptionDone: recept});
                     }
                 });
