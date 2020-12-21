@@ -7,8 +7,8 @@ const   Admin           = require('../MongoSchemes/admins'),
         Architecte      = require('../MongoSchemes/architectes'),
         PresidentCS     = require('../MongoSchemes/presidentCS'),
         Prestataire     = require('../MongoSchemes/prestataires'),
-        Gestionnaire    = require('../MongoSchemes/gestionnaires');
-        Notifications    = require('../MongoSchemes/notifications');
+        Gestionnaire    = require('../MongoSchemes/gestionnaires'),
+        Notifications   = require('../MongoSchemes/notifications');
 /************************/
 
 /**************************************/
