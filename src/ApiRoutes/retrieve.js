@@ -9,6 +9,7 @@ const express = require('express');
 /************************/
 
 let {
+    getNotif,
     getPCS,
     getCopro,
     postCopro,
@@ -44,6 +45,11 @@ let {
 /* init router */
 /***************/
 let router = express.Router();
+
+/**
+
+ */
+router.post('/notifications', getNotif);
 
 /**
  * Cette route permet de récupérer un PCS, JWT necessaire.

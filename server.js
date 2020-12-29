@@ -4,12 +4,13 @@
 require('dotenv').config();
 const   express     = require('express'),
         cors        = require('cors'),
-        fs	    = require('fs'),
+        fs	        = require('fs'),
         https	    = require('https'),
         http        = require('http'),
-	path	    = require('path'),
-        bodyParser  = require('body-parser');
-
+	    path	    = require('path'),
+        bodyParser  = require('body-parser'),
+        secretExpr    = require('./src/Config/tsconfig.json'),
+        jwtAuth       = require('socketio-jwt-auth');
 /************************/
 /* import local modules */
 /************************/
@@ -45,7 +46,7 @@ let options = {
             title: 'Swagger',
             version: '3.0.0',
         },
-        host: 'http://54.37.157.34:3018',
+        host: 'http://54.37.157.34:3016',
         basePath: '/',
         produces: [
             "application/json",
@@ -114,6 +115,27 @@ let update      = require('./src/ApiRoutes/update');
 let gestion	    = require('./src/ApiRoutes/gestion');
 let retrieve	= require('./src/ApiRoutes/retrieve');
 
+
+var server = http.createServer(app);
+var io = require('socket.io')(server, {
+    cors: {
+        origin: '*',
+    }
+});
+io.use(jwtAuth.authenticate({
+    secret: secretExpr.secret,    // required, used to verify the token's signature
+    algorithm: 'HS256'        // optional, default to be HS256
+}, function(payload, done) {
+    return done(null, payload);
+})).on('connection', function(socket) {
+    console.log('Authentication passed!', socket.request.user);
+    socket.emit('success', {
+        message: 'success logged in!',
+    });
+    socket.authenticatedUser = socket.request.user;
+});
+
+app.set('socketio', io)
 app.use('/auth', auth);
 app.use('/create', create);
 app.use('/update', update);
@@ -138,7 +160,7 @@ https.createServer({
     });
 */
 
-app.listen(serverPort, serverIp, (err) => {
+server.listen(serverPort, serverIp, (err) => {
     if (err) {
         return console.log('something bad happened', err)
     }
@@ -146,6 +168,15 @@ app.listen(serverPort, serverIp, (err) => {
     console.log(`server is listening on port ${serverPort} at ${new Date()}`)
 });
 
+/* before notif commented code
+app.listen(serverPort, serverIp, (err) => {
+    if (err) {
+        return console.log('something bad happened', err)
+    }
+
+    console.log(`server is listening on port ${serverPort} at ${new Date()}`)
+});
+*/
 /* 404 API CallBack */
 
 app.use(function(req, res, next){

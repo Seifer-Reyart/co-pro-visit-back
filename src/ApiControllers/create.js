@@ -29,17 +29,17 @@ function generateP() {
     return pass;
 }
 
-function generateRefDesordre(ref, num) {
+function generateName() {
     let name = 'Copro ';
     let str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
-    while (name.length <= 5) {
+    while (name.length <= 6) {
         let char = Math.floor(Math.random() * str.length + 1);
 
         name += str.charAt(char)
     }
 
-    return name + '-' + new Date().getFullYear().toString();
+    return name;
 }
 
 /**** salt to crypt password ****/
@@ -1095,7 +1095,7 @@ let registerIncident = async (req, res) => {
                 }
                 let incident = new Incident({
                     images          : imagesUploaded  ,
-                    date            : new Date()        ,
+                    date            : new Date()      ,
                     metrages                ,
                     desordre                ,
                     situation               ,
