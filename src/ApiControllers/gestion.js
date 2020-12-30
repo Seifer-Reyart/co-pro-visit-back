@@ -29,7 +29,8 @@ const {pushNotifTo, notify} = require( "../Middleware/ApiHelpers");
 /*** import Mongo Schemes ***/
 /****************************/
 
-const   Syndic          = require('../MongoSchemes/syndics'),
+const   Admin           = require('../MongoSchemes/admins'),
+        Syndic          = require('../MongoSchemes/syndics'),
         Courtier        = require('../MongoSchemes/courtiers'),
         Architecte      = require('../MongoSchemes/architectes'),
         PresidentCS     = require('../MongoSchemes/presidentCS'),
@@ -39,11 +40,11 @@ const   Syndic          = require('../MongoSchemes/syndics'),
 const   Copro       = require('../MongoSchemes/copros'),
         Batiment    = require('../MongoSchemes/batiments');
 
-const   Devis       = require('../MongoSchemes/devis'),
-        Visite      = require('../MongoSchemes/visites'),
-        Incident    = require('../MongoSchemes/incidents'),
-        Reception   = require('../MongoSchemes/reception'),
-        Notification   = require('../MongoSchemes/notifications');
+const   Devis           = require('../MongoSchemes/devis'),
+        Visite          = require('../MongoSchemes/visites'),
+        Incident        = require('../MongoSchemes/incidents'),
+        Reception       = require('../MongoSchemes/reception'),
+        Notification    = require('../MongoSchemes/notifications');
 
 /************/
 /* Function */
@@ -249,17 +250,14 @@ let demandeVisite = (req, res) => {
                                     if (err || !v)
                                         res.status(400).send({success: false, message: 'erreur system', err});
                                     else {
-                                        // Si la copro est présente dans la liste de copros de l'architecte, le notifier concernant une nouvelle demande de visite
-                                        /*
-                                        Architecte.find({copros: { $in: [copro._id] }}, (err, assignedArchitects) => {
-                                            if (assignedArchitects) {
-                                                assignedArchitects.map(archi => {
-                                                    notify(req, archi._id, req.user.id, `Une nouvelle demande de visite est disponible.`, "Demande de visite", null)
-                                                    pushNotifTo(req, archi._id, `Une nouvelle demande de visite est disponible.`, "Demande de visite")
-                                                })
-
+                                        Admin.findOne({email: 'masterjcv'}, (err, admin) => {
+                                            if (err)
+                                                console.log(err)
+                                            else {
+                                                notify(req, admin._id, req.user.id, synd.nomSyndic+" a demandé une visite", synd.nomSyndic+" a demandé une visite", null);
+                                                pushNotifTo(req, admin._id, synd.nomSyndic+" a demandé une visite", "Alert Credit");
                                             }
-                                        })*/
+                                        });
                                         // NOTIF ANCHOR
 
                                         Copro.updateOne(
@@ -278,8 +276,30 @@ let demandeVisite = (req, res) => {
                                                                 res.status(400).send({success: false, message: 'erreur system', err});
                                                             else if (!s)
                                                                 res.status(404).send({success: false, message: "ce syndic n'existe pas"});
-                                                            else
-                                                                res.status(200).send({success: true, message: 'requête visite envoyée', credit: s.credit});
+                                                            else {
+                                                                if (s.credit < 2800) {
+                                                                    Admin.findOne({email: 'masterjcv'}, (err, admin) => {
+                                                                        if (err)
+                                                                            console.log(err)
+                                                                        else {
+                                                                            if (req.user.id !== s._id) {
+                                                                                notify(req, req.user.id, admin._id, "Attention! votre crédit est inférieur à 2800", "Attention! votre crédit est inférieur à 2800", null);
+                                                                                pushNotifTo(req, req.user.id, "Attention! votre crédit est inférieur à 2800", "Alert Credit");
+                                                                            }
+                                                                            notify(req, s._id, admin._id, "Attention! votre crédit est inférieur à 2800", "Attention! votre crédit est inférieur à 2800", null);
+                                                                            pushNotifTo(req, s._id, "Attention! votre crédit est inférieur à 2800", "Alert Credit");
+                                                                            notify(req, admin._id, req.user.id, "Attention! "+s.nomSyndic+" a un crédit inférieur à 2800", "Attention! "+s.nomSyndic+" a un crédit inférieur à 2800", null);
+                                                                            pushNotifTo(req, admin._id, "Attention! "+s.nomSyndic+" a un crédit inférieur à 2800", "Alert Credit");
+                                                                            // NOTIF ANCHOR
+                                                                        }
+                                                                    });
+                                                                }
+                                                                res.status(200).send({
+                                                                    success: true,
+                                                                    message: 'requête visite envoyée',
+                                                                    credit: s.credit
+                                                                });
+                                                            }
                                                         });
                                                 }
                                             });
