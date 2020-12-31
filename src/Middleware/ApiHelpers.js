@@ -305,13 +305,14 @@ const pushNotifTo = (req, targetId, message, title) => {
     }
 };
 
-const notify = (req, receiver_id, emitter_id, message, title, url) => {
+const notify = (req, receiver_id, emitter_id, message, title, coproId, url) => {
     const notif = new Notifications({
         date_seen: null,
         date_create: new Date(),
         title,
         message,
         url,
+        coproId,
         receiver_id,
         emitter_id,
     })

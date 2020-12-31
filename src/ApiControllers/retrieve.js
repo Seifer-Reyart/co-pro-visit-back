@@ -43,14 +43,36 @@ let getNotif = (req, res) => {
     Notification.find({receiver_id: req.user.id}, (err, notifications) => {
         if (err) {
             res.status(400).send({success: false, message: 'Erreur lors de la récupération de la notification', err});
-        }
-        else {
+        } else {
             res.status(200).send({success: false, notifications});
         }
         //notify(req, req.user.id, req.user.id, "test notif body", "test notif titre", null)
         //pushNotifTo(req, req.user.id, "message", "titre")
     })
 }
+
+let getNotificationByCopros = (req, res) => {
+    if (req.user.role !== "syndic")
+        res.status(401).send({success: false, message: 'accès refusé'});
+    else {
+        const {copros} = req.body;
+        Notification.find({$and: [{receiver_id: req.user.id}, {date_seen: null}, {coproId: {$in: copros}}]}, (err, notifications) => {
+            if (err) {
+                res.status(400).send({success: false, message: 'Erreur lors de la récupération de la notification', err});
+            } else {
+                let response = [];
+                for (let i in notifications) {
+                    if (!response.find(el => el.coproId === notifications[i].coproId)) {
+                        let tmp = notifications.filter(el => el.coproId === notifications[i].coproId);
+                        response.push({coproId: notifications.coproId, nbNotif: tmp.length});
+                    }
+                }
+                res.status(200).send({success: false, notifications: response});
+            }
+        });
+    }
+}
+
 /*** get single PCS ***/
 
 let getPCS = (req, res) => {
@@ -1176,5 +1198,6 @@ module.exports = {
     retrieveAllReception,
     retrieveVisisteCourtier,
     retrieveCredit,
-    retrieveDataByPeriod
+    retrieveDataByPeriod,
+    getNotificationByCopros
 }

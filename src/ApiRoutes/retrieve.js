@@ -38,7 +38,8 @@ let {
     retrieveAllReception,
     retrieveVisisteCourtier,
     retrieveCredit,
-    retrieveDataByPeriod
+    retrieveDataByPeriod,
+    getNotificationByCopros
 } = require('../ApiControllers/retrieve');
 
 /***************/
@@ -50,6 +51,11 @@ let router = express.Router();
 
  */
 router.post('/notifications', getNotif);
+
+/**
+
+ */
+router.post('/notifs-corpos', getNotificationByCopros);
 
 /**
  * Cette route permet de récupérer un PCS, JWT necessaire.

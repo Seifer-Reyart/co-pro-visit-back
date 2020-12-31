@@ -14,11 +14,15 @@ let notificationsSchema = new Schema({
         type: String,
         required: true
     },
-    message                : {
+    coproId             : {
+        type    : Schema.Types.ObjectId,
+        default : null
+    },
+    message             : {
         type: String,
         required: true
     },
-    url                    : {
+    url                 : {
         type: String,
         required: false
     },
@@ -26,7 +30,7 @@ let notificationsSchema = new Schema({
         type: Schema.Types.ObjectId,
         required: true
     },
-    receiver_id          :  {
+    receiver_id         :  {
         type: Schema.Types.ObjectId,
         required: true
     }
