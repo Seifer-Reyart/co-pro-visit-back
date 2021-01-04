@@ -8,12 +8,14 @@ let path    = require("path");
 let xlsx    = require('node-xlsx').default;
 let fs      = require('fs');
 let crypto  = require('crypto');
+
 /***************/
 /*** helpers ***/
 /***************/
 
 const { uploadFile, identityCheck }    = require('../Middleware/ApiHelpers');
 const {sendCredentials} = require('../Config/mailer');
+const {pushNotifTo, notify} = require("../Middleware/ApiHelpers");
 
 /*** generate password ***/
 function generateP() {
@@ -29,17 +31,17 @@ function generateP() {
     return pass;
 }
 
-function generateRefDesordre(ref, num) {
+function generateName() {
     let name = 'Copro ';
     let str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
-    while (name.length <= 5) {
+    while (name.length <= 6) {
         let char = Math.floor(Math.random() * str.length + 1);
 
         name += str.charAt(char)
     }
 
-    return name + '-' + new Date().getFullYear().toString();
+    return name;
 }
 
 /**** salt to crypt password ****/
@@ -64,7 +66,6 @@ const   Devis       = require('../MongoSchemes/devis');
 const   Visite      = require('../MongoSchemes/visites');
 const   Incident    = require('../MongoSchemes/incidents');
 const   Reception   = require('../MongoSchemes/reception');
-
 
 /************/
 /* Function */
@@ -790,10 +791,17 @@ let registerBatiment = async (req, res) => {
                             if (err)
                                 console.log(err)
                         });
-                    await Visite.findOneAndUpdate({coproId}, {$set: {faiteLe: new Date(), done: true}}, {new: false}, function (err) {
+                    await Visite.findOneAndUpdate({coproId}, {$set: {faiteLe: new Date(), done: true}}, {new: false}, function (err, visite) {
                         if (err) {
                             failed.push({err})
                             console.log('update err: ', err)
+                        } else {
+                            notify(req, visite?.syndicId, req.user.id, `visite effectuée pour la copro n°${visite?.reference}.`, "Visite effectuée", visite?.coproId, null);
+                            pushNotifTo(req, visite?.syndicId, `visite effectuée pour la copro n°${visite?.reference}.`, "Visite effectuée");
+                            if (visite?.gestionnaireId) {
+                                notify(req, visite?.gestionnaireId, req.user.id, `visite effectuée pour la copro n°${visite?.reference}.`, "Visite effectuée", visite?.coproId, null);
+                                pushNotifTo(req, visite?.gestionnaireId, `visite effectuée pour la copro n°${visite?.reference}.`, "Visite effectuée");
+                            }
                         }
                     });
                     await Architecte.findOneAndUpdate({_id: req.user.id}, {$addToSet: {honnorairesVisites: {date: new Date(), amount: 0.02 * copr.surface}}}, {new: true}, (err, arch) => {
@@ -867,6 +875,12 @@ let registerEvaluation = async (req, res) => {
                                         } else if (!result) {
                                             res.status(404).send({success: false, message: 'Incident introuvable'});
                                         } else {
+                                            notify(req, result?.syndicId, req.user.id, `Évaluation déposée pour le désordre n° ${result?.refDesordre}.`, "Evaluation déposée", result?.coproId, null);
+                                            pushNotifTo(req, result?.syndicId, `Évaluation déposée pour le désordre n° ${result?.refDesordre}.`, "Evaluation déposée");
+                                            if (result?.gestionnaireId) {
+                                                notify(req, result?.gestionnaireId, req.user.id, `Évaluation déposée pour le désordre n°${result?.refDesordre}.`, "Evaluation déposée", result?.coproId, null);
+                                                pushNotifTo(req, result?.gestionnaireId, `Évaluation déposée pour le désordre n°${result?.refDesordre}.`, "Evaluation déposée");
+                                            }
                                             res.status(200).send({success: true, message:"Evaluation envoyée!"})
                                         }
                                     }
@@ -942,12 +956,19 @@ let uploadDevisFile = (req, res) => {
                                     res.status(400).send({success: false, message: "erreur système", err});
                                 } else if (!devis)
                                     res.status(404).send({success: false, message: "devis introuvable"});
-                                else
+                                else {
+                                    notify(req, devis?.syndicId, req.user.id, `Devis déposée pour le désordre n°${devis?.refDesordre}.`, "Devis déposé", devis?.coproId, null);
+                                    pushNotifTo(req, devis?.syndicId, `Devis déposée pour le désordre n°${devis?.refDesordre}.`, "Devis déposé");
+                                    if (devis?.gestionnaireId) {
+                                        notify(req, devis?.gestionnaireId, req.user.id, `Devis déposée pour le désordre n°${devis?.refDesordre}.`, "Devis déposé", devis?.coproId, null);
+                                        pushNotifTo(req, devis?.gestionnaireId, `Devis déposée pour le désordre n°${devis?.refDesordre}.`, "Devis déposé");
+                                    }
                                     res.status(200).send({
                                         success: true,
                                         message: "devis uploadé",
                                         dateDepotDevis: devis.dateDepotDevis
                                     });
+                                }
                             });
                 }
 
@@ -1032,6 +1053,14 @@ let uploadFactureFile = (req, res) => {
                                                         console.log(err)
                                                     else if (!vis)
                                                         console.log("visite introuvable");
+                                                    else {
+                                                        notify(req, vis?.syndicId, req.user.id, `Facture déposée pour la copro n°${vis?.reference}.`, "Facture déposée", vis?.coproId, null);
+                                                        pushNotifTo(req, vis?.syndicId, `Facture déposée pour la copro n°${vis?.reference}.`, "Facture déposée");
+                                                        if (vis?.gestionnaireId) {
+                                                            notify(req, vis?.gestionnaireId, req.user.id, `Facture déposée pour la copro n°${vis?.reference}.`, "Facture déposée", vis?.coproId, null);
+                                                            pushNotifTo(req, vis?.gestionnaireId, `Facture déposée pour la copro n°${vis?.reference}.`, "Facture déposée");
+                                                        }
+                                                    }
                                                 });
                                         }
                                     });
@@ -1095,7 +1124,7 @@ let registerIncident = async (req, res) => {
                 }
                 let incident = new Incident({
                     images          : imagesUploaded  ,
-                    date            : new Date()        ,
+                    date            : new Date()      ,
                     metrages                ,
                     desordre                ,
                     situation               ,
@@ -1255,8 +1284,15 @@ let registerAvisTravaux = async (req, res) => {
                                 console.log("error: ", err)
                             //res.status(400).send({success: false, message: "Erreur lors de la mise à jour de la copropriété associée", err});
                             else if (!dev)
-                                console.log("devis introuvable")
-                            //res.status(400).send({success: false, message: "visite introuvable"});
+                                console.log("devis introuvable");
+                            else {
+                                notify(req, dev?.syndicId, req.user.id, `Avis travaux déposée pour le désordre n°${dev?.refDesordre}.`, "Avis travaux déposé", dev?.coproId, null);
+                                pushNotifTo(req, dev?.syndicId, `Avis travaux déposée pour le désordre n°${dev?.refDesordre}.`, "Avis travaux déposé");
+                                if (dev?.gestionnaireId) {
+                                    notify(req, dev?.gestionnaireId, req.user.id, `Avis travaux déposée pour le désordre n°${dev?.refDesordre}.`, "Avis travaux déposé", dev?.coproId, null);
+                                    pushNotifTo(req, dev?.gestionnaireId, `Avis travaux déposée pour le désordre n°${dev?.refDesordre}.`, "Avis travaux déposé");
+                                }
+                            }
                         });
                         Architecte.findOneAndUpdate({_id: req.user.id}, {$addToSet: {honnorairesAvis: {date: new Date(), amount: 25}}}, {new: true}, (err, arch) => {
                             if (err)
@@ -1284,7 +1320,7 @@ let registerAvisTravaux = async (req, res) => {
                                             console.log("error: ", err)
                                         else if (!prest)
                                             console.log("no prest")
-                                    })
+                                    });
                             }
                         });
                         res.status(200).send({success: true, message: "Avis travaux enregistrée", receptionDone: recept});
