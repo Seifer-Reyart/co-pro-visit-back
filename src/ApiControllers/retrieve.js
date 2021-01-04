@@ -64,7 +64,7 @@ let getNotificationByCopros = (req, res) => {
                 for (let i in notifications) {
                     if (!response.find(el => el.coproId === notifications[i].coproId)) {
                         let tmp = notifications.filter(el => el.coproId === notifications[i].coproId);
-                        response.push({coproId: notifications.coproId, nbNotif: tmp.length});
+                        response.push({coproId: notifications[i].coproId, nbNotif: tmp.length});
                     }
                 }
                 res.status(200).send({success: false, notifications: response});
