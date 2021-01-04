@@ -1749,13 +1749,12 @@ let updateUnseenNotification = (req, res) => {
 }
 
 let updateUnseenNotifByCopro = async (req, res) => {
-    await req.body.copros.map(copro => {
-        Notification.updateMany({$and: [{receiver_id: req.user.id},{coproId: copro}]}, {date_seen: new Date()},(err) => {
-            if (err)
-                console.log(err)
-        });
+    Notification.updateMany({$and: [{receiver_id: req.user.id},{coproId: req.body.coproId}]}, {date_seen: new Date()},(err) => {
+        if (err)
+            res.status(400).send({success: false, message: 'erreur système', err});
+        else
+            res.status(200).send({success: true, message: "Mise a jour du status des notifications réussie"});
     });
-    res.status(200).send({success: true, message: "Mise a jour du status des notifications réussie"});
 }
 
 /* Export Functions */
