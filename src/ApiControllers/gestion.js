@@ -1747,6 +1747,17 @@ let updateUnseenNotification = (req, res) => {
         }
     })
 }
+
+let updateUnseenNotifByCopro = async (req, res) => {
+    await req.body.copros.map(copro => {
+        Notification.updateMany({$and: [{receiver_id: req.user.id},{coproId: copro}]}, {date_seen: new Date()},(err) => {
+            if (err)
+                console.log(err)
+        });
+    });
+    res.status(200).send({success: true, message: "Mise a jour du status des notifications réussie"});
+}
+
 /* Export Functions */
 
 module.exports = {
@@ -1778,4 +1789,5 @@ module.exports = {
     deleteIncident,
     ajoutCreditSyndic,
     updateUnseenNotification,
+    updateUnseenNotifByCopro
 }
