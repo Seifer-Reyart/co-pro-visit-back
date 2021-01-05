@@ -44,7 +44,7 @@ let getNotif = (req, res) => {
         if (err) {
             res.status(400).send({success: false, message: 'Erreur lors de la récupération de la notification', err});
         } else {
-            res.status(200).send({success: false, notifications});
+            res.status(200).send({success: true, notifications});
         }
         //notify(req, req.user.id, req.user.id, "test notif body", "test notif titre", null)
         //pushNotifTo(req, req.user.id, "message", "titre")
@@ -67,7 +67,7 @@ let getNotificationByCopros = (req, res) => {
                         response.push({coproId: notifications[i].coproId, nbNotif: tmp.length});
                     }
                 }
-                res.status(200).send({success: false, notifications: response});
+                res.status(200).send({success: true, notifications: response});
             }
         });
     }

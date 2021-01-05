@@ -858,7 +858,7 @@ let assignerGestionnaireToCopro = (req, res) => {
                                 else if (!gest)
                                     res.status(404).send({success: false, message: "ce Gestionnaire n'existe pas"});
                                 else {
-                                    notify(req, gestionnaireId, req.user.id, `La copropriété (${copro.nomCopro}) a été ajoutée à votre parc.`, "Assignation copropriété", coproId, null)
+                                    notify(req, gestionnaireId, req.user.id, `La copropriété (${copro.nomCopro}) a été ajoutée à votre parc.`, "Assignation copropriété", coproId, `/mon-parc/mon-parc-immeuble/${coproId}`)
                                     pushNotifTo(req, gestionnaireId, `La copropriété (${copro.nomCopro}) a été ajoutée à votre parc.`, "Assignation copropriété")
                                     res.status(200).send({
                                             success: true,
@@ -878,7 +878,7 @@ let assignerGestionnaireToCopro = (req, res) => {
                                 else if (!gest)
                                     res.status(404).send({success: false, message: "ce Gestionnaire n'existe pas"});
                                 else {
-                                    notify(req, gestionnaireId, req.user.id, `La copropriété (${copro.nomCopro}) a été ajoutée à votre liste 'en cours de selection'.`, "Assignation copropriété", coproId, null)
+                                    notify(req, gestionnaireId, req.user.id, `La copropriété (${copro.nomCopro}) a été ajoutée à votre liste 'en cours de selection'.`, "Assignation copropriété", coproId, `/en-cours-selection/selection-immeuble/${coproId}`);
                                     pushNotifTo(req, gestionnaireId, `La copropriété (${copro.nomCopro}) a été ajoutée à votre liste 'en cours de selection'.`, "Assignation copropriété")
                                     res.status(200).send(
                                         {
