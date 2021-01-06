@@ -254,8 +254,8 @@ let demandeVisite = (req, res) => {
                                             if (err)
                                                 console.log(err)
                                             else {
-                                                notify(req, admin._id, req.user.id, synd.nomSyndic+" a demandé une visite", synd.nomSyndic+" a demandé une visite", copro._id, null);
-                                                pushNotifTo(req, admin._id, synd.nomSyndic+" a demandé une visite", "Alert Credit");
+                                                notify(req, admin._id, req.user.id, synd.nomSyndic+` a demandé une visite (${copro.codePostal})`, "demande de visite", copro._id, null);
+                                                pushNotifTo(req, admin._id, synd.nomSyndic+` a demandé une visite (${copro.codePostal})`, "demande de visite");
                                             }
                                         });
                                         // NOTIF ANCHOR
@@ -1726,8 +1726,8 @@ let ajoutCreditSyndic = (req, res) => {
                 else if (!syndic)
                     res.status(404).send({success: false, message: "ce syndic n'existe pas dans la base"});
                 else {
-                    notify(req, syndic._id, req.user.id, `${req.body.credit} crédit a été ajouté à votre solde !`, "Ajout Crédit", null, "/ajout-collaborateurs/dashboard")
-                    pushNotifTo(req, syndic._id, `${req.body.credit} crédit a été ajouté à votre solde !`, "Ajout Crédit")
+                    notify(req, syndic._id, req.user.id, `${req.body.credit} de crédit a été ajouté à votre solde !`, "Ajout Crédit", null, "/mon-parc/dashboard")
+                    pushNotifTo(req, syndic._id, `${req.body.credit} de crédit a été ajouté à votre solde !`, "Ajout Crédit")
                     res.status(200).send({
                         success: true,
                         message: "le crédit a bien été mis à jour",
