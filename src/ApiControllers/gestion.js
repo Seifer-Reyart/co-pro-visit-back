@@ -1725,8 +1725,15 @@ let ajoutCreditSyndic = (req, res) => {
                     res.status(400).send({success: false, message: "une erreur est survenue", err});
                 else if (!syndic)
                     res.status(404).send({success: false, message: "ce syndic n'existe pas dans la base"});
-                else
-                    res.status(200).send({success: true, message: "le crédit a bien été mis à jour", credit: syndic.credit});
+                else {
+                    notify(req, syndic._id, req.user.id, `${req.body.credit} crédit a été ajouté à votre solde !`, "Ajout Crédit", null, "/ajout-collaborateurs/dashboard")
+                    pushNotifTo(req, syndic._id, `${req.body.credit} crédit a été ajouté à votre solde !`, "Ajout Crédit")
+                    res.status(200).send({
+                        success: true,
+                        message: "le crédit a bien été mis à jour",
+                        credit: syndic.credit
+                    });
+                }
             })
     }
 }
