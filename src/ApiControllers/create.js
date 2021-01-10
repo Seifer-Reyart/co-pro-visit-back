@@ -787,23 +787,34 @@ let registerBatiment = async (req, res) => {
                         {_id: coproId},
                         {$set: {batiments: succeded, dateVisite: new Date()}},
                         {new: true},
-                        function (err) {
+                        function (err, c) {
                             if (err)
                                 console.log(err)
-                        });
-                    await Visite.findOneAndUpdate({coproId}, {$set: {faiteLe: new Date(), done: true}}, {new: false}, function (err, visite) {
-                        if (err) {
-                            failed.push({err})
-                            console.log('update err: ', err)
-                        } else {
-                            notify(req, visite?.syndicId, req.user.id, `visite effectuée pour la copro n°${visite?.reference}.`, "Visite effectuée", visite?.coproId, null);
-                            pushNotifTo(req, visite?.syndicId, `visite effectuée pour la copro n°${visite?.reference}.`, "Visite effectuée");
-                            if (visite?.gestionnaireId) {
-                                notify(req, visite?.gestionnaireId, req.user.id, `visite effectuée pour la copro n°${visite?.reference}.`, "Visite effectuée", visite?.coproId, null);
-                                pushNotifTo(req, visite?.gestionnaireId, `visite effectuée pour la copro n°${visite?.reference}.`, "Visite effectuée");
+                            else {
+                                Visite.findOneAndUpdate({coproId}, {$set: {faiteLe: new Date(), done: true}}, {new: false}, function (err, visite) {
+                                    if (err) {
+                                        failed.push({err})
+                                        console.log('update err: ', err)
+                                    } else {
+                                        if (c.syndicNominated === visite?.syndicId) {
+                                            notify(req, visite?.syndicId, req.user.id, `visite effectuée pour la copro n°${visite?.reference}.`, "Visite effectuée", visite?.coproId, `/mon-parc/mon-parc-immeuble/${coproId}`);
+                                            pushNotifTo(req, visite?.syndicId, `visite effectuée pour la copro n°${visite?.reference}.`, "Visite effectuée");
+                                            if (visite?.gestionnaireId) {
+                                                notify(req, visite?.gestionnaireId, req.user.id, `visite effectuée pour la copro n°${visite?.reference}.`, "Visite effectuée", visite?.coproId, `/mon-parc/mon-parc-immeuble/${coproId}`);
+                                                pushNotifTo(req, visite?.gestionnaireId, `visite effectuée pour la copro n°${visite?.reference}.`, "Visite effectuée");
+                                            }
+                                        } else if (c.syndicEnCours.includes(visite?.syndicId)) {
+                                            notify(req, visite?.syndicId, req.user.id, `visite effectuée pour la copro n°${visite?.reference}.`, "Visite effectuée", visite?.coproId, `/en-cours-selection/selection-immeuble/${coproId}`);
+                                            pushNotifTo(req, visite?.syndicId, `visite effectuée pour la copro n°${visite?.reference}.`, "Visite effectuée");
+                                            if (visite?.gestionnaireId) {
+                                                notify(req, visite?.gestionnaireId, req.user.id, `visite effectuée pour la copro n°${visite?.reference}.`, "Visite effectuée", visite?.coproId, `/en-cours-selection/selection-immeuble/${coproId}`);
+                                                pushNotifTo(req, visite?.gestionnaireId, `visite effectuée pour la copro n°${visite?.reference}.`, "Visite effectuée");
+                                            }
+                                        }
+                                    }
+                                });
                             }
-                        }
-                    });
+                        });
                     await Architecte.findOneAndUpdate({_id: req.user.id}, {$addToSet: {honnorairesVisites: {date: new Date(), amount: 0.02 * copr.surface}}}, {new: true}, (err, arch) => {
                         if (err)
                             console.log("error: ", err)
@@ -875,10 +886,10 @@ let registerEvaluation = async (req, res) => {
                                         } else if (!result) {
                                             res.status(404).send({success: false, message: 'Incident introuvable'});
                                         } else {
-                                            notify(req, result?.syndicId, req.user.id, `Évaluation déposée pour le désordre n° ${result?.refDesordre}.`, "Evaluation déposée", result?.coproId, null);
+                                            notify(req, result?.syndicId, req.user.id, `Évaluation déposée pour le désordre n° ${result?.refDesordre}.`, "Evaluation déposée", result?.coproId, `/mon-parc/mon-parc-immeuble/${result?.coproId}`);
                                             pushNotifTo(req, result?.syndicId, `Évaluation déposée pour le désordre n° ${result?.refDesordre}.`, "Evaluation déposée");
                                             if (result?.gestionnaireId) {
-                                                notify(req, result?.gestionnaireId, req.user.id, `Évaluation déposée pour le désordre n°${result?.refDesordre}.`, "Evaluation déposée", result?.coproId, null);
+                                                notify(req, result?.gestionnaireId, req.user.id, `Évaluation déposée pour le désordre n°${result?.refDesordre}.`, "Evaluation déposée", result?.coproId, `/mon-parc/mon-parc-immeuble/${result?.coproId}`);
                                                 pushNotifTo(req, result?.gestionnaireId, `Évaluation déposée pour le désordre n°${result?.refDesordre}.`, "Evaluation déposée");
                                             }
                                             res.status(200).send({success: true, message:"Evaluation envoyée!"})
@@ -957,12 +968,14 @@ let uploadDevisFile = (req, res) => {
                                 } else if (!devis)
                                     res.status(404).send({success: false, message: "devis introuvable"});
                                 else {
-                                    notify(req, devis?.syndicId, req.user.id, `Devis déposée pour le désordre n°${devis?.refDesordre}.`, "Devis déposé", devis?.coproId, null);
+                                    notify(req, devis?.syndicId, req.user.id, `Devis déposée pour le désordre n°${devis?.refDesordre}.`, "Devis déposé", devis?.coproId, `/mon-parc/mon-parc-immeuble/${devis?.coproId}`);
                                     pushNotifTo(req, devis?.syndicId, `Devis déposée pour le désordre n°${devis?.refDesordre}.`, "Devis déposé");
                                     if (devis?.gestionnaireId) {
-                                        notify(req, devis?.gestionnaireId, req.user.id, `Devis déposée pour le désordre n°${devis?.refDesordre}.`, "Devis déposé", devis?.coproId, null);
+                                        notify(req, devis?.gestionnaireId, req.user.id, `Devis déposée pour le désordre n°${devis?.refDesordre}.`, "Devis déposé", devis?.coproId, `/mon-parc/mon-parc-immeuble/${devis?.coproId}`);
                                         pushNotifTo(req, devis?.gestionnaireId, `Devis déposée pour le désordre n°${devis?.refDesordre}.`, "Devis déposé");
                                     }
+                                    notify(req, devis.prestataireId, req.user.id, `Demande facture Désordre n°${devis?.refDesordre}.`, "Demande facture", devis?.coproId, `/mes-syndics/mes-syndics-prestataires/devis-prestataires/${devis?.coproId}`);
+                                    pushNotifTo(req, devis.prestataireId, `Demande facture Désordre n°${devis?.refDesordre}.`, "Demande facture");
                                     res.status(200).send({
                                         success: true,
                                         message: "devis uploadé",
@@ -1054,10 +1067,10 @@ let uploadFactureFile = (req, res) => {
                                                     else if (!vis)
                                                         console.log("visite introuvable");
                                                     else {
-                                                        notify(req, vis?.syndicId, req.user.id, `Facture déposée pour la copro n°${vis?.reference}.`, "Facture déposée", vis?.coproId, null);
+                                                        notify(req, vis?.syndicId, req.user.id, `Facture déposée pour la copro n°${vis?.reference}.`, "Facture déposée", vis?.coproId, `/mon-parc/mon-parc-immeuble/${vis?.coproId}`);
                                                         pushNotifTo(req, vis?.syndicId, `Facture déposée pour la copro n°${vis?.reference}.`, "Facture déposée");
                                                         if (vis?.gestionnaireId) {
-                                                            notify(req, vis?.gestionnaireId, req.user.id, `Facture déposée pour la copro n°${vis?.reference}.`, "Facture déposée", vis?.coproId, null);
+                                                            notify(req, vis?.gestionnaireId, req.user.id, `Facture déposée pour la copro n°${vis?.reference}.`, "Facture déposée", vis?.coproId, `/mon-parc/mon-parc-immeuble/${vis?.coproId}`);
                                                             pushNotifTo(req, vis?.gestionnaireId, `Facture déposée pour la copro n°${vis?.reference}.`, "Facture déposée");
                                                         }
                                                     }
@@ -1157,20 +1170,42 @@ let registerIncident = async (req, res) => {
                                         {corpsEtat: {$elemMatch: {$in: corpsEtat}}},
                                         {syndics: {$elemMatch: {$eq: syndicId}}}
                                         ]
-                                }, {$addToSet: {incidentId: incid._id}}, {new: true}, function (err, prest) {
+                                }, {$addToSet: {incidentId: incid._id}}, {new: true}, function (err) {
                                     if (err) {
                                         res.status(400).send({
                                             success: false,
                                             message: "Erreur lors de la mise à jour de la liste des prestataires",
                                             err
                                         });
-                                    } else
+                                    } else {
+                                        Prestataire.find({
+                                                $and: [
+                                                    {corpsEtat: {$elemMatch: {$in: corpsEtat}}},
+                                                    {syndics: {$elemMatch: {$eq: syndicId}}}
+                                                ]
+                                            }, (err, prestats) => {
+                                            if (err)
+                                                console.log(err)
+                                            else {
+                                                for (let i in prestats) {
+                                                    notify(req, prestats[i]._id, req.user.id, `Demande évaluation pour la copro n°${cpr?.reference}.`, "Demande évaluation", cpr?._id, `/mes-syndics/mes-syndics-prestataires/evaluation-prestataires/${cpr?._id}`);
+                                                    pushNotifTo(req, prestats[i]._id, `Demande évaluation pour la copro n°${cpr?.reference}.`, "Demande évaluation");
+                                                }
+                                            }
+                                        });
+                                        notify(req, syndicId, req.user.id, `Désordre constaté pour la copro n°${cpr?.reference}.`, "Désordre constaté", cpr?._id, `/mon-parc/mon-parc-immeuble/${cpr?._id}`);
+                                        pushNotifTo(req, syndicId, `Désordre constaté pour la copro n°${cpr?.reference}.`, "Désordre constaté");
+                                        if (gestionnaireId) {
+                                            notify(req, gestionnaireId, req.user.id, `Désordre constaté pour la copro n°${cpr?.reference}.`, "Désordre constaté", cpr?._id, `/mon-parc/mon-parc-immeuble/${cpr?.coproId}`);
+                                            pushNotifTo(req, gestionnaireId, `Désordre constaté pour la copro n°${cpr?.reference}.`, "Désordre constaté");
+                                        }
                                         res.status(200).send({
                                             success: true,
                                             message: "L'incident a bien été créé",
                                             imagesUploadErrors,
                                             incident
                                         });
+                                    }
                                 });
                             }
                         });
@@ -1268,7 +1303,6 @@ let registerAvisTravaux = async (req, res) => {
             else
                 reception.save(function(err, recept) {
                     if (err) {
-                        console.log("err: ", err)
                         res.status(400).send({ success: false, message: "Erreur lors de l'enregistrement de l'avis de travaux", err});
                     } else {
                         Visite.findOneAndUpdate({_id: visiteId}, {$set: {receptionDone: recept._id}}, {new: true}, (err, visit) => {
@@ -1286,10 +1320,10 @@ let registerAvisTravaux = async (req, res) => {
                             else if (!dev)
                                 console.log("devis introuvable");
                             else {
-                                notify(req, dev?.syndicId, req.user.id, `Avis travaux déposée pour le désordre n°${dev?.refDesordre}.`, "Avis travaux déposé", dev?.coproId, null);
+                                notify(req, dev?.syndicId, req.user.id, `Avis travaux déposée pour le désordre n°${dev?.refDesordre}.`, "Avis travaux déposé", dev?.coproId, `/mon-parc/mon-parc-immeuble/${dev?.coproId}`);
                                 pushNotifTo(req, dev?.syndicId, `Avis travaux déposée pour le désordre n°${dev?.refDesordre}.`, "Avis travaux déposé");
                                 if (dev?.gestionnaireId) {
-                                    notify(req, dev?.gestionnaireId, req.user.id, `Avis travaux déposée pour le désordre n°${dev?.refDesordre}.`, "Avis travaux déposé", dev?.coproId, null);
+                                    notify(req, dev?.gestionnaireId, req.user.id, `Avis travaux déposée pour le désordre n°${dev?.refDesordre}.`, "Avis travaux déposé", dev?.coproId, `/mon-parc/mon-parc-immeuble/${dev?.coproId}`);
                                     pushNotifTo(req, dev?.gestionnaireId, `Avis travaux déposée pour le désordre n°${dev?.refDesordre}.`, "Avis travaux déposé");
                                 }
                             }
@@ -1319,8 +1353,14 @@ let registerAvisTravaux = async (req, res) => {
                                         if (err)
                                             console.log("error: ", err)
                                         else if (!prest)
-                                            console.log("no prest")
+                                            console.log("no prest");
+                                        else {
+                                            notify(req, prest._id, req.user.id, `Avis travaux déposée pour le désordre n°${recept?.refDesordre}.`, "Avis travaux déposé", recept?.coproId, `/mes-syndics/mes-syndics-prestataires/devis-prestataires/${recept?.coproId}`);
+                                            pushNotifTo(req, prest._id, `Avis travaux déposée pour le désordre n°${recept?.refDesordre}.`, "Avis travaux déposé");
+                                        }
                                     });
+                                notify(req, recept.courtierId, req.user.id, `Avis travaux déposée pour le désordre n°${recept?.refDesordre}.`, "Avis travaux déposé", recept?.courtierId, `/mes-syndics/mes-syndics-courtiers/mes-syndics-courtiers-details/${recept?.coproId}`);
+                                pushNotifTo(req, recept.courtierId, `Avis travaux déposée pour le désordre n°${recept?.refDesordre}.`, "Avis travaux déposé");
                             }
                         });
                         res.status(200).send({success: true, message: "Avis travaux enregistrée", receptionDone: recept});

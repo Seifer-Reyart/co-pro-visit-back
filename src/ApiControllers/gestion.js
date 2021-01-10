@@ -288,7 +288,7 @@ let demandeVisite = (req, res) => {
                                                                             }
                                                                             notify(req, s._id, admin._id, "Attention! votre crédit est inférieur à 2800", "Attention! votre crédit est inférieur à 2800", copro._id, null);
                                                                             pushNotifTo(req, s._id, "Attention! votre crédit est inférieur à 2800", "Alert Credit");
-                                                                            notify(req, admin._id, req.user.id, "Attention! "+s.nomSyndic+" a un crédit inférieur à 2800", "Attention! "+s.nomSyndic+" a un crédit inférieur à 2800", copro._id, null);
+                                                                            notify(req, admin._id, req.user.id, "Attention! "+s.nomSyndic+" a un crédit inférieur à 2800", "Attention! "+s.nomSyndic+" a un crédit inférieur à 2800", copro._id, `/admin-copro/gerer-syndics/${copro._id}`);
                                                                             pushNotifTo(req, admin._id, "Attention! "+s.nomSyndic+" a un crédit inférieur à 2800", "Alert Credit");
                                                                             // NOTIF ANCHOR
                                                                         }
@@ -506,7 +506,7 @@ let assignerCourtierToCopro = (req, res) => {
                                                 err
                                             });
                                         } else {
-                                            notify(req, courtier, req.user.id, `Vous avez été assigné à la copropriété ${cop.nomCopro}.`, "Assignation copropriété", cop._id, null)
+                                            notify(req, courtier, req.user.id, `Vous avez été assigné à la copropriété ${cop.nomCopro}.`, "Assignation copropriété", cop._id, `/mes-syndics/mes-syndics-courtiers/mes-syndics-courtiers-details/${cop._id}`)
                                             pushNotifTo(req, courtier, `Vous avez été assigné à la copropriété ${cop.nomCopro}.`, "Assignation copropriété")
                                             Courtier.updateMany(
                                                 {_id: { $ne: courtier}},
@@ -1408,8 +1408,8 @@ let sendToEtude = (req, res) => {
                     res.status(400).send({success: false, message: 'erreur système', err});
                 else {
                     courtiers.map(cou => {
-                        notify(req, cou._id, req.user.id, `Une nouvelle copropriété est disponible en étude !.`, "Copropriété en étude", coproId, null)
-                        pushNotifTo(req, cou._id, `Une nouvelle copropriété est disponible en étude !.`, "Copropriété en étude")
+                        notify(req, cou._id, req.user.id, `Une nouvelle copropriété est disponible en étude !.`, "Copropriété en étude", coproId, `/a-etudier/a-etudier-details/${coproId}`);
+                        pushNotifTo(req, cou._id, `Une nouvelle copropriété est disponible en étude !.`, "Copropriété en étude");
                     })
                     res.status(200).send({success: true, message: 'Copro envoyé en étude'})
                 }
@@ -1473,7 +1473,10 @@ let demandeDevis = (req, res) => {
                     console.log("not found")
                     res.status(404).send({success: false, message: "devis introuvable"});
                 } else {
-                    console.log("all good!!!")
+                    if (option) {
+                        notify(req, devis.prestataireId, req.user.id, `Demande devis pour la copro n°${devis?.refDesordre}.`, "Demande devis", devis?.coproId, `/mes-syndics/mes-syndics-prestataires/devis-prestataires/${devis?.coproId}`);
+                        pushNotifTo(req, devis.prestataireId, `Demande devis pour la copro n°${devis?.refDesordre}.`, "Demande devis");
+                    }
                     res.status(200).send({success: true, message: "demande de devis envoyée!"});
                 }
             }
