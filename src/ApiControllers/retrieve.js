@@ -52,7 +52,7 @@ let getNotif = (req, res) => {
 }
 
 let getNotificationByCopros = (req, res) => {
-    if (req.user.role !== "syndic")
+    if (req.user.role !== "syndic" && req.user.role !== "gestionnaire" && req.user.role !== "prestataire" && req.user.role !== "courtier")
         res.status(401).send({success: false, message: 'accès refusé'});
     else {
         const {copros} = req.body;
