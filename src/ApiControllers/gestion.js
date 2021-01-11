@@ -683,7 +683,7 @@ let assignerPrestataireToSyndic = async (req, res) => {
                                     if (err || !prest)
                                         errorPresta.push({success: false, message: 'erreur assigniation dans prestataire', err});
                                     else {
-                                        notify(req, prestataireId, req.user.id, `Vous avez été assigné au syndicat ${synd.nomSyndic}.`, "Assignation syndicat", null, null)
+                                        notify(req, prestataireId, synd._id, `Vous avez été assigné au syndicat ${synd.nomSyndic}.`, "Assignation syndicat", null, `/mes-syndics/mes-syndics-prestataires/${synd._id}`)
                                         pushNotifTo(req, prestataireId, `Vous avez été assigné au syndicat ${synd.nomSyndic}.`, "Assignation syndicat")
                                         successId.push(synd._id)
                                     }
@@ -761,7 +761,7 @@ let assignerPrestataireToSyndic = async (req, res) => {
                                     if (err || !prest)
                                         errorPresta.push({success: false, message: 'erreur désassigniation dans prestataire', err});
                                     else {
-                                        notify(req, prestataireId, req.user.id, `Vous avez été désassigné du syndicat ${synd.nomSyndic}.`, "Désassignation syndicat", null, null)
+                                        notify(req, prestataireId, synd._id, `Vous avez été désassigné du syndicat ${synd.nomSyndic}.`, "Désassignation syndicat", null, `/mes-syndics/dashboard`)
                                         pushNotifTo(req, prestataireId, `Vous avez été désassigné du syndicat ${synd.nomSyndic}.`, "Désassignation syndicat")
                                         successId.push(synd._id)
                                     }
@@ -1434,8 +1434,11 @@ let aboPrestaToSyndic = (req, res) => {
                        res.status(400).send({success: false, message: 'erreur système', err});
                    else if (!prest)
                        res.status(404).send({success: false, message: "ce prestataire n'existe pas"});
-                   else
+                   else {
+                       notify(req, prest._id, syndicId, `Vous êtes abonné PREMIUM à un syndic`, "Abonnement Syndic", null, `/mon-abonnement/dashboard`);
+                       pushNotifTo(req, prest._id, `Vous êtes abonné PREMIUM à un syndic`, "Abonnement Syndic");
                        res.status(200).send({success: true, message: 'prestataire abonné'});
+                   }
                 });
         } else {
             Prestataire.findOneAndUpdate(
@@ -1447,8 +1450,11 @@ let aboPrestaToSyndic = (req, res) => {
                         res.status(400).send({success: false, message: 'erreur système', err});
                     else if (!prest)
                         res.status(404).send({success: false, message: "ce prestataire n'existe pas"});
-                    else
+                    else {
+                        notify(req, prest._id, syndicId, `Vous êtes abonné BASIC à un syndic`, "Abonnement Syndic", null, `/mon-abonnement/dashboard`);
+                        pushNotifTo(req, prest._id, `Vous êtes abonné BASIC à un syndic`, "Abonnement Syndic");
                         res.status(200).send({success: true, message: 'prestataire désabonné'});
+                    }
                 });
         }
     }
@@ -1474,8 +1480,8 @@ let demandeDevis = (req, res) => {
                     res.status(404).send({success: false, message: "devis introuvable"});
                 } else {
                     if (option) {
-                        notify(req, devis.prestataireId, req.user.id, `Demande devis pour la copro n°${devis?.refDesordre}.`, "Demande devis", devis?.coproId, `/mes-syndics/mes-syndics-prestataires/devis-prestataires/${devis?.coproId}`);
-                        pushNotifTo(req, devis.prestataireId, `Demande devis pour la copro n°${devis?.refDesordre}.`, "Demande devis");
+                        notify(req, devis.prestataireId, devis.syndicId, `Demande devis pour le desordre n°${devis?.refDesordre}.`, "Demande devis", devis?.coproId, `/mes-syndics/mes-syndics-prestataires/devis-prestataires/${devis?.coproId}`);
+                        pushNotifTo(req, devis.prestataireId, `Demande devis pour le desordre n°${devis?.refDesordre}.`, "Demande devis");
                     }
                     res.status(200).send({success: true, message: "demande de devis envoyée!"});
                 }

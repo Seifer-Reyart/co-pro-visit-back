@@ -265,9 +265,9 @@ let registerPrestataire = async (req, res) => {
                 else if (user.siret === siret)
                     res.status(403).send({success: false, message: 'siret déjà utilisé'});
             } else {
-		    let imagesUploadErrors = [];
-		    let imagesUploaded = []
-		    let RCProfessionnelle = "", RCDecennale = "";
+		        let imagesUploadErrors = [];
+		        let imagesUploaded = []
+		        let RCProfessionnelle = "", RCDecennale = "";
                 if (req.files) {
                     const filetypes = /jpeg|jpg|png|pdf|JPEG|JPG|PNG|PDF/;
                     let promisesFiles = req.files.map( async file => {

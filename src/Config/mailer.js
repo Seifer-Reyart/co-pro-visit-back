@@ -624,7 +624,7 @@ let sendDemandePrestataire = (body) => {
             "                         </tr> " +
             "                         <tr style=\"border-collapse:collapse\"> " +
             "                          <td style=\"padding:0;Margin:0;text-align:center\"><br>Nombre de salariés<br></td> " +
-            "                          <td style=\"padding:0;Margin:0;text-align:center\">"+body.nbSalaries+"</td> " +
+            "                          <td style=\"padding:0;Margin:0;text-align:center\">"+body.nbrSalaries+"</td> " +
             "                         </tr> " +
             "                       </table></td> " +
             "                     </tr> " +
