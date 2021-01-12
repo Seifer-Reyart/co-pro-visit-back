@@ -473,7 +473,7 @@ router.post('/visites-courtier', retrieveVisisteCourtier);
 
 /**
  * Cette route permet de récupérer le credit visite d'un syndic, JWT necessaire.
- * @route POST /retrieve/credit
+ * @route GET /retrieve/credit
  * @group Get_Data
  * @returns {object} 200 - {success: true, credit: credit du syndic}
  * @returns {Error}  400 - {success: false, message: error system log from mongoose}
@@ -483,7 +483,7 @@ router.post('/visites-courtier', retrieveVisisteCourtier);
  * @consumes application/json
  * @security JWT
  */
-router.post('/credit', retrieveCredit);
+router.get('/credit', retrieveCredit);
 
 /**
  * Cette route permet de récupérer la liste des demandes de visites d'un syndic par période, JWT necessaire.
