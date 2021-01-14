@@ -160,7 +160,7 @@ let openAccessPCS = (req, res) => {
                            firstName: prenomPCS.toLowerCase(),
                            lastName : nomPCS.toLowerCase(),
                            password : bcrypt.hashSync(password, salt),
-                           phone    : req.body.phonePCS,
+                           phone    : phonePCS,
                            coproId  : coproId,
                        });
                        pcsSave.save(async function (err, p) {
