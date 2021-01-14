@@ -374,18 +374,11 @@ let getCopro = (req, res) => {
                             if (err)
                                 console.log(err)
                             else {
-                                let nbEval = 0;
-                                let nbDevis = 0;
-                                let nbFacture = 0;
+                                let travaux = 0;
                                 for (let i in dev) {
-                                    if (dev[i].evaluationTTC)
-                                        nbEval += 1;
-                                    if (dev[i].devisPDF)
-                                        nbDevis += 1;
-                                    if (dev[i].facturePDF)
-                                        nbFacture += 1;
+                                    travaux += dev[i].factureTTC;
                                 }
-                                res.status(200).send({success: true, parc: copros, nbEval, nbDevis, nbFacture});
+                                res.status(200).send({success: true, parc: copros, travaux});
                             }
                         })
                     }
@@ -401,7 +394,6 @@ let getCopro = (req, res) => {
             else if (!pcs)
                 res.status(404).send({success: false, message: 'aucun pcs enregistré'});
             else {
-                console.log("pcs: ", pcs)
                 Copro.findOne({_id: pcs.coproId}, (err, copro) => {
                     if (err)
                         res.status(400).send({success: false, message: 'erreur system', err});
@@ -641,7 +633,35 @@ let postCopro = (req, res) => {
                 else if (!copro)
                     res.status(404).send({success: false, message: 'aucune copro enregistrée'});
                 else {
-                    res.status(200).send({success: true, copro: copro});
+                    if (req.user.role === 'courtier') {
+                        Courtier.findOne({_id: req.user.id}, (err, courtier) => {
+                            if (err)
+                                res.status(400).send({success: false, message: 'erreur system', err});
+                            else if (!courtier)
+                                res.status(404).send({success: false, message: 'aucun courtier enregistré'});
+                            else {
+                                Devis.find({coproId: {$in: courtier.parc}}, (err, dev) => {
+                                    if (err)
+                                        console.log(err)
+                                    else {
+                                        let nbEval = 0;
+                                        let nbDevis = 0;
+                                        let nbFacture = 0;
+                                        for (let i in dev) {
+                                            if (dev[i].evaluationTTC)
+                                                nbEval += 1;
+                                            if (dev[i].devisPDF)
+                                                nbDevis += 1;
+                                            if (dev[i].facturePDF)
+                                                nbFacture += 1;
+                                        }
+                                        res.status(200).send({success: true, copro: copro, nbEval, nbDevis, nbFacture});
+                                    }
+                                })
+                            }
+                        });
+                    } else
+                        res.status(200).send({success: true, copro: copro});
                 }
             })
 }
