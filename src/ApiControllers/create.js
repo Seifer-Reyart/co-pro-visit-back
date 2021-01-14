@@ -521,18 +521,22 @@ let registerCopro = (req, res) => {
                                 res.status(400).send({ success: false, message: "Erreur lors de la création de la Copro", err});
                             } else {
                                 if (req.body.syndicNominated) {
-                                    if (req.user.role === 'syndic')
+                                    if (req.user.role === 'syndic') {
                                         await Syndic.updateOne({_id: synd._id}, {$push: {parc: cpr._id}});
-                                    else {
+                                        await Courtier.updateOne({_id: cpr.courtier}, {$push: {parc: cpr._id}});
+                                    } else {
                                         await Gestionnaire.updateOne({_id: req.body.syndicNominated}, {$push: {parc: cpr._id}});
                                         await Syndic.updateOne({_id: synd._id}, {$push: {parc: cpr._id}});
+                                        await Courtier.updateOne({_id: cpr.courtier}, {$push: {parc: cpr._id}});
                                     }
                                 } else {
-                                    if (req.user.role === 'syndic')
+                                    if (req.user.role === 'syndic') {
                                         await Syndic.updateOne({_id: req.body.syndicEnCours}, {$push: {enCoursSelect: cpr._id}});
-                                    else {
+                                        await Courtier.updateOne({_id: cpr.courtier}, {$push: {parc: cpr._id}});
+                                    } else {
                                         await Gestionnaire.updateOne({_id: req.body.syndicEnCours}, {$push: {enCoursSelect: cpr._id}});
                                         await Syndic.updateOne({_id: synd._id}, {$push: {enCoursSelect: cpr._id}});
+                                        await Courtier.updateOne({_id: cpr.courtier}, {$push: {parc: cpr._id}});
                                     }
                                 }
                                 res.status(200).send({ success: true, message : "La Copro a bien été créée"});

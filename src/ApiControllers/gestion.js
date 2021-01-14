@@ -288,7 +288,7 @@ let demandeVisite = (req, res) => {
                                                                             }
                                                                             notify(req, s._id, admin._id, "Attention! votre crédit est inférieur à 2800", "Attention! votre crédit est inférieur à 2800", copro._id, null);
                                                                             pushNotifTo(req, s._id, "Attention! votre crédit est inférieur à 2800", "Alert Credit");
-                                                                            notify(req, admin._id, req.user.id, "Attention! "+s.nomSyndic+" a un crédit inférieur à 2800", "Attention! "+s.nomSyndic+" a un crédit inférieur à 2800", copro._id, `/admin-copro/gerer-syndics/${copro._id}`);
+                                                                            notify(req, admin._id, req.user.id, "Attention! "+s.nomSyndic+" a un crédit inférieur à 2800", "Attention! "+s.nomSyndic+" a un crédit inférieur à 2800", copro._id, `/admin-copro/gerer-syndics/${s._id}`);
                                                                             pushNotifTo(req, admin._id, "Attention! "+s.nomSyndic+" a un crédit inférieur à 2800", "Alert Credit");
                                                                             // NOTIF ANCHOR
                                                                         }
@@ -335,8 +335,8 @@ let assignerVisite = async (req, res) => {
                                 if (err)
                                     error.push(err)
                                 else {
-                                    notify(req, req.body.architecteId, req.user.id, `Une nouvelle demande de visite est disponible.`, "Demande de visite", visite.coproId, null)
-                                    pushNotifTo(req, req.body.architecteId, `Une nouvelle demande de visite est disponible.`, "Demande de visite")
+                                    notify(req, req.body.architecteId, req.user.id, `Une nouvelle demande de visite est disponible (N°${visite.reference}).`, "Demande de visite", visite.coproId, `/visites-a-faire/visites-formulaire/${visite.coproId}`)
+                                    pushNotifTo(req, req.body.architecteId, `Une nouvelle demande de visite est disponible (N°${visite.reference})..`, "Demande de visite")
                                     // NOTIF ANCHOR
                                 }
                             });
