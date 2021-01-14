@@ -1133,12 +1133,12 @@ let retrieveOneReception = (req, res) => {
 }
 
 let retrieveAllReception = (req, res) => {
-    if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire' && req.user.role !== 'pcs')
+    if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire' && req.user.role !== 'pcs' && req.user.role !== 'courtier')
         res.status(401).send({success: false, message: 'accès refusé'});
     else {
         const {id} = req.user;
         const {coproId} = req.body;
-        Reception.find({$and: [{coproId},{$or: [{syndicId: id}, {gestionnaireId: id}, {pcsId: id}]}]}, (err, receptions) => {
+        Reception.find({$and: [{coproId},{$or: [{syndicId: id}, {gestionnaireId: id}, {pcsId: id}, {courtierId: id}]}]}, (err, receptions) => {
             if (err)
                 res.status(400).send({success: false, message: 'erreur système', err});
             else if (!receptions)
