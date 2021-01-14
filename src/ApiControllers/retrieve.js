@@ -369,8 +369,26 @@ let getCopro = (req, res) => {
                         res.status(400).send({success: false, message: 'erreur system', err});
                     else if (!copros)
                         res.status(404).send({success: false, message: 'aucun parc enregistré'});
-                    else
-                        res.status(200).send({success: true, parc: copros});
+                    else {
+                        Devis.find({coproId: {$in: courtier.parc}}, (err, dev) => {
+                            if (err)
+                                console.log(err)
+                            else {
+                                let nbEval = 0;
+                                let nbDevis = 0;
+                                let nbFacture = 0;
+                                for (let i in dev) {
+                                    if (dev[i].evaluationTTC)
+                                        nbEval += 1;
+                                    if (dev[i].devisPDF)
+                                        nbDevis += 1;
+                                    if (dev[i].facturePDF)
+                                        nbFacture += 1;
+                                }
+                                res.status(200).send({success: true, parc: copros, nbEval, nbDevis, nbFacture});
+                            }
+                        })
+                    }
                 }).populate({
                     path: 'batiments',
                     model: 'batiments'
