@@ -15,6 +15,7 @@ function jwt(req, res, next) {
                 '/api-docs',
                 '/auth/login',
                 '/api-docs',
+                '/gestion/contact'
             ]
         })
     }
