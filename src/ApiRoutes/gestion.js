@@ -38,7 +38,8 @@ let {
     deleteIncident,
     ajoutCreditSyndic,
     updateUnseenNotification,
-    updateUnseenNotifByCopro
+    updateUnseenNotifByCopro,
+    contactCoproVisit
 } = require('../ApiControllers/gestion');
 
 /***************/
@@ -491,6 +492,21 @@ router.post('/unseen-notif', updateUnseenNotification);
  */
 
 router.post('/unseen-notif-copro', updateUnseenNotifByCopro);
+
+/**
+ * Cette route permet d'envoyer un message à CoproVisit, JWT necessaire.
+ * @route POST /gestion/contact
+ * @group gestion
+ * @param {string} objet.body.required - Objet du message
+ * @param {string} message.body.required - Corps du Message
+ * @returns {object} 200 - {success: true, message: 'Votre message a été envoyé à Coprovisit'}
+ * @returns {Error}  400 - {success: false, message: 'Veuillez vérifier les informations du formulaire'}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+
+router.post('/contact', contactCoproVisit);
 
 module.exports = router;
 

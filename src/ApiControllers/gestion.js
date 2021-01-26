@@ -16,6 +16,7 @@ let {
     sendCredentials,
     sendDemandeCourtier,
     sendDemandePrestataire,
+    sendContactForm
 } = require('../Config/mailer');
 
 let {
@@ -160,7 +161,7 @@ let openAccessPCS = (req, res) => {
                            firstName: prenomPCS.toLowerCase(),
                            lastName : nomPCS.toLowerCase(),
                            password : bcrypt.hashSync(password, salt),
-                           phone    : req.body.phonePCS,
+                           phone    : phonePCS,
                            coproId  : coproId,
                        });
                        pcsSave.save(async function (err, p) {
@@ -1773,6 +1774,118 @@ let updateUnseenNotifByCopro = async (req, res) => {
     });
 }
 
+let contactCoproVisit = (req, res) => {
+    const {objet, message} = req.body;
+
+    if (!objet && !message)
+        res.status(400).send({success: false, message: 'Veuillez vérifier les informations du formulaire'});
+    else {
+        Syndic.findOne({_id: req.user.id}, (err, syndic) => {
+            if (err)
+                res.status(400).send({success: false, message: "erreur système", err})
+            else if (!syndic) {
+                Gestionnaire.findOne({_id: req.user.id}, (err, gestionnaire) => {
+                    if (err)
+                        res.status(400).send({success: false, message: "erreur système", err})
+                    else if (!gestionnaire) {
+                        Prestataire.findOne({_id: req.user.id}, (err, prestataire) => {
+                            if (err)
+                                res.status(400).send({success: false, message: "erreur système", err})
+                            else if (!prestataire) {
+                                Courtier.findOne({_id: req.user.id}, (err, courtier) => {
+                                    if (err)
+                                        res.status(400).send({success: false, message: "erreur système", err})
+                                    else if (!courtier) {
+                                        Architecte.findOne({_id: req.user.id}, (err, architecte) => {
+                                            if (err)
+                                                res.status(400).send({success: false, message: "erreur système", err})
+                                            else if (!architecte) {
+                                                PresidentCS.findOne({_id: req.user.id}, (err, pcs) => {
+                                                    if (err)
+                                                        res.status(400).send({success: false, message: "erreur système", err})
+                                                    else if (!pcs) {
+                                                        res.status(404).send({success: false, message: 'utilisateur introuvable'})
+                                                    } else {
+                                                        let body = {
+                                                            objet,
+                                                            message,
+                                                            nom: pcs.firstName + " " + pcs.lastName,
+                                                            email: pcs.email,
+                                                            telephone: pcs.phone,
+                                                            type: "PCS"
+                                                        };
+                                                        sendContactForm(body);
+                                                        res.status(200).send({success: true, message: 'Votre message a été envoyé à Coprovisit'});
+                                                    }
+                                                });
+                                            } else {
+                                                let body = {
+                                                    objet,
+                                                    message,
+                                                    nom: architecte.firstName + " " + architecte.lastName,
+                                                    email: architecte.email,
+                                                    telephone: architecte.phone,
+                                                    type: "Architecte"
+                                                };
+                                                sendContactForm(body);
+                                                res.status(200).send({success: true, message: 'Votre message a été envoyé à Coprovisit'});
+                                            }
+                                        });
+                                    } else {
+                                        let body = {
+                                            objet,
+                                            message,
+                                            nom: courtier.firstName + " " + courtier.lastName,
+                                            email: courtier.email,
+                                            telephone: courtier.phone,
+                                            type: "Courtier"
+                                        };
+                                        sendContactForm(body);
+                                        res.status(200).send({success: true, message: 'Votre message a été envoyé à Coprovisit'});
+                                    }
+                                });
+                            } else {
+                                let body = {
+                                    objet,
+                                    message,
+                                    nom: prestataire.firstName + " " + prestataire.lastName,
+                                    email: prestataire.email,
+                                    telephone: prestataire.phone,
+                                    type: "Prestataire"
+                                };
+                                sendContactForm(body);
+                                res.status(200).send({success: true, message: 'Votre message a été envoyé à Coprovisit'});
+                            }
+                        });
+                    } else {
+                        let body = {
+                            objet,
+                            message,
+                            nom: gestionnaire.firstName + " " + gestionnaire.lastName,
+                            email: gestionnaire.email,
+                            telephone: gestionnaire.phone,
+                            type: "Gestionnaire"
+                        };
+                        sendContactForm(body);
+                        res.status(200).send({success: true, message: 'Votre message a été envoyé à Coprovisit'});
+                    }
+                });
+            } else {
+                let body = {
+                    objet,
+                    message,
+                    nom: syndic.firstName + " " + syndic.lastName,
+                    email: syndic.email,
+                    telephone: syndic.phone,
+                    type: "Syndic"
+                };
+                sendContactForm(body);
+                res.status(200).send({success: true, message: 'Votre message a été envoyé à Coprovisit'});
+            }
+        });
+    }
+}
+
 /* Export Functions */
 
 module.exports = {
@@ -1804,5 +1917,6 @@ module.exports = {
     deleteIncident,
     ajoutCreditSyndic,
     updateUnseenNotification,
-    updateUnseenNotifByCopro
+    updateUnseenNotifByCopro,
+    contactCoproVisit
 }
