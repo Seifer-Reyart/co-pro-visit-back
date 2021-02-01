@@ -978,8 +978,8 @@ let uploadDevisFile = (req, res) => {
                                         notify(req, devis?.gestionnaireId, req.user.id, `Devis déposée pour le désordre n°${devis?.refDesordre}.`, "Devis déposé", devis?.coproId, `/mon-parc/mon-parc-immeuble/${devis?.coproId}`);
                                         pushNotifTo(req, devis?.gestionnaireId, `Devis déposée pour le désordre n°${devis?.refDesordre}.`, "Devis déposé");
                                     }
-                                    notify(req, devis.prestataireId, req.user.id, `Demande facture Désordre n°${devis?.refDesordre}.`, "Demande facture", devis?.coproId, `/mes-syndics/mes-syndics-prestataires/devis-prestataires/${devis?.coproId}`);
-                                    pushNotifTo(req, devis.prestataireId, `Demande facture Désordre n°${devis?.refDesordre}.`, "Demande facture");
+                                    notify(req, devis.prestataireId, req.user.id, `Demande de facture pour le désordre n°${devis?.refDesordre}.`, "Demande facture", devis?.coproId, `/mes-syndics/mes-syndics-prestataires/devis-prestataires/${devis?.coproId}`);
+                                    pushNotifTo(req, devis.prestataireId, `Demande de facture pour le désordre n°${devis?.refDesordre}.`, "Demande facture");
                                     res.status(200).send({
                                         success: true,
                                         message: "devis uploadé",
@@ -1192,8 +1192,8 @@ let registerIncident = async (req, res) => {
                                                 console.log(err)
                                             else {
                                                 for (let i in prestats) {
-                                                    notify(req, prestats[i]._id, req.user.id, `Demande évaluation pour la copro n°${cpr?.reference}.`, "Demande évaluation", cpr?._id, `/mes-syndics/mes-syndics-prestataires/evaluation-prestataires/${cpr?._id}`);
-                                                    pushNotifTo(req, prestats[i]._id, `Demande évaluation pour la copro n°${cpr?.reference}.`, "Demande évaluation");
+                                                    notify(req, prestats[i]._id, req.user.id, `Demande d'évaluation pour la copro n°${cpr?.reference}.`, "Demande évaluation", cpr?._id, `/mes-syndics/mes-syndics-prestataires/evaluation-prestataires/${cpr?._id}`);
+                                                    pushNotifTo(req, prestats[i]._id, `Demande d'évaluation pour la copro n°${cpr?.reference}.`, "Demande évaluation");
                                                 }
                                             }
                                         });
@@ -1324,11 +1324,11 @@ let registerAvisTravaux = async (req, res) => {
                             else if (!dev)
                                 console.log("devis introuvable");
                             else {
-                                notify(req, dev?.syndicId, req.user.id, `Avis travaux déposée pour le désordre n°${dev?.refDesordre}.`, "Avis travaux déposé", dev?.coproId, `/mon-parc/mon-parc-immeuble/${dev?.coproId}`);
-                                pushNotifTo(req, dev?.syndicId, `Avis travaux déposée pour le désordre n°${dev?.refDesordre}.`, "Avis travaux déposé");
+                                notify(req, dev?.syndicId, req.user.id, `Avis travaux déposé pour le désordre n°${dev?.refDesordre}.`, "Avis travaux déposé", dev?.coproId, `/mon-parc/mon-parc-immeuble/${dev?.coproId}`);
+                                pushNotifTo(req, dev?.syndicId, `Avis travaux déposé pour le désordre n°${dev?.refDesordre}.`, "Avis travaux déposé");
                                 if (dev?.gestionnaireId) {
-                                    notify(req, dev?.gestionnaireId, req.user.id, `Avis travaux déposée pour le désordre n°${dev?.refDesordre}.`, "Avis travaux déposé", dev?.coproId, `/mon-parc/mon-parc-immeuble/${dev?.coproId}`);
-                                    pushNotifTo(req, dev?.gestionnaireId, `Avis travaux déposée pour le désordre n°${dev?.refDesordre}.`, "Avis travaux déposé");
+                                    notify(req, dev?.gestionnaireId, req.user.id, `Avis travaux déposé pour le désordre n°${dev?.refDesordre}.`, "Avis travaux déposé", dev?.coproId, `/mon-parc/mon-parc-immeuble/${dev?.coproId}`);
+                                    pushNotifTo(req, dev?.gestionnaireId, `Avis travaux déposé pour le désordre n°${dev?.refDesordre}.`, "Avis travaux déposé");
                                 }
                             }
                         });
@@ -1359,15 +1359,15 @@ let registerAvisTravaux = async (req, res) => {
                                         else if (!prest)
                                             console.log("no prest");
                                         else {
-                                            notify(req, prest._id, req.user.id, `Avis travaux déposée pour le désordre n°${recept?.refDesordre}.`, "Avis travaux déposé", recept?.coproId, `/mes-syndics/mes-syndics-prestataires/devis-prestataires/${recept?.coproId}`);
-                                            pushNotifTo(req, prest._id, `Avis travaux déposée pour le désordre n°${recept?.refDesordre}.`, "Avis travaux déposé");
+                                            notify(req, prest._id, req.user.id, `Avis travaux déposé pour le désordre n°${recept?.refDesordre}.`, "Avis travaux déposé", recept?.coproId, `/mes-syndics/mes-syndics-prestataires/devis-prestataires/${recept?.coproId}`);
+                                            pushNotifTo(req, prest._id, `Avis travaux déposé pour le désordre n°${recept?.refDesordre}.`, "Avis travaux déposé");
                                         }
                                     });
-                                notify(req, recept.courtierId, req.user.id, `Avis travaux déposée pour le désordre n°${recept?.refDesordre}.`, "Avis travaux déposé", recept?.courtierId, `/mes-syndics/mes-syndics-courtiers/mes-syndics-courtiers-details/${recept?.coproId}`);
-                                pushNotifTo(req, recept.courtierId, `Avis travaux déposée pour le désordre n°${recept?.refDesordre}.`, "Avis travaux déposé");
+                                notify(req, recept.courtierId, req.user.id, `Avis travaux déposé pour le désordre n°${recept?.refDesordre}.`, "Avis travaux déposé", recept?.courtierId, `/mes-syndics/mes-syndics-courtiers/mes-syndics-courtiers-details/${recept?.coproId}`);
+                                pushNotifTo(req, recept.courtierId, `Avis travaux déposé pour le désordre n°${recept?.refDesordre}.`, "Avis travaux déposé");
                             }
                         });
-                        res.status(200).send({success: true, message: "Avis travaux enregistrée", receptionDone: recept});
+                        res.status(200).send({success: true, message: "Avis travaux enregistré", receptionDone: recept});
                     }
                 });
         });

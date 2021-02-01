@@ -1091,7 +1091,6 @@ let retrieveDevisByCopro = (req, res) => {
         if (req.body.option)
             Devis.find({$and: [{coproId: req.body.coproId}, {$or: [{syndicId: req.user.id},{gestionnaireId: req.user.id}, {pcsId: req.user.id}]}]}, function (err, devis) {
                 if (err) {
-                    console.log(err)
                     res.status(400).send({success: false, message: 'erreur système', err});
                 } else if (!devis)
                     res.status(404).send({success: false, message: "ce devis/evaluation n'existe pas"});

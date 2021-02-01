@@ -39,7 +39,8 @@ let {
     ajoutCreditSyndic,
     updateUnseenNotification,
     updateUnseenNotifByCopro,
-    contactCoproVisit
+    contactCoproVisit,
+    removeDemandeEval
 } = require('../ApiControllers/gestion');
 
 /***************/
@@ -507,6 +508,23 @@ router.post('/unseen-notif-copro', updateUnseenNotifByCopro);
  */
 
 router.post('/contact', contactCoproVisit);
+
+/**
+ * Cette route permet de supprimer une evaluation d'un prestataire spécifique, JWT necessaire.
+ * @route POST /gestion/del-eval
+ * @group gestion
+ * @param {string} prest_id.body.required - _id du Prestataire
+ * @param {string} inc_id.body.required - _id du Désordre
+ * @returns {object} 200 - {success: true, message: "suppression effectuée avec succès"}
+ * @returns {Error} 401 - {success: false, message: 'accès interdit'}
+ * @returns {Error} 400 - {success: false, message: 'erreur système', err}
+ * @returns {Error} 404 - {success: false, message: 'prestataire introuvable'}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+
+router.post('/del-eval', removeDemandeEval);
 
 module.exports = router;
 

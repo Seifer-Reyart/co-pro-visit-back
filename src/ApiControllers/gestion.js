@@ -255,8 +255,8 @@ let demandeVisite = (req, res) => {
                                             if (err)
                                                 console.log(err)
                                             else {
-                                                notify(req, admin._id, req.user.id, synd.nomSyndic+` a demandé une visite (${copro.codePostal})`, "demande de visite", copro._id, null);
-                                                pushNotifTo(req, admin._id, synd.nomSyndic+` a demandé une visite (${copro.codePostal})`, "demande de visite");
+                                                notify(req, admin._id, req.user.id, synd.nomSyndic+` a demandé une visite pour la copro du ${copro.address} - ${copro.codePostal} ${copro.ville}`, "demande de visite", copro._id, null);
+                                                pushNotifTo(req, admin._id, synd.nomSyndic+` a demandé une visite pour la copro du ${copro.address} - ${copro.codePostal} ${copro.ville}`, "demande de visite");
                                             }
                                         });
                                         // NOTIF ANCHOR
@@ -1913,6 +1913,36 @@ let contactCoproVisit = (req, res) => {
     }
 }
 
+let removeDemandeEval = (req, res) => {
+    if (req.user.role !== 'syndic' && req.user.role !== 'gestionnaire')
+        res.status(401).send({success: false, message: 'accès interdit'});
+    else {
+        const {prest_id, inc_id} = req.body;
+        Prestataire.findOneAndUpdate({_id: prest_id}, {$pull: {incidentId: inc_id}}, {new: true}, function (err, prest) {
+            if (err)
+                res.status(400).send({success: false, message: 'erreur système', err});
+            else if (!prest)
+                res.status(404).send({success: false, message: 'prestataire introuvable'});
+            else {
+                Incident.findOne({_id: inc_id}, (err, inc) => {
+                    if (err)
+                        console.log(err);
+                    else if (!inc)
+                        console.log('not found');
+                    else {
+                        notify(req, prest._id, req.user.id, `${inc.syndicId.nomSyndic} a annulé sa demande d'évaluation pour le désordre ${inc.refDesordre}`, "Annulation Evaluation", inc.coproId, null);
+                        pushNotifTo(req, prest._id, `${inc.syndicId.nomSyndic} a annulé sa demande d'évaluation pour le désordre ${inc.refDesordre}`, "Annulation Evaluation");
+                        res.status(200).send({success: true, message: "suppression effectuée avec succès"});
+                    }
+                }).populate({
+                    path: 'syndicId',
+                    model: 'syndics'
+                });
+            }
+        });
+    }
+}
+
 /* Export Functions */
 
 module.exports = {
@@ -1945,5 +1975,6 @@ module.exports = {
     ajoutCreditSyndic,
     updateUnseenNotification,
     updateUnseenNotifByCopro,
-    contactCoproVisit
+    contactCoproVisit,
+    removeDemandeEval
 }
