@@ -534,6 +534,7 @@ router.post('/del-eval', removeDemandeEval);
  * @param {string} _id.body.required - _id de la notification
  * @returns {object} 200 - {success: true, message: "suppression effectuée"}
  * @returns {Error} 400 - {success: false, message: 'erreur système', err}
+ * @returns {Error} 404 - {success: false, message: "notification introuvable"}
  * @produces application/json
  * @consumes application/json
  * @security JWT
