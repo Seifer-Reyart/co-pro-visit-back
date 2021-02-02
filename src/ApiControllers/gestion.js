@@ -1801,6 +1801,15 @@ let updateUnseenNotifByCopro = async (req, res) => {
     });
 }
 
+let removeSingleNotif = (req, res) => {
+    Notification.deleteOne({$and: [{_id: req.body._id}, {receiver_id: req.body.user}]}, (err) => {
+        if (err)
+            res.status(400).send({success: false, message: "erreur lors de la suppression", err});
+        else
+            res.status(200).send({success: true, message: "suppression effectuée"});
+    });
+}
+
 let contactCoproVisit = (req, res) => {
     const {objet, message} = req.body;
 
@@ -1944,6 +1953,8 @@ let removeDemandeEval = (req, res) => {
     }
 }
 
+
+
 /* Export Functions */
 
 module.exports = {
@@ -1977,5 +1988,6 @@ module.exports = {
     updateUnseenNotification,
     updateUnseenNotifByCopro,
     contactCoproVisit,
-    removeDemandeEval
+    removeDemandeEval,
+    removeSingleNotif
 }

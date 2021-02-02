@@ -40,7 +40,8 @@ let {
     updateUnseenNotification,
     updateUnseenNotifByCopro,
     contactCoproVisit,
-    removeDemandeEval
+    removeDemandeEval,
+    removeSingleNotif
 } = require('../ApiControllers/gestion');
 
 /***************/
@@ -525,6 +526,20 @@ router.post('/contact', contactCoproVisit);
  */
 
 router.post('/del-eval', removeDemandeEval);
+
+/**
+ * Cette route permet de supprimer une notification spécifique, JWT necessaire.
+ * @route POST /gestion/del-notif
+ * @group gestion
+ * @param {string} _id.body.required - _id de la notification
+ * @returns {object} 200 - {success: true, message: "suppression effectuée"}
+ * @returns {Error} 400 - {success: false, message: 'erreur système', err}
+ * @produces application/json
+ * @consumes application/json
+ * @security JWT
+ */
+
+router.post('/del-notif', removeSingleNotif);
 
 module.exports = router;
 
