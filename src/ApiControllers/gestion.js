@@ -1930,6 +1930,7 @@ let removeDemandeEval = (req, res) => {
                     else if (!inc)
                         console.log('not found');
                     else {
+                        Devis.findOneAndDelete({$and: [{incidentId: inc._id}, {devisPDF: null}, {prestataireId: prest._id}]});
                         notify(req, prest._id, req.user.id, `${inc.syndicId.nomSyndic} a annulé sa demande d'évaluation pour le désordre ${inc.refDesordre}`, "Annulation Evaluation", inc.coproId, null);
                         pushNotifTo(req, prest._id, `${inc.syndicId.nomSyndic} a annulé sa demande d'évaluation pour le désordre ${inc.refDesordre}`, "Annulation Evaluation");
                         res.status(200).send({success: true, message: "suppression effectuée avec succès"});
