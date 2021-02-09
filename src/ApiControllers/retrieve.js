@@ -864,7 +864,6 @@ let postArchitecte = (req,res) => {
 /*** fetch Incidents list ***/
 
 let postIncidentslist = (req,res) => {
-    console.log(req.body)
     const { coproId, architecteId, syndicId, gestionnaireId, courtierId } = req.body;
     this.resolveIncidents = function (err, incidents) {
         if (err) {
@@ -900,7 +899,7 @@ let postIncidentslist = (req,res) => {
             } else {
                 let corpsEtat = presta.corpsEtat;
                 Incident.find(
-                    {$and: [{coproId: coproId}, {corpsEtat: {$elemMatch: {$in: corpsEtat}}}]},
+                    {$and: [{_id: {$in: presta.incidentId}}, {coproId: coproId}, {corpsEtat: {$elemMatch: {$in: corpsEtat}}}]},
                     (err, incidents) => {
                         if (err) {
                             res.status(400).send({success: false, message: 'erreur system', err});
@@ -1091,7 +1090,6 @@ let retrieveDevisByCopro = (req, res) => {
         if (req.body.option)
             Devis.find({$and: [{coproId: req.body.coproId}, {$or: [{syndicId: req.user.id},{gestionnaireId: req.user.id}, {pcsId: req.user.id}]}]}, function (err, devis) {
                 if (err) {
-                    console.log(err)
                     res.status(400).send({success: false, message: 'erreur système', err});
                 } else if (!devis)
                     res.status(404).send({success: false, message: "ce devis/evaluation n'existe pas"});
