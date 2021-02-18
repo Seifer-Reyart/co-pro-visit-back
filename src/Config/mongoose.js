@@ -8,7 +8,7 @@ db.on('error', function (err) {
 });
 
 db.once('open', function() {
-    console.log('DB Connection successed on mongodb://localhost:27017/coprovisit-prod');
+    console.log('DB Connection successed on mongodb://localhost:27017/coprovisit');
 });
 
 
