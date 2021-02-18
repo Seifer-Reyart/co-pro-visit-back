@@ -16,6 +16,12 @@ const {login, createAdmin} = require('../ApiControllers/auth');
 
 let router = express.Router();
 
+
+
+/**********/
+/* Routes */
+/**********/
+
 /* login */
 
 /**
@@ -24,7 +30,7 @@ let router = express.Router();
  * @property {string} password.required - mot de passe - eg: t5@VuLs#Sbght8yN
  */
 /**
- * Cette route permet de se connecter, aucun JWT necessaire.
+ * Cette route permet de se connecter, aucun JWT (Json Web Token) nécessaire.
  * @route POST /auth/login
  * @group auth - login
  * @param {LOGIN.model} email.body.required - email
@@ -32,6 +38,7 @@ let router = express.Router();
  * @returns {object} 200 - un objet avec les clés suivantes {success: true, message: 'connexion réussie', user: object, token: string}
  * @returns {Error}  404 - {success: false, message: 'utilisateur introuvable'}
  * @returns {Error}  403 - {success: false, message: 'mot de passe incorrect'}
+ * @returns {Error}  404 - {success: false, message: 'utilisateur introuvable'}
  * @produces application/json
  * @consumes application/json
  */
@@ -39,7 +46,9 @@ let router = express.Router();
 router.post('/login', login);
 
 /*create Admin*/
+
 router.post('/admin', createAdmin)
+
 /* Export '/auth' routes */
 
 module.exports = router;

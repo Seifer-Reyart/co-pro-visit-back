@@ -5,6 +5,7 @@
 let bcrypt  = require('bcryptjs');
 let jwt     = require('jsonwebtoken');
 let salt = bcrypt.genSaltSync(10);
+
 /************************/
 /* import local modules */
 /************************/
@@ -23,13 +24,16 @@ const   Admin           = require('../MongoSchemes/admins'),
         Prestataire     = require('../MongoSchemes/prestataires'),
         Gestionnaire    = require('../MongoSchemes/gestionnaires');
 
-/************/
-/* Function */
-/************/
+/*************/
+/* Functions */
+/*************/
+
+/* Fonction de connexion à la plateforme */
 
 let login = async (req, res) => {
     const {email, password} = req.body;
 
+    //Connexion Admin//
     Admin.findOne({email: email.toLowerCase()}, async (err, user) => {
         if (err)
             res.status(400).send({success: false, message: err});
@@ -38,10 +42,11 @@ let login = async (req, res) => {
                 res.status(403).send({success: false, message: "mot de passe incorrect"});
             else {
                 let token = await jwt.sign({id: user._id, role: user.role}, secretExpr.secret, {expiresIn: 60 * 60 * 24 * 30});
-                await delete user.password;
+                delete user.password;
                 res.status(200).send({success: true, message: 'connexion réussie', user, token});
             }
         } else {
+            //Connexion Syndic//
             Syndic.findOne({email: email.toLowerCase()}, async (err, user) => {
                 if (err)
                     res.status(400).send({success: false, message: err});
@@ -54,6 +59,7 @@ let login = async (req, res) => {
                         res.status(200).send({success: true, message: 'connexion réussie', user, token});
                     }
                 } else {
+                    //Connexion Courtier//
                     Courtier.findOne({email: email.toLowerCase()}, async (err, user) => {
                         if (err)
                             res.status(400).send({success: false, message: err});
@@ -66,6 +72,7 @@ let login = async (req, res) => {
                                 res.status(200).send({success: true, message: 'connexion réussie', user, token});
                             }
                         } else {
+                            //Connexion Architecte//
                             Architecte.findOne({email: email.toLowerCase()}, async (err, user) => {
                                 if (err)
                                     res.status(400).send({success: false, message: err});
@@ -78,6 +85,7 @@ let login = async (req, res) => {
                                         res.status(200).send({success: true, message: 'connexion réussie', user, token});
                                     }
                                 } else {
+                                    //Connexion President du Conseil Syndical//
                                     PresidentCS.findOne({email: email.toLowerCase()}, async (err, user) => {
                                         if (err)
                                             res.status(400).send({success: false, message: err});
@@ -90,6 +98,7 @@ let login = async (req, res) => {
                                                 res.status(200).send({success: true, message: 'connexion réussie', user, token});
                                             }
                                         } else {
+                                            //Connexion Prestataire//
                                             Prestataire.findOne({email: email.toLowerCase()}, async (err, user) => {
                                                 if (err)
                                                     res.status(400).send({success: false, message: err});
@@ -102,6 +111,7 @@ let login = async (req, res) => {
                                                         res.status(200).send({success: true, message: 'connexion réussie', user, token});
                                                     }
                                                 } else {
+                                                    //Connexion Gestionnaire//
                                                     Gestionnaire.findOne({email: email.toLowerCase()}, async (err, user) => {
                                                         if (err)
                                                             res.status(400).send({success: false, message: err});
@@ -118,7 +128,7 @@ let login = async (req, res) => {
                                                         }
                                                     });
                                                 }
-                                            }).populate({ model: 'incidents', path: 'incidentId' });
+                                            }).populate({ model: 'incidents', path: 'incidentId' }); // Envoyer la liste des incidents associés en cas de connexion Prestataire
                                         }
                                     });
                                 }
@@ -130,15 +140,9 @@ let login = async (req, res) => {
         }
     });
 }
-/*
-let getUserByToken = (req, res) => {
-    if (!req.user.id) {
-        res.status(401).send({success: false, message: 'token invalid, veuillez vous connecter'});
-    } else {
-        login(req, res);
-    }
-}
-*/
+
+/* Fonction création d'un Admin */
+
 let createAdmin = (req, res) => {
     let admin = new Admin({
         email: req.body.email,

@@ -6,7 +6,7 @@
 
 let HttpServer = {
 	ip	 	: '54.37.157.34',
-	port	: 3018
+	port	: 3017
 }
 
 module.exports = {

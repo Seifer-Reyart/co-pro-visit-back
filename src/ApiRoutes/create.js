@@ -86,7 +86,7 @@ let router = express.Router();
  * @returns {object} 200 - {success: true, message : 'Le Syndic a bien été créé'}
  * @returns {Error}  400 - {success: false, message: error system log from mongoose}
  * @returns {Error}  401 - si dans token, role !== admin  {success: false, message: 'accès interdit'}
- * @returns {Error}  403 - si email existe  {success: false, message: 'email déjà utilisé'}
+ * @returns {Error}  403 - si email ou siren existant {success: false, message: 'information déjà utilisée'}
  * @produces application/json
  * @consumes application/json
  * @security JWT
@@ -691,14 +691,45 @@ router.post('/devis-pdf', multer().any(), uploadDevisFile);
 router.post('/facture-pdf', multer().any(), uploadFactureFile);
 
 /**
- * @typedef Devis
+ * @typedef Reception
  * @property {file} data.required - fichier Facture au format jpg|jpeg|png|pdf
+ * @property {string} src_img - image principal
+ * @property {integer} factureTTC - montant TTC d'une facture
+ * @property {integer} metrages - metrage surface désordre
+ * @property {string} comArchi - commentaire de l'architecte sur le désordre
+ * @property {string} comPrest - commentaire du prestataire sur le désordre
+ * @property {string} desordre - spécification du désordre
+ * @property {string} description - descriptif du désordre
+ * @property {string} situation - situation du désordre
+ * @property {Array.<string>} corpsEtat - tableau des corps d'état correspondant au désordre
+ * @property {Array.<string>} images_bf - tableau des photos avant travaux
+ * @property {Array.<string>} images_bf - tableau des photos après travaux
+ * @property {string} date - date d'enregistrement de l'avis
+ * @property {boolean} conformite - conformité des travaux (oui ou non)
+ * @property {integer} rate - nombre d'étoile attribuée
+ * @property {string} remarque - remarque de l'architecte sur les travaux
+ * @property {string} incidentId - _id du désordre
+ * @property {string} coproId - _id de la copro
+ * @property {string} pcsId - _id du President du conseil syndical
+ * @property {string} devisId - _id du Devis
+ * @property {string} syndicId - _id du Syndic
+ * @property {string} visiteId - _id de la visite
+ * @property {string} courtierId - _id du courtier
+ * @property {string} architecteId - _id de l'Architecte
+ * @property {string} prestataireId - _id du prestataire
+ * @property {string} gestionnaireId - _id du gestionnaire
+ * @property {boolean} demandeDevis - demande de devis effectuée (oui ou non)
+ * @property {string} devisPDF - nom du fichier devis
+ * @property {string} dateDepotDevis - date du dépot de devis
+ * @property {string} facturePDF - nom du fichier facture
+ * @property {string} dateDepotFacture - date de dépot de la facture
+ * @property {string} refDesordre - reference du Désordre
  */
 /**
  * Cette route permet d'enregistrer un Avis sur Travaux par un Architecte + photos après
  * @route POST /create/reception
  * @group prestataire
- * @param {Devis.model} data.body - toutes les infos sur la Pré-réception
+ * @param {Reception.model} data.body - toutes les infos sur la Pré-réception
  * @returns {object} 200 - {success: true, message : "Avis travaux enregistré"}
  * @returns {Error}  400 - {success: false, message: error system log, err}
  * @returns {Error}  401 - si dans token, role !== architecte  {success: false, message: 'accès interdit'}
