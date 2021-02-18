@@ -17,7 +17,7 @@ const { uploadFile, identityCheck }    = require('../Middleware/ApiHelpers');
 const {sendCredentials} = require('../Config/mailer');
 const {pushNotifTo, notify} = require("../Middleware/ApiHelpers");
 
-/*** generate password ***/
+/*** Generation de mot de passe aléatoire ***/
 function generateP() {
     let pass = '';
     let str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' + 'abcdefghijklmnopqrstuvwxyz0123456789@#$';
@@ -31,20 +31,8 @@ function generateP() {
     return pass;
 }
 
-function generateName() {
-    let name = 'Copro ';
-    let str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-
-    while (name.length <= 6) {
-        let char = Math.floor(Math.random() * str.length + 1);
-
-        name += str.charAt(char)
-    }
-
-    return name;
-}
-
 /**** salt to crypt password ****/
+// Augmente la complexité de l'encryption du mot de passe //
 let salt = bcrypt.genSaltSync(10);
 
 
@@ -71,10 +59,11 @@ const   Reception   = require('../MongoSchemes/reception');
 /* Function */
 /************/
 
-/* register new syndic */
+/* Création d'un Syndic */
 
 let registerSyndic = async (req, res) => {
     const {email, siren} = req.body;
+
     if (req.user.role !== 'admin') {
         res.status(401).send({success: false, message: 'accès interdit'});
     } else {
@@ -116,7 +105,7 @@ let registerSyndic = async (req, res) => {
     }
 }
 
-/* register new courtier */
+/* Création d'un courtier */
 
 let registerCourtier = async (req, res) => {
     const {email} = req.body;
@@ -165,7 +154,7 @@ let registerCourtier = async (req, res) => {
     }
 }
 
-/* register new architecte */
+/* Création d'un architecte */
 
 let registerArchitecte = async (req, res) => {
 console.log("create architecte")
@@ -212,7 +201,7 @@ console.log("create architecte")
     }
 }
 
-/* register new president conseil syndical */
+/* Création d'un president de conseil syndical */
 
 let registerPresidentCS = async (req, res) => {
     const {email} = req.body;
@@ -249,7 +238,7 @@ let registerPresidentCS = async (req, res) => {
     }
 }
 
-/* register new prestataire */
+/* Création d'un prestataire */
 
 let registerPrestataire = async (req, res) => {
     const {email, siret} = req.body;
@@ -341,11 +330,10 @@ let registerPrestataire = async (req, res) => {
     }
 }
 
-/* upload RCProfessionnelle & RCDecennale */
+/* Stockage des uploads RCProfessionnelle & RCDecennale d'un Prestataire */
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        // Uploads is the Upload_folder_name
-        cb(null, "./src/uploads/RC-files")
+        cb(null, "./src/uploads/RC-files"); // emplacement des RCP et RCD sur le serveur.
     },
     filename: async function (req, file, cb) {
         let name = await generateP();
@@ -353,8 +341,9 @@ let storage = multer.diskStorage({
     }
 })
 
-const maxSize = 5 * 1000 * 1000;
+const maxSize = 5 * 1000 * 1000; // Taille maximum autorisée pour les fichiers (5mo)
 
+/* Sous fonction d'upload */
 let upload = multer({
     storage: storage,
     limits: { fileSize: maxSize },
@@ -369,12 +358,11 @@ let upload = multer({
             return cb(null, true);
         }
 
-        cb("Error: File upload only supports the following filetypes - " + filetypes);
+        cb("Error: Seules sont supportées, les extensions suivantes - " + filetypes);
     }
+}).single("data"); // "data" correspond à l'attribut assigné au fichier lors de l'envoie
 
-// data is the name of file attribute sent in body
-}).single("data");
-
+/* Fonction liée à la Route d'upload de RCP */
 let uploadRCProfessionnelle = (req, res) => {
     if (req.user.role !== 'prestataire') {
         res.status(403).send({success: false, message: 'accès interdit'});
@@ -403,6 +391,7 @@ let uploadRCProfessionnelle = (req, res) => {
         })
 }
 
+/* Fonction liée à la Route d'upload de RCD */
 let uploadRCDecennale = (req, res) => {
     if (req.user.role !== 'prestataire') {
         res.status(403).send({success: false, message: 'accès interdit'});
@@ -433,10 +422,11 @@ let uploadRCDecennale = (req, res) => {
         })
 }
 
-/* register new gestionnaire */
+/* Création d'un gestionnaire */
 
 let registerGestionnaire = async (req, res) => {
     const {email} = req.body;
+
     if (req.user.role !== 'syndic') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
@@ -479,11 +469,11 @@ let registerGestionnaire = async (req, res) => {
     }
 }
 
-/* register new Copro without batiment */
+/* Création d'une Copro (Matrice d'une copropriété, pas détails Batiment avant visite Architecte) */
 
 let registerCopro = (req, res) => {
     const {nomCopro, codePostal, ville, reference} = req.body;
-    console.log(req.body)
+
     if (req.user.role !== 'gestionnaire' && req.user.role !== 'syndic') {
         res.status(403).send({success: false, message: 'accès interdit'});
     } else {
@@ -520,19 +510,25 @@ let registerCopro = (req, res) => {
                             if (err) {
                                 res.status(400).send({ success: false, message: "Erreur lors de la création de la Copro", err});
                             } else {
+                                // Cas où le Syndic est Nominé
                                 if (req.body.syndicNominated) {
+                                    // Si le Créateur est un Syndic
                                     if (req.user.role === 'syndic') {
                                         await Syndic.updateOne({_id: synd._id}, {$push: {parc: cpr._id}});
                                         await Courtier.updateOne({_id: cpr.courtier}, {$push: {parc: cpr._id}});
+                                    // Si le Créateur est un Gestionnaire
                                     } else {
                                         await Gestionnaire.updateOne({_id: req.body.syndicNominated}, {$push: {parc: cpr._id}});
                                         await Syndic.updateOne({_id: synd._id}, {$push: {parc: cpr._id}});
                                         await Courtier.updateOne({_id: cpr.courtier}, {$push: {parc: cpr._id}});
                                     }
+                                // Cas où le Syndic n'est pas Nominé
                                 } else {
+                                    // Si le Créateur est un Syndic
                                     if (req.user.role === 'syndic') {
                                         await Syndic.updateOne({_id: req.body.syndicEnCours}, {$push: {enCoursSelect: cpr._id}});
                                         await Courtier.updateOne({_id: cpr.courtier}, {$push: {parc: cpr._id}});
+                                    // Si le Créateur est un Gestionnaire
                                     } else {
                                         await Gestionnaire.updateOne({_id: req.body.syndicEnCours}, {$push: {enCoursSelect: cpr._id}});
                                         await Syndic.updateOne({_id: synd._id}, {$push: {enCoursSelect: cpr._id}});
@@ -549,17 +545,16 @@ let registerCopro = (req, res) => {
     }
 }
 
-/* upload an xls/xlsx file of copros, parse it and store elements in DB */
-/* upload RCProfessionnelle & RCDecennale */
+/* upload au format xls/xlsx d'une liste de Copro, parcours et enregistrement dans la BDD */
 let storageXls = multer.diskStorage({
     destination: function (req, file, cb) {
         // Uploads is the Upload_folder_name
-        cb(null, "./src/uploads/copros-xls")
+        cb(null, "./src/uploads/copros-xls"); // Chemin d'accès sur le serveur
     },
     filename: function (req, file, cb) {
         cb(null, req.user + "-" + file.originalname);
     }
-})
+});
 
 let uploadXls = multer({
     storage: storageXls,
@@ -576,9 +571,7 @@ let uploadXls = multer({
 
         cb("Error: Assurez vous de transmettre un fichier excel - " + exttypes);
     }
-
-// data is the name of file attribute sent in body
-}).single("data");
+}).single("data"); // "data" correspond à l'attribut assigné au fichier lors de l'envoie
 
 let parseXlsThenStore = (req, res) => {
     if (req.user.role !== 'syndic') {
@@ -650,7 +643,7 @@ let parseXlsThenStore = (req, res) => {
     }
 }
 
-/* upload batiment images */
+/* upload des images liées aux Batiments */
 
 let uploadBatImage = async (req, res) => {
     if (req.user.role !== 'architecte' && req.user.role !== 'admin') {
@@ -697,7 +690,7 @@ let uploadBatImage = async (req, res) => {
     }
 }
 
-/* register new Batiment */
+/* Enregistrement d'un Batiment lié à une Copro (lors d'une visite Architecte, enregistrer les détails d'une copro) */
 
 let saveBatiment = async (batiment, index, id, images) => {
     return new Promise(async (resolve) => {
@@ -727,11 +720,8 @@ let saveBatiment = async (batiment, index, id, images) => {
                     contiguite         : images?.filter(e => imageFormatted.contiguite?.find(img => img === e)) ?? [],
                 };
                 let toBeRemoved = [];
-                for (prop in batImages) {
-                    //if (prop !== "ParcelleCadastrale" && prop !== "VueGenGoogle")
-                    //    toBeRemoved = toBeRemoved.concat(batImages[prop]);
-                    //else
-                        toBeRemoved.push(batImages[prop]);
+                for (let prop in batImages) {
+                    toBeRemoved.push(batImages[prop]);
                 }
                 Copro.findOneAndUpdate({_id: id}, {
                     assignableImage: images.filter(img => !toBeRemoved.find(im => im === img ))
@@ -745,7 +735,7 @@ let saveBatiment = async (batiment, index, id, images) => {
                         resolve({ success: false, message: "Erreur lors de la création du Batiment "+bat.reference, err});
                     } else {
                         console.log('mongo save ok!!: '+b._id);
-                        resolve({success: true, _id: b._id});
+                        resolve({success: true, _id: b._id, img: batImages.facadeRue[0]});
                     }
                 });
             }
@@ -753,6 +743,7 @@ let saveBatiment = async (batiment, index, id, images) => {
     })
 }
 
+/* Création d'un Batiment lié à une Copro (lors d'une visite Architecte, renseigner les détails d'une copro) */
 let registerBatiment = async (req, res) => {
     const {batiments, coproId} = req.body;
     if (req.user.role !== 'admin' && req.user.role !== 'architecte') {
@@ -767,11 +758,13 @@ let registerBatiment = async (req, res) => {
                 let succeded = [];
                 let failed = [];
                 let promises = null;
+                let img = "";
                 promises = await batiments.map((batiment, index) => {
                     return new Promise(async resolve => {
                         let resp = await saveBatiment(batiment, index, coproId, copr.assignableImage.filter((a, b) => copr.assignableImage.indexOf(a) === b));
                         if (resp.success) {
                             succeded.push(resp._id);
+                            img = resp.img;
                             resolve();
                         } else {
                             failed.push(resp);
@@ -795,7 +788,7 @@ let registerBatiment = async (req, res) => {
                             if (err)
                                 console.log(err)
                             else {
-                                Visite.findOneAndUpdate({coproId}, {$set: {faiteLe: new Date(), done: true}}, {new: false}, function (err, visite) {
+                                Visite.findOneAndUpdate({coproId}, {$set: {faiteLe: new Date(), img: img, done: true}}, {new: false}, function (err, visite) {
                                     if (err) {
                                         failed.push({err})
                                         console.log('update err: ', err)
@@ -834,7 +827,7 @@ let registerBatiment = async (req, res) => {
 }
 
 
-/* register new Devis */
+/* Création d'un Pré-Devis, lors d'une evaluation */
 
 let registerEvaluation = async (req, res) => {
     const {coproId, prestataireId, syndicId, incidentId} = req.body;
@@ -909,6 +902,7 @@ let registerEvaluation = async (req, res) => {
     }
 }
 
+/* Enregistrement d'un Devis sur demande du Syndic */
 let uploadDevisFile = (req, res) => {
     if (req.user.role !== 'prestataire') {
         res.status(403).send({success: false, message: 'accès interdit'});
@@ -994,6 +988,7 @@ let uploadDevisFile = (req, res) => {
     }
 }
 
+/* Enregistrement d'une Facture */
 let uploadFactureFile = (req, res) => {
     if (req.user.role !== 'prestataire') {
         res.status(403).send({success: false, message: 'accès interdit'});
@@ -1063,7 +1058,7 @@ let uploadFactureFile = (req, res) => {
                                         else {
                                             Visite.findOneAndUpdate(
                                                 {_id: devis.visiteId},
-                                                {$set: {img: bat.image.facadeRue[0]}, demandeReception: true},
+                                                {$set: {demandeReception: true}},
                                                 {new: true},
                                                 (err, vis) => {
                                                     if (err)
@@ -1090,7 +1085,7 @@ let uploadFactureFile = (req, res) => {
     }
 }
 
-/* register new Incident */
+/* Déclaration d'un désordre lors d'une visite d'Architecte */
 
 let registerIncident = async (req, res) => {
     if (req.user.role !== 'architecte' && req.user.role !== 'admin') {
@@ -1220,6 +1215,7 @@ let registerIncident = async (req, res) => {
     }
 };
 
+/* Enregistrer un Avis sur travaux */
 let registerAvisTravaux = async (req, res) => {
     if (req.user.role !== 'architecte') {
         res.status(401).send({success: false, message: 'accès interdit'});
