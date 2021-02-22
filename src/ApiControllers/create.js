@@ -1072,6 +1072,8 @@ let uploadFactureFile = (req, res) => {
                                                             notify(req, vis?.gestionnaireId, req.user.id, `Facture déposée pour la copro n°${vis?.reference}.`, "Facture déposée", vis?.coproId, `/mon-parc/mon-parc-immeuble/${vis?.coproId}`);
                                                             pushNotifTo(req, vis?.gestionnaireId, `Facture déposée pour la copro n°${vis?.reference}.`, "Facture déposée");
                                                         }
+                                                        notify(req, vis?.architecteId, req.user.id, `Vous avez une demande d'avis sur travaux pour la copro n°${vis?.reference}.`, "demande avis travaux", vis?.coproId, `/pre-reception/dashboard`);
+                                                        pushNotifTo(req, vis?.architecteId, `Vous avez une demande d'avis sur travaux pour la copro n°${vis?.reference}.`, "demande avis travaux");
                                                     }
                                                 });
                                         }
